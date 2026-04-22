@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "music-library-management-59ce4",
+  "private_key_id": "08da9a25a067640d51d3271d73ca14329417db66",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDg8YwqQZZ8NcoS\nz3TRQx3htpbZ1N6kv/v4kFfvdMdp0T+fSuYy7TZOjo9qvzFq44Xud6mARubeIgJG\nBLIyEM4zFNLwRk1OLppGiTB1r7/YaDf8MHC6GW0eHOLnMrLbdzpXV4OSxlk4qVKW\nxDqrd81NWlPLiBE5i1Jur4Fs/hROugf+TsZl0I6p6R2qHHiTRSjPFFNrqekQ21Fi\nkFlXtJ3EVJehxNFO/HV1qNwXV428bH4wEsPECv3JoKPusDhb9o1+nDrtCaEJcBkX\nr1gXhqUMrsCSzRRwnWnNvSxjO0SOEauTC8MhuGBe1/5ULZONRahbE4CLAZSRp1nL\nt0B8fDD5AgMBAAECggEABTHe3Ez2djjhyUxsNLb5ljBazH4LhD+AyK1AsqF+R3XT\nI9EdftiWk/rb2gm/UOofOjIeQn2gsEmVxtst6FUWBfz5oB3nhCI0YuOhMF6WLh++\nBz9xIwMaT4M4REGZ+tKGkOTO/5FAFzxl0WCHwFT8c0hePgmO6EbM6Qx5jzRQ8L51\nAlfxqfjvYrSlD+0sHec1QtPlivsIrgwd3FarafL2HWIynAIrG3keESj+T/LkJ6JI\nCsq2GsixMaVBZWKY+SrIoU6We23eapC95wT6TpDpDQwUyUEYaRe8OVdQvyVhk+k/\nBSlrNGYs0Iu8HVu1njBgtTQ7QqRhjHppF7c5EHtUwQKBgQDwJJHIkiM+cIh2iA7w\nBNbb4AA19nLhbQl2ElD4c69sJI/YqTLvHWBkyZIFerX2uH0sNVD30k5V6Ebpp3Jr\nm3wL8itPjekYQuqSYOutRdTg9BQu3mkGQsyT81lwuDm4CtERR8zTU42CQAWn8pOH\n62yPDp1CANg+tOoDrzqxybOD0QKBgQDvzAukcr2TRBzzJr/N5I4SZ2XrEtgygRhS\nJRxSqZodWl3SpDRTwBNjwn2ZIzxW58h4ySejmql2LeWaXuw2KypIBjAsPE79lK6M\nlvxGglQ1mWKGp01ctveZtZgRg+l+FgPOkzojgn7lcNkpHpDUwxXsdiqO55b+RPB9\nlctU0P5sqQKBgQCV7t8ukT97/prVFsHszbiwczzudD7pzEA5/dmcJe6C4JkHNyzb\n6kWC5+9JiIIP1sQgU/GHqUDLlkigHbHsyZk7hCnSc9HzGeSHHAhJmO3+vaXUVXzR\nMee1ABz5qawv4mECHwgdcW9KwVpGr8e49x5Ce2doDEr3a9EoF8HXuw1f4QKBgFMc\nCyTxx5aU0tvLIEsB3eOvBnnUzC2k5IMD7a8QrSNjQIVS9/fW6GF49QLwXWdZaffC\n8AQaBIW7HorEP2X+y+aujl+mf1IQB/ceFU1yujDhem5k6cEqgOI7N/tKFtDmXGdq\nS4onHkfzNrCzsUqsWprb0aA5z/FMf3VnR1OcI7IRAoGBAID8aaZ5YsoHFj/zpocv\npkvRIt2VltPGPHL0AUax7fEjNPh4vrcHdPmGpBdjE4BMrzGBMgdR6ekNxZGdQkQw\nP68g0zMkuBEgFzVe6M/ohXyiRExYCD2L9O1f6Bz7uU72EP98dg1MKCxoorkT1ofi\nE0k9D3OlWapx+IrWomkpTOjt\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@music-library-management-59ce4.iam.gserviceaccount.com",
+  "client_id": "104897823837081230580",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40music-library-management-59ce4.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
