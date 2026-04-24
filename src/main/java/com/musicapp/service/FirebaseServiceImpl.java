@@ -19,7 +19,7 @@ public class FirebaseServiceImpl {
             FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 // THAY CÁI LINK BÊN DƯỚI BẰNG LINK DATABASE CỦA NHÓM MÀY (Lấy ở Giai đoạn 2)
-                .setDatabaseUrl("https://musicapp-comp1020-default-rtdb.firebaseio.com/") 
+                .setDatabaseUrl("https://music-library-management-59ce4-default-rtdb.firebaseio.com/") 
                 .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
