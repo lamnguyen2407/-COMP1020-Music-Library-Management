@@ -8,12 +8,48 @@
   <version>0.0.1-SNAPSHOT</version>
   <description>Music Library Management</description>
 
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <javafx.version>21</javafx.version>
+  </properties>
+
   <dependencies>
       <dependency>
           <groupId>com.google.firebase</groupId>
           <artifactId>firebase-admin</artifactId>
           <version>9.2.0</version>
       </dependency>
+
+      <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <version>${javafx.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <version>${javafx.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-media</artifactId>
+          <version>${javafx.version}</version>
+      </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+        <plugin>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-maven-plugin</artifactId>
+            <version>0.0.8</version>
+            <configuration>
+                <mainClass>com.musicapp.MainApp</mainClass> 
+            </configuration>
+        </plugin>
+    </plugins>
+  </build>
 
 </project>
