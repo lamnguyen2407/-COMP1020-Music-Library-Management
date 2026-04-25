@@ -18,7 +18,6 @@ public class FirebaseServiceImpl implements FirebaseService{
 
             FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                // THAY CÁI LINK BÊN DƯỚI BẰNG LINK DATABASE CỦA NHÓM MÀY (Lấy ở Giai đoạn 2)
                 .setDatabaseUrl("https://music-library-management-59ce4-default-rtdb.firebaseio.com/") 
                 .build();
 
@@ -27,10 +26,10 @@ public class FirebaseServiceImpl implements FirebaseService{
             }
 
             dbRef = FirebaseDatabase.getInstance().getReference();
-            System.out.println("✅ Kết nối Firebase thành công rực rỡ!");
+            System.out.println("Connected database successfully");
 
         } catch (Exception e) {
-            System.err.println("❌ Lỗi kết nối Firebase: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
     }
     @Override
