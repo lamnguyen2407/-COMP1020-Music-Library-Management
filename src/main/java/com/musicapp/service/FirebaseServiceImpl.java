@@ -1,5 +1,5 @@
 package com.musicapp.service;
-
+import com.musicapp.model.Song;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -7,8 +7,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.InputStream;
-
-public class FirebaseServiceImpl {
+import java.util.*;
+public class FirebaseServiceImpl implements FirebaseService{
 
     private DatabaseReference dbRef;
 
@@ -32,6 +32,19 @@ public class FirebaseServiceImpl {
             System.err.println("Error: " + e.getMessage());
         }
     }
-
-    // Các hàm CompletableFuture<Void> fetchSongs(), saveSong()... anh em backend tự viết tiếp ở đây nhé!
+    @Override
+    public List<Song> fetchSongs() {
+    	return null; //temporarily return null value
+    }
+    
+    @Override
+    public void saveSong(Song song) {
+    	
+    }
+    
+    @Override
+    public void deleteSong(String id) {
+    	
+    }
+    
 }
