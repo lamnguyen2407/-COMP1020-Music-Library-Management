@@ -1,12 +1,12 @@
 package com.musicapp.service;
 
 import com.musicapp.model.Song;
-import com.musicapp.interfaces.FirebaseService;
+import com.musicapp.service.FirebaseService;
 import java.util.*;
 
 
 public class LibraryManager {
-	private HashMap<String, Song> songCache = new HashMap<>;
+	private HashMap<String, Song> songCache = new HashMap<>();
 	private FirebaseService firebaseService;
 	
 	public LibraryManager(FirebaseService firebaseService) {
@@ -20,8 +20,8 @@ public class LibraryManager {
 		
 		// put songs to Hash Map for quick searching (O(1) complexity)
 		songCache.clear();
-		if (fetchSongs != null) {
-			for (Song song: fetchSongs) {
+		if (fetchedSongs != null) {
+			for (Song song: fetchedSongs) {
 				songCache.put(song.getSongId(), song);
 			}
 		}
