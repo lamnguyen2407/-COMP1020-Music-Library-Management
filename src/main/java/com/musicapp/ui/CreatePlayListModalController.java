@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class CreatePlaylistController implements Initializable {
+public class CreatePlayListModalController implements Initializable {
 
     // ═══════════════════════════════════════════
     // FXML FIELDS
