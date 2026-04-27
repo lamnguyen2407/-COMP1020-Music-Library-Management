@@ -21,7 +21,7 @@ public class PlaybackService {
 		}
 		
 		this.currentSong = song;
-		System.out.println("Currently playing: " + currenSong.getTitle());
+		System.out.println("Currently playing: " + currentSong.getTitle());
 	}
 	
 	public Song next() {

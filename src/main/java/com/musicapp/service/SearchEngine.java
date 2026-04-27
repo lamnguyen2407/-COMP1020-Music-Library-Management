@@ -17,8 +17,8 @@ public class SearchEngine {
 	}
 	
 	public List<Song> search(String kw) {
-		List<Song> allSogs = libraryManager.getAllSong();
+		List<Song> allSongs = libraryManager.getAllSong();
 		
-		return strategy.search(all Songs, kw);
+		return strategy.search(allSongs, kw);
 	}
 }
