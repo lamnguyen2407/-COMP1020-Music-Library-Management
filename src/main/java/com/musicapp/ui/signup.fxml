@@ -7,129 +7,80 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane
-    style="-fx-background-color: #fdf8f5;"
-    xmlns="http://javafx.com/javafx/21"
-    xmlns:fx="http://javafx.com/fxml/1">
+<Pane prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #fdf8f5;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
 
     <!-- Decorative top-right gradient blob -->
-    <Region
-        prefWidth="280.0"
-        prefHeight="180.0"
-        style="-fx-background-color: radial-gradient(center 100% 0%, radius 60%, rgba(210,160,130,0.45), transparent);"
-        StackPane.alignment="TOP_RIGHT" />
+    <Region layoutX="620.0" layoutY="0.0" prefHeight="180.0" prefWidth="280.0" style="-fx-background-color: radial-gradient(center 100% 0%, radius 60%, rgba(210,160,130,0.45), transparent);" />
 
-    <VBox
-        alignment="TOP_CENTER"
-        spacing="0"
-        maxWidth="380.0"
-        StackPane.alignment="CENTER">
+    <!-- Centered card VBox — manually positioned in Pane -->
+    <VBox alignment="TOP_CENTER" layoutX="260.0" layoutY="40.0" prefWidth="380.0" spacing="0">
 
         <!-- ── LOGO / HEADER ── -->
-        <HBox alignment="CENTER" spacing="10.0"
-            style="-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0;">
+        <HBox alignment="CENTER" spacing="10.0" style="-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0;">
             <padding>
                 <Insets bottom="18" top="22" />
             </padding>
-            <StackPane
-                prefWidth="32.0" prefHeight="32.0"
-                style="-fx-background-color: #c07840; -fx-background-radius: 8;">
-                <Label text="♪" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+            <StackPane prefHeight="32.0" prefWidth="32.0" style="-fx-background-color: #c07840; -fx-background-radius: 8;">
+                <Label style="-fx-text-fill: white; -fx-font-size: 16px;" text="♪" />
             </StackPane>
-            <Label text="Souleea"
-                style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #333333;" />
+            <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Souleea" />
         </HBox>
 
         <!-- ── FORM AREA ── -->
-        <VBox spacing="10.0" maxWidth="360.0">
+        <VBox prefWidth="360.0" spacing="10.0">
             <padding>
                 <Insets bottom="24" left="10" right="10" top="28" />
             </padding>
 
-            <!-- Sign up with Facebook -->
-            <Button
-                text="f   SIGN UP WITH FACEBOOK"
-                maxWidth="Infinity"
-                mnemonicParsing="false"
-                style="-fx-background-color: #c07840; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-radius: 24; -fx-border-width: 0; -fx-padding: 12 20 12 20; -fx-cursor: hand;" />
+            <!-- Continue with Facebook -->
+            <Button maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: #c07840; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-radius: 24; -fx-border-width: 0; -fx-padding: 12 20 12 20; -fx-cursor: hand;" text="f   SIGN UP WITH FACEBOOK" />
 
-            <!-- Sign up with Apple -->
-            <Button
-                text="  SIGN UP WITH APPLE"
-                maxWidth="Infinity"
-                mnemonicParsing="false"
-                style="-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-radius: 24; -fx-border-width: 0; -fx-padding: 12 20 12 20; -fx-cursor: hand;" />
+            <!-- Continue with Apple -->
+            <Button maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-radius: 24; -fx-border-width: 0; -fx-padding: 12 20 12 20; -fx-cursor: hand;" text="  SIGN UP WITH APPLE" />
 
-            <!-- Sign up with Google -->
-            <Button
-                text="SIGN UP WITH GOOGLE"
-                maxWidth="Infinity"
-                mnemonicParsing="false"
-                style="-fx-background-color: transparent; -fx-text-fill: #333333; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-radius: 24; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-padding: 12 20 12 20; -fx-cursor: hand;" />
+            <!-- Continue with Google -->
+            <Button maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #333333; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-radius: 24; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-padding: 12 20 12 20; -fx-cursor: hand;" text="SIGN UP WITH GOOGLE" />
 
             <!-- OR divider -->
             <HBox alignment="CENTER" spacing="10.0">
-                <padding><Insets top="4" bottom="4" /></padding>
-                <Separator HBox.hgrow="ALWAYS" style="-fx-background-color: #dddddd;" />
-                <Label text="OR" style="-fx-font-size: 11px; -fx-text-fill: #aaaaaa;" />
-                <Separator HBox.hgrow="ALWAYS" style="-fx-background-color: #dddddd;" />
+                <padding><Insets bottom="4" top="4" /></padding>
+                <Separator style="-fx-background-color: #dddddd;" HBox.hgrow="ALWAYS" />
+                <Label style="-fx-font-size: 11px; -fx-text-fill: #aaaaaa;" text="OR" />
+                <Separator style="-fx-background-color: #dddddd;" HBox.hgrow="ALWAYS" />
             </HBox>
 
             <!-- Email label + field -->
-            <Label text="Email address or username"
-                style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" />
-            <TextField
-                fx:id="emailField"
-                promptText="Email address or username"
-                style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
+            <Label alignment="CENTER" contentDisplay="CENTER" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Email address or username" textAlignment="CENTER" />
+            <TextField fx:id="emailField" promptText="Email address or username" style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
 
             <!-- Password label + field -->
-            <Label text="Password"
-                style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" />
-            <PasswordField
-                fx:id="passwordField"
-                promptText="Password"
-                style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
+            <Label style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Password" />
+            <PasswordField fx:id="passwordField" promptText="Password" style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
 
-            <!-- Confirm Password label + field -->
-            <Label text="Confirm Password"
-                style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" />
-            <PasswordField
-                fx:id="confirmPasswordField"
-                promptText="Confirm Password"
-                style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
-
-            <!-- SIGN UP button -->
-            <HBox alignment="CENTER_RIGHT">
-                <Button
-                    fx:id="signUpBtn"
-                    text="SIGN UP"
-                    mnemonicParsing="false"
-                    style="-fx-background-color: #c07840; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-width: 0; -fx-padding: 11 28 11 28; -fx-cursor: hand;" />
+            <!-- Remember me + LOG IN -->
+            <HBox alignment="CENTER_LEFT" spacing="0">
+                <padding><Insets bottom="4" top="4" /></padding>
+                <Region prefHeight="38.0" prefWidth="101.0" HBox.hgrow="ALWAYS" />
+                <Button fx:id="loginBtn" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" style="-fx-background-color: #c07840; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-width: 0; -fx-padding: 11 28 11 28; -fx-cursor: hand;" text="SIGN UP" textAlignment="CENTER" />
+            <Region prefHeight="38.0" prefWidth="120.0" />
             </HBox>
 
             <!-- Divider -->
             <Separator style="-fx-background-color: #dddddd;">
-                <VBox.margin><Insets top="6" bottom="6" /></VBox.margin>
+                <VBox.margin><Insets bottom="6" top="6" /></VBox.margin>
             </Separator>
 
-            <!-- Already have an account -->
-            <Label
-                text="Already have an account?"
-                maxWidth="Infinity"
-                style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #333333; -fx-alignment: CENTER;" />
+            <!-- Don't have an account -->
+            <Label maxWidth="Infinity" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #333333; -fx-alignment: CENTER;" text="Already have an account?" />
 
-            <!-- Log in button -->
-            <Button
-                text="LOG IN"
-                maxWidth="Infinity"
-                mnemonicParsing="false"
-                style="-fx-background-color: transparent; -fx-text-fill: #333333; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-radius: 24; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-padding: 12 20 12 20; -fx-cursor: hand;" />
+            <!-- Sign up button -->
+            <Button maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #333333; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-radius: 24; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-padding: 12 20 12 20; -fx-cursor: hand;" text="LOG IN" />
 
         </VBox>
     </VBox>
-</StackPane>
+</Pane>
