@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="700" prefWidth="860" spacing="0" styleClass="create-playlist-root"
+      xmlns="http://javafx.com/javafx/26"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.musicapp.ui.CreatePlaylistController">
+
+    <!-- Top Bar: Cancel | New Playlist | Done -->
+    <HBox alignment="CENTER" minHeight="56" styleClass="create-playlist-topbar">
+        <padding>
+            <Insets left="28" right="28" />
+        </padding>
+
+        <!-- Cancel -->
+        <Button onAction="#onCancelClicked" styleClass="topbar-cancel-btn" text="Cancel" />
+
+        <!-- Spacer -->
+        <Region HBox.hgrow="ALWAYS" />
+
+        <!-- Title -->
+        <Label styleClass="topbar-title-label" text="New Playlist" />
+
+        <!-- Spacer -->
+        <Region HBox.hgrow="ALWAYS" />
+
+        <!-- Done -->
+        <Button onAction="#onDoneClicked" styleClass="topbar-done-btn" text="Done" />
+    </HBox>
+
+    <!-- Content Area -->
+    <VBox alignment="TOP_CENTER" spacing="0" styleClass="create-playlist-content" VBox.vgrow="ALWAYS">
+        <padding>
+            <Insets bottom="40" top="36" />
+        </padding>
+
+        <!-- Playlist Cover Image Box -->
+        <StackPane fx:id="playlistCoverContainer"
+                   maxHeight="300" maxWidth="300"
+                   minHeight="300" minWidth="300"
+                   prefHeight="300" prefWidth="300"
+                   styleClass="playlist-cover-container">
+
+            <!-- Terracotta background box -->
+            <VBox fx:id="playlistCoverBox"
+                  alignment="CENTER"
+                  minHeight="300" minWidth="300"
+                  prefHeight="300" prefWidth="300"
+                  styleClass="playlist-cover-box">
+                <children>
+                    <ImageView fitHeight="300.0" fitWidth="300.0"
+                               pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@../../../../../Downloads/Group%20113.png" />
+                        </image>
+                    </ImageView>
+                </children>
+            </VBox>
+
+        </StackPane>
+
+        <!-- Spacing -->
+        <Region maxHeight="24" minHeight="24" />
+
+        <!-- "Playlist Name" hint label -->
+        <Label styleClass="playlist-name-hint-label" text="Playlist Name" />
+
+        <!-- Spacing -->
+        <Region maxHeight="8" minHeight="8" />
+
+        <!-- Playlist Name TextField -->
+        <TextField fx:id="playlistNameField"
+                   maxWidth="380" prefWidth="380"
+                   promptText=""
+                   styleClass="playlist-name-field" />
+
+        <!-- Spacing -->
+        <Region maxHeight="24" minHeight="24" />
+
+        <!-- Description label -->
+        <Label maxWidth="380" prefWidth="380"
+               styleClass="playlist-description-label"
+               text="Description" />
+
+        <!-- Spacing -->
+        <Region maxHeight="6" minHeight="6" />
+
+        <!-- Description TextField -->
+        <TextField fx:id="descriptionField"
+                   maxWidth="380" prefWidth="380"
+                   promptText=""
+                   styleClass="playlist-description-field" />
+
+        <!-- Spacing -->
+        <Region maxHeight="32" minHeight="32" />
+
+        <!-- Add Music Row -->
+        <HBox alignment="CENTER_LEFT"
+              maxWidth="380" prefWidth="380"
+              onMouseClicked="#onAddMusicClicked"
+              spacing="10"
+              styleClass="add-music-row">
+
+            <!-- Circle Plus Icon -->
+            <Label styleClass="add-music-icon-label" text="⊕" />
+
+            <!-- Label -->
+            <Label styleClass="add-music-text-label" text="Add Music" />
+        </HBox>
+
+    </VBox>
+
+</VBox>
