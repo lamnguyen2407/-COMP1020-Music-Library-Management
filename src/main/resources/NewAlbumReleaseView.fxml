@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.musicapp.controller.NewAlbumReleaseController"
+      styleClass="album-release-root"
+      spacing="0">
+
+    <!-- Section Title -->
+    <Label text="New Releases"
+           styleClass="section-title-label">
+        <VBox.margin>
+            <Insets top="28" left="28" bottom="16" right="28"/>
+        </VBox.margin>
+    </Label>
+
+    <!-- Scrollable Album Grid -->
+    <ScrollPane fx:id="albumScrollPane"
+                fitToWidth="true"
+                hbarPolicy="NEVER"
+                vbarPolicy="AS_NEEDED"
+                styleClass="album-scroll-pane"
+                VBox.vgrow="ALWAYS">
+
+        <!--
+            TilePane: tự chia đều các ô theo chiều rộng, không có gap bên phải.
+            prefTileWidth/prefTileHeight định kích thước mỗi ô.
+            Controller inject VBox card vào fx:id="albumTilePane".
+        -->
+        <TilePane fx:id="albumTilePane"
+                  styleClass="album-tile-pane"
+                  hgap="16"
+                  vgap="20"
+                  prefTileWidth="170"
+                  prefTileHeight="210"
+                  prefColumns="5">
+            <padding>
+                <Insets top="4" left="28" right="28" bottom="32"/>
+            </padding>
+
+            <!-- Card 1 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+            <!-- Card 2 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+            <!-- Card 3 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+            <!-- Card 4 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+            <!-- Card 5 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+            <!-- Card 6 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+            <!-- Card 7 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+            <!-- Card 8 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+            <!-- Card 9 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+            <!-- Card 10 -->
+            <VBox styleClass="album-card" spacing="6">
+                <Region styleClass="album-cover-placeholder" prefWidth="170" prefHeight="170"/>
+                <Label text="Album Title" styleClass="album-title-label" maxWidth="170"/>
+                <Label text="Artist Name" styleClass="album-artist-label" maxWidth="170"/>
+            </VBox>
+
+        </TilePane>
+
+    </ScrollPane>
+
+</VBox>

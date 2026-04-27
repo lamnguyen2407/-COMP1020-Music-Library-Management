@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<!-- 
+    MainView.fxml - Khung Dashboard chính (Shell / Layout cố định)
+    Cấu trúc:
+      ┌─────────────────────────────────────────┐
+      │TopBar (Header) + Hidden PlayerBar       |      
+      ├──────────┬──────────────────────────────┤
+      │          │                              │
+      │ Sidebar  │   contentArea (StackPane)    │
+      │          │   ← nơi load các View con    │ 
+      │          │                              │
+
+
+    Controller: MainViewController.java
+    CSS: styles/main.css
+-->
+
+<BorderPane prefHeight="800" prefWidth="1280" styleClass="root-pane" stylesheets="@../styles/main.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.musicapp.controller.MainViewController">
+
+    <top>
+        <StackPane BorderPane.alignment="CENTER">
+
+            <HBox fx:id="topBar" alignment="CENTER_LEFT" managed="true" spacing="16" styleClass="top-bar" visible="true">
+                <padding><Insets bottom="14" left="24" right="24" top="14" /></padding>
+                <HBox alignment="CENTER" prefWidth="80" styleClass="logo-box">
+                    <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@../../../../../Downloads/hình%20logo.png" />
+                        </image>
+                    </ImageView>
+                </HBox>
+                <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <TextField fx:id="searchField" maxWidth="480" prefWidth="420" promptText="🎤  Search for songs" styleClass="search-field" />
+                </HBox>
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <VBox alignment="CENTER_RIGHT">
+                        <Label fx:id="userNameLabel" styleClass="user-name" text="Rachelly Proovra" />
+                        <Label styleClass="user-sub" text="Your Profile" />
+                    </VBox>
+                    <ImageView fx:id="userImageView" fitHeight="44.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@../../../../../Downloads/mắt%201.png" />
+                        </image>
+                        <clip>
+                            <Circle centerX="22.0" centerY="22.0" radius="22.0" />
+                        </clip>
+                    </ImageView>
+                </HBox>
+            </HBox>
+
+            <HBox fx:id="playerBar" alignment="CENTER" managed="false" spacing="0" styleClass="player-bar" visible="false">
+                <padding>
+                    <Insets bottom="12" left="24" right="24" top="12" />
+                </padding>
+                <HBox alignment="CENTER_LEFT" prefWidth="280" spacing="14">
+                    <StackPane styleClass="player-art-box">
+                        <ImageView fx:id="playerArtImage" fitHeight="52" fitWidth="52" preserveRatio="true">
+                            <image>
+                                <Image url="@../../../../../Downloads/shawn-mendes-itll-be-okay-music-video.jpg" />
+                            </image>
+                        </ImageView>
+                    </StackPane>
+                    <VBox alignment="CENTER_LEFT" spacing="2">
+                        <Label fx:id="playerSongTitle" styleClass="player-song-title" text="It Will Be Okay" />
+                        <Label fx:id="playerArtistName" styleClass="player-artist-name" text="Shawn Mendes" />
+                    </VBox>
+                    <Button fx:id="btnLike" onAction="#onToggleLike" styleClass="player-icon-btn" text="♡" />
+                </HBox>
+                <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER" spacing="20">
+                        <Button fx:id="btnShuffle" onAction="#onShuffle" styleClass="player-icon-btn" text="⇌" />
+                        <Button fx:id="btnPrev" onAction="#onPrev" styleClass="player-icon-btn" text="⏮" />
+                        <Button fx:id="btnPlayPause" onAction="#onPlayPause" styleClass="player-play-btn" text="▶" />
+                        <Button fx:id="btnNext" onAction="#onNext" styleClass="player-icon-btn" text="⏭" />
+                        <Button fx:id="btnRepeat" onAction="#onRepeat" styleClass="player-icon-btn" text="↻" />
+                    </HBox>
+                    <HBox alignment="CENTER" spacing="10">
+                        <Label fx:id="labelCurrentTime" styleClass="player-time" text="1:1" />
+                        <Slider fx:id="progressSlider" max="100" min="0" onMouseReleased="#onSeek" prefWidth="360" styleClass="player-progress" value="40" HBox.hgrow="ALWAYS" />
+                        <Label fx:id="labelTotalTime" styleClass="player-time" text="2:40" />
+                    </HBox>
+                </VBox>
+                <HBox alignment="CENTER_RIGHT" prefWidth="200" spacing="10">
+                    <Label styleClass="player-icon-btn" text="🔊" />
+                    <Slider fx:id="volumeSlider" max="100" min="0" prefWidth="100" styleClass="player-volume" value="70" />
+                </HBox>
+            </HBox>
+
+        </StackPane>
+    </top>
+
+    <!-- ══════════════════════════════════════════
+         CENTER: SIDEBAR + CONTENT AREA
+    ══════════════════════════════════════════ -->
+    <center>
+        <HBox>
+
+            <!-- ── SIDEBAR ── -->
+            <VBox fx:id="sidebar" prefWidth="200" spacing="4" styleClass="sidebar">
+                <padding><Insets bottom="24" left="12" right="12" top="24" /></padding>
+
+                <!-- Nav Items -->
+                <Button fx:id="btnHome" maxWidth="Infinity" onAction="#onNavHome" styleClass="nav-btn nav-btn-active" text="Home">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <image>
+                                <Image url="@../../../../../Downloads/icon-home%20(1).png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <Button fx:id="btnAccount" maxWidth="Infinity" onAction="#onNavAccount" styleClass="nav-btn" text="Account">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <image>
+                                <Image url="@../../../../../Downloads/icon-%20Account.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <Button fx:id="btnSearch" maxWidth="Infinity" onAction="#onNavSearch" styleClass="nav-btn" text="Search">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <image>
+                                <Image url="@../../../../../Downloads/Ellipse%202%20(Stroke).png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <Button fx:id="btnPlaylists" maxWidth="Infinity" onAction="#onNavPlaylists" styleClass="nav-btn" text="Playlists">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <image>
+                                <Image url="@../../../../../Downloads/Vector.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <!-- Spacer đẩy Settings xuống đáy -->
+                <Region VBox.vgrow="ALWAYS" />
+
+                <!-- Settings -->
+                <Button maxWidth="Infinity" onAction="#onNavSettings" styleClass="nav-btn" text="⚙   Settings" />
+            </VBox>
+
+            <!-- ── CONTENT AREA (nơi inject các View con) ── -->
+            <!-- CONTENT: HBox.hgrow=ALWAYS → lấp đầy phần còn lại -->
+            <ScrollPane fx:id="mainScrollPane" fitToHeight="false" fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll" vbarPolicy="AS_NEEDED" HBox.hgrow="ALWAYS">
+                <StackPane fx:id="contentArea" minHeight="600" styleClass="content-area">
+                    <Label styleClass="placeholder-label" text="Loading" />
+                </StackPane>
+            </ScrollPane>
+
+        </HBox>
+    </center>
+
+</BorderPane>
