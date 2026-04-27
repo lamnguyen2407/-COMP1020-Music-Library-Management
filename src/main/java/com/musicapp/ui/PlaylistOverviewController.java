@@ -77,7 +77,7 @@ public class PlaylistOverviewController implements Initializable {
             );
             Node view = loader.load();
 
-            CreatePlaylistController ctrl = loader.getController();
+            CreatePlayListModalController ctrl = loader.getController();
             ctrl.setContentArea(contentArea);
 
             if (contentArea != null) {

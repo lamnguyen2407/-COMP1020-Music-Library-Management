@@ -84,10 +84,10 @@ public class MainViewController implements Initializable {
     // ══════════════════════════════════════════
     // FXML paths cho các View con
     // ══════════════════════════════════════════
-    private static final String FXML_DISCOVERY = "/com/music/ui/DiscoveryView.fxml";
-    private static final String FXML_ACCOUNT   = "/com/music/ui/AccountView.fxml";
-    private static final String FXML_PLAYLIST  = "/com/music/ui/PlaylistOverview.fxml";
-    private static final String FXML_SETTINGS  = "/com/music/ui/SettingsView.fxml";
+ // ✅ Đúng
+    private static final String FXML_DISCOVERY = "/DiscoveryView.fxml";
+    private static final String FXML_ACCOUNT   = "/AccountView.fxml";
+    private static final String FXML_PLAYLIST  = "/PlaylistOverview.fxml";
 
     // ══════════════════════════════════════════
     // Initializable
@@ -158,10 +158,7 @@ public class MainViewController implements Initializable {
     /**
      * Bấm "Settings" → load SettingsView vào contentArea (nếu có)
      */
-    @FXML
-    private void onNavSettings() {
-        loadView(FXML_SETTINGS);
-    }
+
 
     // ══════════════════════════════════════════
     // PLAYER BAR HANDLERS

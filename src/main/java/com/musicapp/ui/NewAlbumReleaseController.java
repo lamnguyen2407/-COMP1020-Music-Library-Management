@@ -145,8 +145,7 @@ public class NewAlbumReleaseController implements Initializable {
 
             // Truyền thông tin album sang SongListController
             SongListController songListController = loader.getController();
-            songListController.setData(albumTitle, artistName, imagePath);
-
+            songListController.setData(albumTitle, artistName, "", imagePath, null);
             // Swap nội dung trong content area của MainView
             if (contentArea != null) {
                 contentArea.getChildren().setAll(songListView);
