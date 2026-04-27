@@ -8,8 +8,9 @@ public class Song implements Comparable<Song> {
 	private int duration;
 	private int releaseYear;
 	private String audioURL;
+	private String imageURL;
 
-	public Song(String songId, String title, String artist, String genre, int duration, int releaseYear, String audioURL) {
+	public Song(String songId, String title, String artist, String genre, int duration, int releaseYear, String audioURL, String imageURL) {
 		this.songId = songId;
 		this.title = title;
 		this.artist = artist;
@@ -17,6 +18,7 @@ public class Song implements Comparable<Song> {
 		this.duration = duration;
 		this.releaseYear = releaseYear;
 		this.audioURL = audioURL;
+		this.imageURL = imageURL;
 	}
 
 	public String getSongId() {
@@ -45,6 +47,10 @@ public class Song implements Comparable<Song> {
 
 	public String getAudioURL() {
 		return audioURL;
+	}
+	
+	public String getImageURL() {
+		return imageURL;
 	}
 
 	@Override

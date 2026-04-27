@@ -3,22 +3,16 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Rectangle?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.text.Font?>
 
 <ScrollPane
     fx:id="discoveryScrollPane"
@@ -34,703 +28,108 @@
         spacing="32"
         style="-fx-background-color: #F2EDE6; -fx-padding: 28 32 40 32;">
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!--              TRENDING SONG                  -->
-        <!-- ═══════════════════════════════════════════ -->
         <VBox spacing="14">
             <HBox alignment="CENTER_LEFT" spacing="6">
-                <Label
-                    text="Trending Song"
-                    style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                <Label
-                    text="›"
-                    style="-fx-font-size: 18px; -fx-text-fill: #8B6F47; -fx-cursor: hand;"/>
+                <Label text="Trending Song" style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
+                <Label text="›" style="-fx-font-size: 18px; -fx-text-fill: #8B6F47; -fx-cursor: hand;"/>
             </HBox>
 
-            <!-- Trending Cards Row — all 4 cards same size: 165×215, art 165×160 -->
             <HBox spacing="14" alignment="CENTER_LEFT">
-
-                <!-- Card 1 -->
-                <StackPane
-                    fx:id="trendingCard1"
-                    prefWidth="165" prefHeight="215"
-                    style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 8, 0, 0, 3); -fx-cursor: hand;">
+                <StackPane fx:id="trendingCard1" prefWidth="165" prefHeight="215" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
                     <VBox alignment="BOTTOM_LEFT">
                         <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #C9B49A;">
-                            <ImageView fx:id="trending1AlbumArt"
-                                fitWidth="165" fitHeight="160"
-                                preserveRatio="false"/>
-                            <!-- Play button — bottom-right, centered icon -->
+                            <ImageView fx:id="trending1AlbumArt" fitWidth="165" fitHeight="160" preserveRatio="false"/>
                             <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="16" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
+                                <Circle radius="16" style="-fx-fill: #C17B3A;"/><Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white;"/>
                             </StackPane>
                         </StackPane>
                         <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="trending1Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="trending1Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
+                            <Label fx:id="trending1Title" text="Trending 1" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold;"/><Label fx:id="trending1Artist" text="Artist 1" style="-fx-font-size: 11px;"/>
                         </VBox>
                     </VBox>
                 </StackPane>
-
-                <!-- Card 2 -->
-                <StackPane
-                    fx:id="trendingCard2"
-                    prefWidth="165" prefHeight="215"
-                    style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 3); -fx-cursor: hand;">
+                <StackPane fx:id="trendingCard2" prefWidth="165" prefHeight="215" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
                     <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #B8A898;">
-                            <ImageView fx:id="trending2AlbumArt"
-                                fitWidth="165" fitHeight="160"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="16" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="trending2Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="trending2Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
+                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0;"><ImageView fx:id="trending2AlbumArt" fitWidth="165" fitHeight="160" preserveRatio="false"/></StackPane>
+                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;"><Label fx:id="trending2Title" text="Trending 2" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold;"/><Label fx:id="trending2Artist" text="Artist 2" style="-fx-font-size: 11px;"/></VBox>
                     </VBox>
                 </StackPane>
-
-                <!-- Card 3 -->
-                <StackPane
-                    fx:id="trendingCard3"
-                    prefWidth="165" prefHeight="215"
-                    style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 3); -fx-cursor: hand;">
+                <StackPane fx:id="trendingCard3" prefWidth="165" prefHeight="215" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
                     <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #A09080;">
-                            <ImageView fx:id="trending3AlbumArt"
-                                fitWidth="165" fitHeight="160"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="16" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="trending3Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="trending3Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
+                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0;"><ImageView fx:id="trending3AlbumArt" fitWidth="165" fitHeight="160" preserveRatio="false"/></StackPane>
+                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;"><Label fx:id="trending3Title" text="Trending 3" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold;"/><Label fx:id="trending3Artist" text="Artist 3" style="-fx-font-size: 11px;"/></VBox>
                     </VBox>
                 </StackPane>
-
-                <!-- Card 4 -->
-                <StackPane
-                    fx:id="trendingCard4"
-                    prefWidth="165" prefHeight="215"
-                    style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 3); -fx-cursor: hand;">
+                <StackPane fx:id="trendingCard4" prefWidth="165" prefHeight="215" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
                     <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #C0B5A5;">
-                            <ImageView fx:id="trending4AlbumArt"
-                                fitWidth="165" fitHeight="160"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="16" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="trending4Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="trending4Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
+                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0;"><ImageView fx:id="trending4AlbumArt" fitWidth="165" fitHeight="160" preserveRatio="false"/></StackPane>
+                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;"><Label fx:id="trending4Title" text="Trending 4" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold;"/><Label fx:id="trending4Artist" text="Artist 4" style="-fx-font-size: 11px;"/></VBox>
                     </VBox>
                 </StackPane>
-
             </HBox>
         </VBox>
 
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!--        TOP ARTIST  +  RECENT PLAYED  +  GO-TO SONG         -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
+        <VBox spacing="10">
+            <Label text="Updated Playlist" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: white;" />
+            <StackPane fx:id="todaysHitBanner" prefHeight="300" style="-fx-background-color: #1A1A1A; -fx-background-radius: 10;">
+                <children>
+                    <ImageView fx:id="bannerImage" fitWidth="800" fitHeight="300" preserveRatio="false" style="-fx-opacity: 0.7;" />
+                    <VBox alignment="CENTER_LEFT" spacing="5">
+                        <padding><Insets left="40"/></padding>
+                        <Label text="Today's Hits" style="-fx-font-size: 64px; -fx-font-weight: bold; -fx-text-fill: #D4AF37;" />
+                        <Label text="The biggest tracks on everyone's mind." style="-fx-text-fill: white;" />
+                    </VBox>
+                </children>
+            </StackPane>
+        </VBox>
+
         <HBox spacing="20" alignment="TOP_LEFT" fillHeight="false">
-
-            <!-- ── TOP ARTIST ── -->
-            <VBox spacing="10" prefWidth="280" HBox.hgrow="NEVER">
-                <HBox alignment="CENTER_LEFT" spacing="6">
-                    <Label text="Top Artist" style="-fx-font-family: 'Georgia'; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="See All" style="-fx-font-size: 12px; -fx-text-fill: #C17B3A; -fx-cursor: hand;"/>
+            <VBox spacing="10" prefWidth="280">
+                <Label text="Top Artist" style="-fx-font-family: 'Georgia'; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Label text="01" /><ImageView fx:id="artist1Avatar" fitWidth="44" fitHeight="44" /><VBox><Label fx:id="artist1Name" text="Artist"/><Label fx:id="artist1Plays" text="Plays"/></VBox>
                 </HBox>
-
-                <!-- Row 01 -->
-                <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="01" style="-fx-font-size: 12px; -fx-text-fill: #A08060; -fx-min-width: 22;"/>
-                    <StackPane>
-                        <Circle fx:id="artist1AvatarClip" radius="22" style="-fx-fill: #C9B49A;"/>
-                        <ImageView fx:id="artist1Avatar"
-                            fitWidth="44" fitHeight="44"
-                            preserveRatio="false">
-                            <clip>
-                                <Circle radius="22" centerX="22" centerY="22"/>
-                            </clip>
-                        </ImageView>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="artist1Name" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="artist1Plays" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="✓" style="-fx-font-size: 14px; -fx-text-fill: #C17B3A;"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Label text="02" /><ImageView fx:id="artist2Avatar" fitWidth="44" fitHeight="44" /><VBox><Label fx:id="artist2Name" text="Artist"/><Label fx:id="artist2Plays" text="Plays"/></VBox>
                 </HBox>
+                </VBox>
 
-                <!-- Row 02 -->
-                <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="02" style="-fx-font-size: 12px; -fx-text-fill: #A08060; -fx-min-width: 22;"/>
-                    <StackPane>
-                        <Circle radius="22" style="-fx-fill: #B8A890;"/>
-                        <ImageView fx:id="artist2Avatar"
-                            fitWidth="44" fitHeight="44"
-                            preserveRatio="false">
-                            <clip>
-                                <Circle radius="22" centerX="22" centerY="22"/>
-                            </clip>
-                        </ImageView>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="artist2Name" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="artist2Plays" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="✓" style="-fx-font-size: 14px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <!-- Row 03 -->
-                <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="03" style="-fx-font-size: 12px; -fx-text-fill: #A08060; -fx-min-width: 22;"/>
-                    <StackPane>
-                        <Circle radius="22" style="-fx-fill: #D0C0A8;"/>
-                        <ImageView fx:id="artist3Avatar"
-                            fitWidth="44" fitHeight="44"
-                            preserveRatio="false">
-                            <clip>
-                                <Circle radius="22" centerX="22" centerY="22"/>
-                            </clip>
-                        </ImageView>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="artist3Name" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="artist3Plays" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="+" style="-fx-font-size: 16px; -fx-text-fill: #8B7563;"/>
-                </HBox>
-
-                <!-- Row 04 -->
-                <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="04" style="-fx-font-size: 12px; -fx-text-fill: #A08060; -fx-min-width: 22;"/>
-                    <StackPane>
-                        <Circle radius="22" style="-fx-fill: #BCA898;"/>
-                        <ImageView fx:id="artist4Avatar"
-                            fitWidth="44" fitHeight="44"
-                            preserveRatio="false">
-                            <clip>
-                                <Circle radius="22" centerX="22" centerY="22"/>
-                            </clip>
-                        </ImageView>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="artist4Name" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="artist4Plays" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="+" style="-fx-font-size: 16px; -fx-text-fill: #8B7563;"/>
-                </HBox>
-
-                <!-- Row 05 -->
-                <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="05" style="-fx-font-size: 12px; -fx-text-fill: #A08060; -fx-min-width: 22;"/>
-                    <StackPane>
-                        <Circle radius="22" style="-fx-fill: #C8B8A2;"/>
-                        <ImageView fx:id="artist5Avatar"
-                            fitWidth="44" fitHeight="44"
-                            preserveRatio="false">
-                            <clip>
-                                <Circle radius="22" centerX="22" centerY="22"/>
-                            </clip>
-                        </ImageView>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="artist5Name" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="artist5Plays" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="✓" style="-fx-font-size: 14px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-            </VBox>
-
-            <!-- ── RECENT PLAYED ── -->
             <VBox spacing="8" prefWidth="260" HBox.hgrow="ALWAYS">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Recent Played" style="-fx-font-family: 'Georgia'; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="See All" style="-fx-font-size: 12px; -fx-text-fill: #C17B3A; -fx-cursor: hand;"/>
+                <Label text="Recent Played" style="-fx-font-family: 'Georgia'; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <ImageView fx:id="recent1AlbumArt" fitWidth="38" fitHeight="38" /><VBox><Label fx:id="recent1Title" text="Song"/><Label fx:id="recent1Artist" text="Artist"/></VBox><Label fx:id="recent1Like" text="♥" style="-fx-text-fill: #C17B3A;"/>
                 </HBox>
+                </VBox>
 
-                <!-- Recent Row 1 -->
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="▶" style="-fx-font-size: 12px; -fx-text-fill: #8B7563;"/>
-                    <StackPane prefWidth="38" prefHeight="38">
-                        <Rectangle width="38" height="38" arcWidth="8" arcHeight="8" style="-fx-fill: #C9B49A;"/>
-                        <ImageView fx:id="recent1AlbumArt"
-                            fitWidth="38" fitHeight="38"
-                            preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="recent1Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="recent1Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label fx:id="recent1Like" text="♥" style="-fx-font-size: 14px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <!-- Recent Row 2 -->
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="▶" style="-fx-font-size: 12px; -fx-text-fill: #8B7563;"/>
-                    <StackPane prefWidth="38" prefHeight="38">
-                        <Rectangle width="38" height="38" arcWidth="8" arcHeight="8" style="-fx-fill: #B8A890;"/>
-                        <ImageView fx:id="recent2AlbumArt"
-                            fitWidth="38" fitHeight="38"
-                            preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="recent2Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="recent2Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label fx:id="recent2Like" text="♥" style="-fx-font-size: 14px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <!-- Recent Row 3 -->
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="▶" style="-fx-font-size: 12px; -fx-text-fill: #8B7563;"/>
-                    <StackPane prefWidth="38" prefHeight="38">
-                        <Rectangle width="38" height="38" arcWidth="8" arcHeight="8" style="-fx-fill: #D0C0A8;"/>
-                        <ImageView fx:id="recent3AlbumArt"
-                            fitWidth="38" fitHeight="38"
-                            preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="recent3Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="recent3Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label fx:id="recent3Like" text="♡" style="-fx-font-size: 14px; -fx-text-fill: #8B7563;"/>
-                </HBox>
-
-                <!-- Recent Row 4 -->
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="▶" style="-fx-font-size: 12px; -fx-text-fill: #8B7563;"/>
-                    <StackPane prefWidth="38" prefHeight="38">
-                        <Rectangle width="38" height="38" arcWidth="8" arcHeight="8" style="-fx-fill: #BCA898;"/>
-                        <ImageView fx:id="recent4AlbumArt"
-                            fitWidth="38" fitHeight="38"
-                            preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="recent4Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="recent4Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label fx:id="recent4Like" text="♥" style="-fx-font-size: 14px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <!-- Recent Row 5 -->
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;">
-                    <Label text="▶" style="-fx-font-size: 12px; -fx-text-fill: #8B7563;"/>
-                    <StackPane prefWidth="38" prefHeight="38">
-                        <Rectangle width="38" height="38" arcWidth="8" arcHeight="8" style="-fx-fill: #C8B8A2;"/>
-                        <ImageView fx:id="recent5AlbumArt"
-                            fitWidth="38" fitHeight="38"
-                            preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="recent5Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="recent5Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label fx:id="recent5Like" text="♡" style="-fx-font-size: 14px; -fx-text-fill: #8B7563;"/>
-                </HBox>
-            </VBox>
-
-            <!-- ── YOUR GO-TO SONG (Now Playing Card) ── -->
-            <VBox spacing="10" prefWidth="220" maxWidth="220" HBox.hgrow="NEVER">
-                <Label text="Your Go-To Song" style="-fx-font-family: 'Georgia'; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-
-                <VBox
-                    style="-fx-background-color: #3D2C1E; -fx-background-radius: 18; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 4);"
-                    prefWidth="220" maxWidth="220" prefHeight="280"
-                    spacing="0">
-
-                    <!-- Album art area -->
-                    <StackPane prefWidth="220" prefHeight="175" style="-fx-background-radius: 18 18 0 0; -fx-background-color: #5A4035;">
-                        <ImageView fx:id="gotoAlbumArt"
-                            fitWidth="220" fitHeight="175"
-                            preserveRatio="false"/>
-                    </StackPane>
-
-                    <!-- Player info -->
-                    <VBox spacing="8" style="-fx-padding: 14 16 16 16; -fx-background-color: #3D2C1E; -fx-background-radius: 0 0 18 18;">
-                        <Label fx:id="gotoTitle" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #F5EEE4;"/>
-                        <Label fx:id="gotoArtist" text="" style="-fx-font-size: 11px; -fx-text-fill: #A89070;"/>
-
-                        <!-- Progress Bar -->
-                        <ProgressBar
-                            fx:id="playerProgress"
-                            progress="0.35"
-                            prefWidth="188"
-                            prefHeight="3"
-                            style="-fx-accent: #C17B3A; -fx-background-color: #5A4035; -fx-background-radius: 2;"/>
-
-                        <!-- Time labels -->
-                        <HBox>
-                            <Label fx:id="playerCurrentTime" text="0:00" style="-fx-font-size: 10px; -fx-text-fill: #A89070;"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Label fx:id="playerTotalTime" text="0:00" style="-fx-font-size: 10px; -fx-text-fill: #A89070;"/>
-                        </HBox>
-
-                        <!-- Controls -->
-                        <HBox alignment="CENTER" spacing="18" style="-fx-padding: 4 0 0 0;">
-                            <Label fx:id="prevBtn" text="⏮" style="-fx-font-size: 16px; -fx-text-fill: #A89070; -fx-cursor: hand;"/>
-                            <StackPane style="-fx-cursor: hand;" alignment="CENTER">
-                                <Circle radius="20" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 14px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                            <Label fx:id="nextBtn" text="⏭" style="-fx-font-size: 16px; -fx-text-fill: #A89070; -fx-cursor: hand;"/>
-                        </HBox>
+            <VBox spacing="10" prefWidth="220">
+                <Label text="Your Go-To Song" style="-fx-font-family: 'Georgia'; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+                <VBox style="-fx-background-color: #3D2C1E; -fx-background-radius: 18;">
+                    <ImageView fx:id="gotoAlbumArt" fitWidth="220" fitHeight="175" preserveRatio="false"/>
+                    <VBox spacing="8" style="-fx-padding: 14;">
+                        <Label fx:id="gotoTitle" text="Title" style="-fx-text-fill: white;"/>
+                        <Label fx:id="gotoArtist" text="Artist" style="-fx-text-fill: #A89070;"/>
+                        <ProgressBar fx:id="playerProgress" progress="0.35" prefWidth="188" />
                     </VBox>
                 </VBox>
             </VBox>
-
         </HBox>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!--            NEW ALBUM RELEASE                -->
-        <!-- ═══════════════════════════════════════════ -->
         <VBox spacing="14">
-            <HBox alignment="CENTER_LEFT" spacing="6">
-                <Label text="New Album Release" style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                <Label text="›" style="-fx-font-size: 18px; -fx-text-fill: #8B6F47; -fx-cursor: hand;"/>
-            </HBox>
-
-            <!-- Row 1 -->
+            <Label text="New Album Release" style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold;"/>
             <HBox spacing="14">
-                <!-- Album Card A -->
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 8, 0, 0, 3); -fx-cursor: hand;">
-                    <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="175" prefHeight="165" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #C9B49A;">
-                            <ImageView fx:id="newAlbum1AlbumArt"
-                                fitWidth="175" fitHeight="165"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="15" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 7 10 9 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="newAlbum1Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="newAlbum1Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
-                    </VBox>
-                </StackPane>
-
-                <!-- Album Card B -->
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 8, 0, 0, 3); -fx-cursor: hand;">
-                    <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="175" prefHeight="165" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #B0A090;">
-                            <ImageView fx:id="newAlbum2AlbumArt"
-                                fitWidth="175" fitHeight="165"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="15" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 7 10 9 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="newAlbum2Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="newAlbum2Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
-                    </VBox>
-                </StackPane>
-
-                <!-- Album Card C -->
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 8, 0, 0, 3); -fx-cursor: hand;">
-                    <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="175" prefHeight="165" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #9A8878;">
-                            <ImageView fx:id="newAlbum3AlbumArt"
-                                fitWidth="175" fitHeight="165"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="15" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 7 10 9 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="newAlbum3Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="newAlbum3Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
-                    </VBox>
-                </StackPane>
-
-                <!-- Album Card D -->
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 8, 0, 0, 3); -fx-cursor: hand;">
-                    <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="175" prefHeight="165" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #BEB0A0;">
-                            <ImageView fx:id="newAlbum4AlbumArt"
-                                fitWidth="175" fitHeight="165"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="15" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 7 10 9 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="newAlbum4Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="newAlbum4Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
-                    </VBox>
-                </StackPane>
-            </HBox>
-
-            <!-- Row 2 -->
-            <HBox spacing="14">
-                <!-- Album Card E -->
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 8, 0, 0, 3); -fx-cursor: hand;">
-                    <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="175" prefHeight="165" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #C5B5A0;">
-                            <ImageView fx:id="newAlbum5AlbumArt"
-                                fitWidth="175" fitHeight="165"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="15" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 7 10 9 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="newAlbum5Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="newAlbum5Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
-                    </VBox>
-                </StackPane>
-
-                <!-- Album Card F -->
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 8, 0, 0, 3); -fx-cursor: hand;">
-                    <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="175" prefHeight="165" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #A89880;">
-                            <ImageView fx:id="newAlbum6AlbumArt"
-                                fitWidth="175" fitHeight="165"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="15" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 7 10 9 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="newAlbum6Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="newAlbum6Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
-                    </VBox>
-                </StackPane>
-
-                <!-- Album Card G -->
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 8, 0, 0, 3); -fx-cursor: hand;">
-                    <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="175" prefHeight="165" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #9E9080;">
-                            <ImageView fx:id="newAlbum7AlbumArt"
-                                fitWidth="175" fitHeight="165"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="15" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 7 10 9 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="newAlbum7Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="newAlbum7Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
-                    </VBox>
-                </StackPane>
-
-                <!-- Album Card H -->
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 8, 0, 0, 3); -fx-cursor: hand;">
-                    <VBox alignment="BOTTOM_LEFT">
-                        <StackPane prefWidth="175" prefHeight="165" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #C0AE98;">
-                            <ImageView fx:id="newAlbum8AlbumArt"
-                                fitWidth="175" fitHeight="165"
-                                preserveRatio="false"/>
-                            <StackPane StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                                <Circle radius="15" style="-fx-fill: #C17B3A;"/>
-                                <Label text="▶" style="-fx-font-size: 10px; -fx-text-fill: white; -fx-padding: 0 0 0 3;"/>
-                            </StackPane>
-                        </StackPane>
-                        <VBox style="-fx-padding: 7 10 9 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
-                            <Label fx:id="newAlbum8Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                            <Label fx:id="newAlbum8Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #7A6652;"/>
-                        </VBox>
-                    </VBox>
-                </StackPane>
-            </HBox>
+                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14;"><VBox><ImageView fx:id="newAlbum1AlbumArt" fitWidth="175" fitHeight="165" /><Label fx:id="newAlbum1Title" text="Album 1"/><Label fx:id="newAlbum1Artist" text="Artist 1"/></VBox></StackPane>
+                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14;"><VBox><ImageView fx:id="newAlbum2AlbumArt" fitWidth="175" fitHeight="165" /><Label fx:id="newAlbum2Title" text="Album 2"/><Label fx:id="newAlbum2Artist" text="Artist 2"/></VBox></StackPane>
+                </HBox>
         </VBox>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!--              LATEST SONG                    -->
-        <!-- ═══════════════════════════════════════════ -->
         <VBox spacing="10">
-            <HBox alignment="CENTER_LEFT" spacing="6">
-                <Label text="Latest Song" style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                <Label text="›" style="-fx-font-size: 18px; -fx-text-fill: #8B6F47; -fx-cursor: hand;"/>
-            </HBox>
-
-            <!-- Latest Song Grid — 3 columns × 4 rows -->
-            <GridPane hgap="0" vgap="0">
-                <columnConstraints>
-                    <ColumnConstraints percentWidth="33.33"/>
-                    <ColumnConstraints percentWidth="33.33"/>
-                    <ColumnConstraints percentWidth="33.33"/>
-                </columnConstraints>
-
-                <!-- Row 0 -->
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #C9B49A;"/>
-                        <ImageView fx:id="latest1AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest1Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest1Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
+            <HBox alignment="CENTER_LEFT"><Label text="Latest Song" style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold;"/><Label text="›" /></HBox>
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints><ColumnConstraints percentWidth="33.33"/><ColumnConstraints percentWidth="33.33"/><ColumnConstraints percentWidth="33.33"/></columnConstraints>
+                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <ImageView fx:id="latest1AlbumArt" fitWidth="36" fitHeight="36" /><VBox><Label fx:id="latest1Title" text="Song 1"/><Label fx:id="latest1Artist" text="Artist 1"/></VBox><Label text="♥" style="-fx-text-fill: #C17B3A;"/>
                 </HBox>
-
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #B8A890;"/>
-                        <ImageView fx:id="latest2AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest2Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest2Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #D0C0A8;"/>
-                        <ImageView fx:id="latest3AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest3Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest3Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <!-- Row 1 -->
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #BCA898;"/>
-                        <ImageView fx:id="latest4AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest4Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest4Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #C8B8A2;"/>
-                        <ImageView fx:id="latest5AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest5Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest5Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #A89878;"/>
-                        <ImageView fx:id="latest6AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest6Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest6Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <!-- Row 2 -->
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="0" GridPane.rowIndex="2">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #C2B09A;"/>
-                        <ImageView fx:id="latest7AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest7Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest7Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #B0A088;"/>
-                        <ImageView fx:id="latest8AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest8Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest8Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="2" GridPane.rowIndex="2">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #D4C4AE;"/>
-                        <ImageView fx:id="latest9AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest9Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest9Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <!-- Row 3 -->
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="0" GridPane.rowIndex="3">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #C0AE9A;"/>
-                        <ImageView fx:id="latest10AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest10Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest10Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #B8A890;"/>
-                        <ImageView fx:id="latest11AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest11Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest11Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 6;" GridPane.columnIndex="2" GridPane.rowIndex="3">
-                    <StackPane prefWidth="36" prefHeight="36">
-                        <Rectangle width="36" height="36" arcWidth="6" arcHeight="6" style="-fx-fill: #CAB8A4;"/>
-                        <ImageView fx:id="latest12AlbumArt" fitWidth="36" fitHeight="36" preserveRatio="false"/>
-                    </StackPane>
-                    <VBox spacing="1" HBox.hgrow="ALWAYS">
-                        <Label fx:id="latest12Title" text="" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
-                        <Label fx:id="latest12Artist" text="" style="-fx-font-size: 11px; -fx-text-fill: #8B7563;"/>
-                    </VBox>
-                    <Label text="♥" style="-fx-font-size: 13px; -fx-text-fill: #C17B3A;"/>
-                </HBox>
-
-            </GridPane>
+                </GridPane>
         </VBox>
-
     </VBox>
 </ScrollPane>

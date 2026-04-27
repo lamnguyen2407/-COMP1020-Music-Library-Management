@@ -4,120 +4,68 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="700" prefWidth="860" spacing="0" styleClass="create-playlist-root"
-      xmlns="http://javafx.com/javafx/26"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.musicapp.ui.CreatePlaylistController">
+<VBox prefHeight="700" prefWidth="860" spacing="0" 
+      xmlns="http://javafx.com/javafx" 
+      xmlns:fx="http://javafx.com/fxml" 
+      fx:controller="com.musicapp.ui.CreatePlaylistModalController"
+      style="-fx-background-color: #FAF7F4;">
 
-    <!-- Top Bar: Cancel | New Playlist | Done -->
-    <HBox alignment="CENTER" minHeight="56" styleClass="create-playlist-topbar">
+    <HBox alignment="CENTER" minHeight="56" style="-fx-background-color: #FAF7F4; -fx-border-color: #E0D8D0; -fx-border-width: 0 0 1 0;">
         <padding>
             <Insets left="28" right="28" />
         </padding>
 
-        <!-- Cancel -->
-        <Button onAction="#onCancelClicked" styleClass="topbar-cancel-btn" text="Cancel" />
+        <Button onAction="#onCancelClicked" text="Cancel" 
+                style="-fx-background-color: transparent; -fx-text-fill: #7A6A60; -fx-cursor: hand; -fx-font-size: 14px;"/>
 
-        <!-- Spacer -->
+        <Region HBox.hgrow="ALWAYS" />
+        <Label text="New Playlist" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C1810;" />
         <Region HBox.hgrow="ALWAYS" />
 
-        <!-- Title -->
-        <Label styleClass="topbar-title-label" text="New Playlist" />
-
-        <!-- Spacer -->
-        <Region HBox.hgrow="ALWAYS" />
-
-        <!-- Done -->
-        <Button onAction="#onDoneClicked" styleClass="topbar-done-btn" text="Done" />
+        <Button onAction="#onDoneClicked" text="Done" 
+                style="-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14px;"/>
     </HBox>
 
-    <!-- Content Area -->
-    <VBox alignment="TOP_CENTER" spacing="0" styleClass="create-playlist-content" VBox.vgrow="ALWAYS">
+    <VBox alignment="TOP_CENTER" spacing="0" VBox.vgrow="ALWAYS">
         <padding>
             <Insets bottom="40" top="36" />
         </padding>
 
-        <!-- Playlist Cover Image Box -->
-        <StackPane fx:id="playlistCoverContainer"
-                   maxHeight="300" maxWidth="300"
-                   minHeight="300" minWidth="300"
-                   prefHeight="300" prefWidth="300"
-                   styleClass="playlist-cover-container">
-
-            <!-- Terracotta background box -->
-            <VBox fx:id="playlistCoverBox"
-                  alignment="CENTER"
-                  minHeight="300" minWidth="300"
-                  prefHeight="300" prefWidth="300"
-                  styleClass="playlist-cover-box">
+        <StackPane fx:id="playlistCoverContainer" maxHeight="300" maxWidth="300" minHeight="300" minWidth="300">
+            <VBox fx:id="playlistCoverBox" alignment="CENTER" minHeight="300" minWidth="300" 
+                  style="-fx-background-color: #D2B48C; -fx-background-radius: 12; -fx-cursor: hand;">
                 <children>
-                    <ImageView fitHeight="300.0" fitWidth="300.0"
-                               pickOnBounds="true" preserveRatio="true">
-                        <image>
-                            <Image url="@../../../../../Downloads/Group%20113.png" />
-                        </image>
-                    </ImageView>
+                    <ImageView fx:id="uploadedImageView" fitHeight="300.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="false" />
+                    <Label text="Click to upload cover" style="-fx-text-fill: white; -fx-font-size: 13px;" />
                 </children>
             </VBox>
-
         </StackPane>
 
-        <!-- Spacing -->
-        <Region maxHeight="24" minHeight="24" />
+        <Region minHeight="24" />
+        <Label text="Playlist Name" style="-fx-text-fill: #9E8E84; -fx-font-size: 12px;" />
+        <Region minHeight="8" />
 
-        <!-- "Playlist Name" hint label -->
-        <Label styleClass="playlist-name-hint-label" text="Playlist Name" />
+        <TextField fx:id="playlistNameField" maxWidth="380" promptText="Give your playlist a name"
+                   style="-fx-background-color: transparent; -fx-border-color: #E0D8D0; -fx-border-width: 0 0 1 0; -fx-padding: 5 0 5 0; -fx-font-size: 16px;"/>
 
-        <!-- Spacing -->
-        <Region maxHeight="8" minHeight="8" />
+        <Region minHeight="24" />
+        <Label text="Description" style="-fx-text-fill: #9E8E84; -fx-font-size: 12px;" />
+        <Region minHeight="6" />
 
-        <!-- Playlist Name TextField -->
-        <TextField fx:id="playlistNameField"
-                   maxWidth="380" prefWidth="380"
-                   promptText=""
-                   styleClass="playlist-name-field" />
+        <TextField fx:id="descriptionField" maxWidth="380" promptText="Add an optional description"
+                   style="-fx-background-color: transparent; -fx-border-color: #E0D8D0; -fx-border-width: 0 0 1 0; -fx-padding: 5 0 5 0; -fx-font-size: 14px;"/>
 
-        <!-- Spacing -->
-        <Region maxHeight="24" minHeight="24" />
+        <Region minHeight="32" />
 
-        <!-- Description label -->
-        <Label maxWidth="380" prefWidth="380"
-               styleClass="playlist-description-label"
-               text="Description" />
-
-        <!-- Spacing -->
-        <Region maxHeight="6" minHeight="6" />
-
-        <!-- Description TextField -->
-        <TextField fx:id="descriptionField"
-                   maxWidth="380" prefWidth="380"
-                   promptText=""
-                   styleClass="playlist-description-field" />
-
-        <!-- Spacing -->
-        <Region maxHeight="32" minHeight="32" />
-
-        <!-- Add Music Row -->
-        <HBox alignment="CENTER_LEFT"
-              maxWidth="380" prefWidth="380"
-              onMouseClicked="#onAddMusicClicked"
-              spacing="10"
-              styleClass="add-music-row">
-
-            <!-- Circle Plus Icon -->
-            <Label styleClass="add-music-icon-label" text="⊕" />
-
-            <!-- Label -->
-            <Label styleClass="add-music-text-label" text="Add Music" />
+        <HBox alignment="CENTER_LEFT" maxWidth="380" onMouseClicked="#onAddMusicClicked" spacing="10" style="-fx-cursor: hand;">
+            <Label text="⊕" style="-fx-text-fill: #C0703A; -fx-font-size: 20px;" />
+            <Label text="Add Music" style="-fx-text-fill: #2C1810; -fx-font-size: 14px; -fx-font-weight: bold;" />
         </HBox>
-
     </VBox>
-
 </VBox>

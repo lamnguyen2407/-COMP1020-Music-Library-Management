@@ -2,110 +2,55 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Rectangle?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.musicapp.ui.PlaylistOverviewController"
-
-      styleClass="playlist-overview-root"
+      style="-fx-background-color: #FAF7F4;"
       spacing="0">
 
-    <!-- Page Title -->
-    <Label text="Playlists"
-           styleClass="playlist-title-label">
+    <Label text="Playlists" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2C1810;">
         <VBox.margin>
             <Insets top="32" left="32" bottom="20" right="32"/>
         </VBox.margin>
     </Label>
 
-    <!-- Scrollable Playlist List -->
     <ScrollPane fx:id="playlistScrollPane"
                 fitToWidth="true"
                 hbarPolicy="NEVER"
                 vbarPolicy="AS_NEEDED"
-                styleClass="playlist-scroll-pane"
+                style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;"
                 VBox.vgrow="ALWAYS">
 
-        <VBox fx:id="playlistListContainer"
-              styleClass="playlist-list-container"
-              spacing="0">
+        <VBox fx:id="playlistListContainer" spacing="0" style="-fx-background-color: #FAF7F4;">
             <padding>
                 <Insets left="32" right="32" bottom="16"/>
             </padding>
 
-            <!-- Dynamic playlist items will be added here by the controller -->
-            <!-- Example static item (replace with dynamic ListView or controller-injected nodes) -->
-
-            <!-- "Your favorite songs" playlist row (static/default) -->
-            <HBox styleClass="playlist-row"
-                  alignment="CENTER_LEFT"
-                  spacing="16"
-                  minHeight="80">
-                <padding>
-                    <Insets top="8" bottom="8"/>
-                </padding>
-
-                <!-- Playlist Icon Box -->
-                <HBox styleClass="playlist-icon-box"
-                      alignment="CENTER"
-                      minWidth="56" minHeight="56"
-                      maxWidth="56" maxHeight="56">
-                    <!-- Music note icon (replace ImageView with SVGPath or actual icon) -->
-                    <Label text="♫" styleClass="playlist-icon-label"/>
+            <HBox fx:id="favoriteRow" styleClass="playlist-row" alignment="CENTER_LEFT" spacing="16" minHeight="80" style="-fx-cursor: hand;">
+                <padding><Insets top="8" bottom="8"/></padding>
+                <HBox alignment="CENTER" minWidth="56" minHeight="56" style="-fx-background-color: #C0703A; -fx-background-radius: 8;">
+                    <Label text="♥" style="-fx-text-fill: white; -fx-font-size: 20px;"/>
                 </HBox>
-
-                <!-- Playlist Name -->
-                <Label text="Your favorite songs"
-                       styleClass="playlist-name-label"
-                       HBox.hgrow="ALWAYS"/>
-
-                <!-- Chevron -->
-                <Label text="›" styleClass="playlist-chevron-label"/>
+                <Label text="Your favorite songs" style="-fx-font-size: 16px; -fx-text-fill: #2C1810;" HBox.hgrow="ALWAYS"/>
+                <Label text="›" style="-fx-font-size: 20px; -fx-text-fill: #9E8E84;"/>
             </HBox>
 
-            <!-- Separator -->
-            <Region styleClass="playlist-separator" minHeight="1" maxHeight="1" prefHeight="1"/>
+            <Region fx:id="favSeparator" minHeight="1" prefHeight="1" style="-fx-background-color: #E0D8D0;"/>
 
-            <!-- Dynamically injected playlist rows go above this line -->
-            <!-- fx:id on the VBox lets the controller insert rows before "New PlayList" -->
-
-            <!-- "New PlayList" row — always last -->
-            <HBox fx:id="newPlaylistRow"
-                  styleClass="playlist-row playlist-new-row"
-                  alignment="CENTER_LEFT"
-                  spacing="16"
-                  minHeight="80"
-                  onMouseClicked="#onNewPlaylistClicked">
-                <padding>
-                    <Insets top="8" bottom="8"/>
-                </padding>
-
-                <!-- Plus Icon Box -->
-                <HBox styleClass="playlist-icon-box playlist-add-icon-box"
-                      alignment="CENTER"
-                      minWidth="56" minHeight="56"
-                      maxWidth="56" maxHeight="56">
-                    <Label text="+" styleClass="playlist-add-label"/>
+            <HBox fx:id="newPlaylistRow" onMouseClicked="#onNewPlaylistClicked" alignment="CENTER_LEFT" spacing="16" minHeight="80" style="-fx-cursor: hand;">
+                <padding><Insets top="8" bottom="8"/></padding>
+                <HBox alignment="CENTER" minWidth="56" minHeight="56" style="-fx-background-color: #E0D8D0; -fx-background-radius: 8;">
+                    <Label text="+" style="-fx-font-size: 24px; -fx-text-fill: #7A6A60;"/>
                 </HBox>
-
-                <!-- Label -->
-                <Label text="New PlayList"
-                       styleClass="playlist-name-label"
-                       HBox.hgrow="ALWAYS"/>
-
-                <!-- Chevron -->
-                <Label text="›" styleClass="playlist-chevron-label"/>
+                <Label text="New PlayList" style="-fx-font-size: 16px; -fx-text-fill: #2C1810;" HBox.hgrow="ALWAYS"/>
+                <Label text="›" style="-fx-font-size: 20px; -fx-text-fill: #9E8E84;"/>
             </HBox>
 
         </VBox>
     </ScrollPane>
-
 </VBox>
