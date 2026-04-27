@@ -18,102 +18,69 @@
     để đổ dữ liệu vào tuỳ theo nút bấm.
 -->
 
-<VBox spacing="0" style="-fx-background-color: #FAF7F4;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-
-<!--
-    SongListView.fxml — Template A (*)
-    Dùng cho: Trending Songs, Top Artist, Click Album, Your Playlist
-    Phần này được load vào contentArea (StackPane) bên trong MainView.
-    Controller sẽ gọi setData(title, subtitle, description, coverImage, ObservableList)
-    để đổ dữ liệu vào tuỳ theo nút bấm.
--->
-
-<VBox spacing="0" style="-fx-background-color: #FAF7F4;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-
-<!--
-    SongListView.fxml — Template A (*)
-    Dùng cho: Trending Songs, Top Artist, Click Album, Your Playlist
-    Phần này được load vào contentArea (StackPane) bên trong MainView.
-    Controller sẽ gọi setData(title, subtitle, description, coverImage, ObservableList)
-    để đổ dữ liệu vào tuỳ theo nút bấm.
--->
-
-<VBox spacing="0" style="-fx-background-color: #FAF7F4;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-
-<!--
-    SongListView.fxml — Template A (*)
-    Dùng cho: Trending Songs, Top Artist, Click Album, Your Playlist
-    Phần này được load vào contentArea (StackPane) bên trong MainView.
-    Controller sẽ gọi setData(title, subtitle, description, coverImage, ObservableList)
-    để đổ dữ liệu vào tuỳ theo nút bấm.
--->
-
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.musicapp.ui.CompactListController"
       spacing="0"
       style="-fx-background-color: #FAF7F4;">
+
     <!-- ═══════════════════════════════════════════
          HEADER SECTION: ảnh bìa lớn + thông tin
     ════════════════════════════════════════════ -->
     <HBox spacing="40" style="-fx-background-color: #FAF7F4; -fx-padding: 32 40 24 40;">
 
         <!-- Ảnh bìa lớn bên trái -->
-        <ImageView fx:id="coverImageView" fitHeight="230" fitWidth="230" preserveRatio="false" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 0, 4);">
-        </ImageView>
+        <ImageView fx:id="coverImageView"
+                   fitHeight="230" fitWidth="230"
+                   preserveRatio="false"
+                   style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 0, 4);" />
 
         <!-- Thông tin bên phải -->
         <VBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
 
             <!-- Tiêu đề lớn -->
-            <Label fx:id="titleLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2C1810;" />
+            <Label fx:id="titleLabel"
+                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2C1810;" />
 
             <!-- Subtitle / tag line màu cam -->
-            <Label fx:id="subtitleLabel" style="-fx-font-size: 15px; -fx-text-fill: #C0703A; -fx-font-style: italic;" />
+            <Label fx:id="subtitleLabel"
+                   style="-fx-font-size: 15px; -fx-text-fill: #C0703A; -fx-font-style: italic;" />
 
             <!-- Spacer nhỏ -->
             <Region prefHeight="10" />
 
             <!-- Mô tả -->
-            <Label fx:id="descriptionLabel" maxWidth="500" style="-fx-font-size: 13px; -fx-text-fill: #7A6A60; -fx-line-spacing: 3;" wrapText="true" />
+            <Label fx:id="descriptionLabel"
+                   maxWidth="500"
+                   wrapText="true"
+                   style="-fx-font-size: 13px; -fx-text-fill: #7A6A60; -fx-line-spacing: 3;" />
 
             <!-- Spacer -->
             <Region prefHeight="16" />
 
             <!-- Nút PLAY và SHUFFLE -->
             <HBox spacing="12">
-                <Button fx:id="playButton" prefHeight="38" prefWidth="160" style="-fx-background-color: #C0703A;                                -fx-text-fill: white;                                -fx-font-size: 13px;                                -fx-font-weight: bold;                                -fx-background-radius: 4;                                -fx-cursor: hand;" text="PLAY" />
-                <Button fx:id="shuffleButton" prefHeight="38" prefWidth="160" style="-fx-background-color: transparent;                                -fx-text-fill: #C0703A;                                -fx-font-size: 13px;                                -fx-font-weight: bold;                                -fx-background-radius: 4;                                -fx-border-color: #C0703A;                                -fx-border-radius: 4;                                -fx-border-width: 1.5;                                -fx-cursor: hand;" text="SHUFFLE" />
+                <Button fx:id="playButton"
+                        text="PLAY"
+                        prefHeight="38" prefWidth="160"
+                        style="-fx-background-color: #C0703A;
+                               -fx-text-fill: white;
+                               -fx-font-size: 13px;
+                               -fx-font-weight: bold;
+                               -fx-background-radius: 4;
+                               -fx-cursor: hand;" />
+                <Button fx:id="shuffleButton"
+                        text="SHUFFLE"
+                        prefHeight="38" prefWidth="160"
+                        style="-fx-background-color: transparent;
+                               -fx-text-fill: #C0703A;
+                               -fx-font-size: 13px;
+                               -fx-font-weight: bold;
+                               -fx-background-radius: 4;
+                               -fx-border-color: #C0703A;
+                               -fx-border-radius: 4;
+                               -fx-border-width: 1.5;
+                               -fx-cursor: hand;" />
             </HBox>
 
         </VBox>
@@ -131,11 +98,19 @@
          không scroll theo danh sách)
     ════════════════════════════════════════════ -->
     <HBox style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
-        <Label prefWidth="36" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="#" />
-        <Label fx:id="col1Header" prefWidth="300" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col2Header" prefWidth="180" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col3Header" prefWidth="200" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
-        <Label prefWidth="60" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="TIME" />
+        <Label prefWidth="36"
+               text="#"
+               style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        <Label fx:id="col1Header" prefWidth="300"
+               style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        <Label fx:id="col2Header" prefWidth="180"
+               style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        <Label fx:id="col3Header" prefWidth="200"
+               style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;"
+               HBox.hgrow="ALWAYS" />
+        <Label prefWidth="60"
+               text="TIME"
+               style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
     </HBox>
 
     <Separator style="-fx-opacity: 0.2;">
@@ -147,245 +122,12 @@
          Header cột bên trên đứng yên, chỉ
          phần ListView này cuộn.
     ════════════════════════════════════════════ -->
-    <ListView fx:id="songListView" fixedCellSize="62" style="-fx-background-color: transparent;                      -fx-background-insets: 0;                      -fx-padding: 0 40 20 40;                      -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
-        <!--
-            Controller sẽ set:
-              songListView.setItems(data);
-              songListView.setCellFactory(lv -> new SongListCell());
-            Mỗi cell (SongListCell) là 1 HBox gồm:
-              [index] [ImageView nhỏ] [Label tên] [+button] [Label col2] [Label col3] [+button] [Label time]
-        -->
-    </ListView>
-
-</VBox>
-.SongListController">
-
-    <!-- ═══════════════════════════════════════════
-         HEADER SECTION: ảnh bìa lớn + thông tin
-    ════════════════════════════════════════════ -->
-    <HBox spacing="40" style="-fx-background-color: #FAF7F4; -fx-padding: 32 40 24 40;">
-
-        <!-- Ảnh bìa lớn bên trái -->
-        <ImageView fx:id="coverImageView" fitHeight="230" fitWidth="230" preserveRatio="false" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 0, 4);">
-        </ImageView>
-
-        <!-- Thông tin bên phải -->
-        <VBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
-
-            <!-- Tiêu đề lớn -->
-            <Label fx:id="titleLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2C1810;" />
-
-            <!-- Subtitle / tag line màu cam -->
-            <Label fx:id="subtitleLabel" style="-fx-font-size: 15px; -fx-text-fill: #C0703A; -fx-font-style: italic;" />
-
-            <!-- Spacer nhỏ -->
-            <Region prefHeight="10" />
-
-            <!-- Mô tả -->
-            <Label fx:id="descriptionLabel" maxWidth="500" style="-fx-font-size: 13px; -fx-text-fill: #7A6A60; -fx-line-spacing: 3;" wrapText="true" />
-
-            <!-- Spacer -->
-            <Region prefHeight="16" />
-
-            <!-- Nút PLAY và SHUFFLE -->
-            <HBox spacing="12">
-                <Button fx:id="playButton" prefHeight="38" prefWidth="160" style="-fx-background-color: #C0703A;                                -fx-text-fill: white;                                -fx-font-size: 13px;                                -fx-font-weight: bold;                                -fx-background-radius: 4;                                -fx-cursor: hand;" text="PLAY" />
-                <Button fx:id="shuffleButton" prefHeight="38" prefWidth="160" style="-fx-background-color: transparent;                                -fx-text-fill: #C0703A;                                -fx-font-size: 13px;                                -fx-font-weight: bold;                                -fx-background-radius: 4;                                -fx-border-color: #C0703A;                                -fx-border-radius: 4;                                -fx-border-width: 1.5;                                -fx-cursor: hand;" text="SHUFFLE" />
-            </HBox>
-
-        </VBox>
-    </HBox>
-
-    <!-- ═══════════════════════════════════════════
-         DIVIDER
-    ════════════════════════════════════════════ -->
-    <Separator style="-fx-opacity: 0.3;">
-        <padding><Insets left="40" right="40" /></padding>
-    </Separator>
-
-    <!-- ═══════════════════════════════════════════
-         TABLE HEADER ROW (cột tiêu đề cố định,
-         không scroll theo danh sách)
-    ════════════════════════════════════════════ -->
-    <HBox style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
-        <Label prefWidth="36" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="#" />
-        <Label fx:id="col1Header" prefWidth="300" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col2Header" prefWidth="180" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col3Header" prefWidth="200" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
-        <Label prefWidth="60" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="TIME" />
-    </HBox>
-
-    <Separator style="-fx-opacity: 0.2;">
-        <padding><Insets left="40" right="40" /></padding>
-    </Separator>
-
-    <!-- ═══════════════════════════════════════════
-         DANH SÁCH BÀI HÁT — có thể scroll
-         Header cột bên trên đứng yên, chỉ
-         phần ListView này cuộn.
-    ════════════════════════════════════════════ -->
-    <ListView fx:id="songListView" fixedCellSize="62" style="-fx-background-color: transparent;                      -fx-background-insets: 0;                      -fx-padding: 0 40 20 40;                      -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
-        <!--
-            Controller sẽ set:
-              songListView.setItems(data);
-              songListView.setCellFactory(lv -> new SongListCell());
-            Mỗi cell (SongListCell) là 1 HBox gồm:
-              [index] [ImageView nhỏ] [Label tên] [+button] [Label col2] [Label col3] [+button] [Label time]
-        -->
-    </ListView>
-
-</VBox>
-.SongListController">
-
-    <!-- ═══════════════════════════════════════════
-         HEADER SECTION: ảnh bìa lớn + thông tin
-    ════════════════════════════════════════════ -->
-    <HBox spacing="40" style="-fx-background-color: #FAF7F4; -fx-padding: 32 40 24 40;">
-
-        <!-- Ảnh bìa lớn bên trái -->
-        <ImageView fx:id="coverImageView" fitHeight="230" fitWidth="230" preserveRatio="false" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 0, 4);">
-        </ImageView>
-
-        <!-- Thông tin bên phải -->
-        <VBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
-
-            <!-- Tiêu đề lớn -->
-            <Label fx:id="titleLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2C1810;" />
-
-            <!-- Subtitle / tag line màu cam -->
-            <Label fx:id="subtitleLabel" style="-fx-font-size: 15px; -fx-text-fill: #C0703A; -fx-font-style: italic;" />
-
-            <!-- Spacer nhỏ -->
-            <Region prefHeight="10" />
-
-            <!-- Mô tả -->
-            <Label fx:id="descriptionLabel" maxWidth="500" style="-fx-font-size: 13px; -fx-text-fill: #7A6A60; -fx-line-spacing: 3;" wrapText="true" />
-
-            <!-- Spacer -->
-            <Region prefHeight="16" />
-
-            <!-- Nút PLAY và SHUFFLE -->
-            <HBox spacing="12">
-                <Button fx:id="playButton" prefHeight="38" prefWidth="160" style="-fx-background-color: #C0703A;                                -fx-text-fill: white;                                -fx-font-size: 13px;                                -fx-font-weight: bold;                                -fx-background-radius: 4;                                -fx-cursor: hand;" text="PLAY" />
-                <Button fx:id="shuffleButton" prefHeight="38" prefWidth="160" style="-fx-background-color: transparent;                                -fx-text-fill: #C0703A;                                -fx-font-size: 13px;                                -fx-font-weight: bold;                                -fx-background-radius: 4;                                -fx-border-color: #C0703A;                                -fx-border-radius: 4;                                -fx-border-width: 1.5;                                -fx-cursor: hand;" text="SHUFFLE" />
-            </HBox>
-
-        </VBox>
-    </HBox>
-
-    <!-- ═══════════════════════════════════════════
-         DIVIDER
-    ════════════════════════════════════════════ -->
-    <Separator style="-fx-opacity: 0.3;">
-        <padding><Insets left="40" right="40" /></padding>
-    </Separator>
-
-    <!-- ═══════════════════════════════════════════
-         TABLE HEADER ROW (cột tiêu đề cố định,
-         không scroll theo danh sách)
-    ════════════════════════════════════════════ -->
-    <HBox style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
-        <Label prefWidth="36" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="#" />
-        <Label fx:id="col1Header" prefWidth="300" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col2Header" prefWidth="180" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col3Header" prefWidth="200" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
-        <Label prefWidth="60" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="TIME" />
-    </HBox>
-
-    <Separator style="-fx-opacity: 0.2;">
-        <padding><Insets left="40" right="40" /></padding>
-    </Separator>
-
-    <!-- ═══════════════════════════════════════════
-         DANH SÁCH BÀI HÁT — có thể scroll
-         Header cột bên trên đứng yên, chỉ
-         phần ListView này cuộn.
-    ════════════════════════════════════════════ -->
-    <ListView fx:id="songListView" fixedCellSize="62" style="-fx-background-color: transparent;                      -fx-background-insets: 0;                      -fx-padding: 0 40 20 40;                      -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
-        <!--
-            Controller sẽ set:
-              songListView.setItems(data);
-              songListView.setCellFactory(lv -> new SongListCell());
-            Mỗi cell (SongListCell) là 1 HBox gồm:
-              [index] [ImageView nhỏ] [Label tên] [+button] [Label col2] [Label col3] [+button] [Label time]
-        -->
-    </ListView>
-
-</VBox>
-.SongListController">
-
-    <!-- ═══════════════════════════════════════════
-         HEADER SECTION: ảnh bìa lớn + thông tin
-    ════════════════════════════════════════════ -->
-    <HBox spacing="40" style="-fx-background-color: #FAF7F4; -fx-padding: 32 40 24 40;">
-
-        <!-- Ảnh bìa lớn bên trái -->
-        <ImageView fx:id="coverImageView" fitHeight="230" fitWidth="230" preserveRatio="false" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 0, 4);">
-        </ImageView>
-
-        <!-- Thông tin bên phải -->
-        <VBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
-
-            <!-- Tiêu đề lớn -->
-            <Label fx:id="titleLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2C1810;" />
-
-            <!-- Subtitle / tag line màu cam -->
-            <Label fx:id="subtitleLabel" style="-fx-font-size: 15px; -fx-text-fill: #C0703A; -fx-font-style: italic;" />
-
-            <!-- Spacer nhỏ -->
-            <Region prefHeight="10" />
-
-            <!-- Mô tả -->
-            <Label fx:id="descriptionLabel" maxWidth="500" style="-fx-font-size: 13px; -fx-text-fill: #7A6A60; -fx-line-spacing: 3;" wrapText="true" />
-
-            <!-- Spacer -->
-            <Region prefHeight="16" />
-
-            <!-- Nút PLAY và SHUFFLE -->
-            <HBox spacing="12">
-                <Button fx:id="playButton" prefHeight="38" prefWidth="160" style="-fx-background-color: #C0703A;                                -fx-text-fill: white;                                -fx-font-size: 13px;                                -fx-font-weight: bold;                                -fx-background-radius: 4;                                -fx-cursor: hand;" text="PLAY" />
-                <Button fx:id="shuffleButton" prefHeight="38" prefWidth="160" style="-fx-background-color: transparent;                                -fx-text-fill: #C0703A;                                -fx-font-size: 13px;                                -fx-font-weight: bold;                                -fx-background-radius: 4;                                -fx-border-color: #C0703A;                                -fx-border-radius: 4;                                -fx-border-width: 1.5;                                -fx-cursor: hand;" text="SHUFFLE" />
-            </HBox>
-
-        </VBox>
-    </HBox>
-
-    <!-- ═══════════════════════════════════════════
-         DIVIDER
-    ════════════════════════════════════════════ -->
-    <Separator style="-fx-opacity: 0.3;">
-        <padding><Insets left="40" right="40" /></padding>
-    </Separator>
-
-    <!-- ═══════════════════════════════════════════
-         TABLE HEADER ROW (cột tiêu đề cố định,
-         không scroll theo danh sách)
-    ════════════════════════════════════════════ -->
-    <HBox style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
-        <Label prefWidth="36" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="#" />
-        <Label fx:id="col1Header" prefWidth="300" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col2Header" prefWidth="180" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col3Header" prefWidth="200" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
-        <Label prefWidth="60" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="TIME" />
-    </HBox>
-
-    <Separator style="-fx-opacity: 0.2;">
-        <padding><Insets left="40" right="40" /></padding>
-    </Separator>
-
-    <!-- ═══════════════════════════════════════════
-         DANH SÁCH BÀI HÁT — có thể scroll
-         Header cột bên trên đứng yên, chỉ
-         phần ListView này cuộn.
-    ════════════════════════════════════════════ -->
-    <ListView fx:id="songListView" fixedCellSize="62" style="-fx-background-color: transparent;                      -fx-background-insets: 0;                      -fx-padding: 0 40 20 40;                      -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
-        <!--
-            Controller sẽ set:
-              songListView.setItems(data);
-              songListView.setCellFactory(lv -> new SongListCell());
-            Mỗi cell (SongListCell) là 1 HBox gồm:
-              [index] [ImageView nhỏ] [Label tên] [+button] [Label col2] [Label col3] [+button] [Label time]
-        -->
-    </ListView>
+    <ListView fx:id="songListView"
+              fixedCellSize="62"
+              VBox.vgrow="ALWAYS"
+              style="-fx-background-color: transparent;
+                     -fx-background-insets: 0;
+                     -fx-padding: 0 40 20 40;
+                     -fx-border-color: transparent;" />
 
 </VBox>
