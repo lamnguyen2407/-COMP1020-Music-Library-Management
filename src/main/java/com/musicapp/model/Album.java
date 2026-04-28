@@ -6,15 +6,21 @@ public class Album {
 	private String artist;
 	private int releaseYear;
 	private String imageURL;
-	private List<Song> songs;
+	private String genre;
+	private List<String> songIds;
 	
-	public Album(String albumId, String title, String artist, int releaseYear, String imageURL) {
+	public Album() {
+		this.songIds= new ArrayList<>();
+	}
+	
+	public Album(String albumId, String title, String artist, int releaseYear, String imageURL, String genre) {
 		this.albumId = albumId;
 		this.title = title;
 		this.artist = artist;
 		this.releaseYear = releaseYear;
 		this.imageURL = imageURL;
-		this.songs = new ArrayList<>();
+		this.genre = genre;
+		this.songIds = new ArrayList<>();
 	}
 	
 	public String getAlbumId() {
@@ -26,13 +32,50 @@ public class Album {
 	public String getArtist() {
 		return this.artist;
 	}
-	public int releaseYear() {
+	public int getReleaseYear() {
 		return this.releaseYear;
 	}
-	public String imageURL() {
+	public String getImageURL() {
 		return this.imageURL;
 	}
-	public List<Song> getAlbumSongs() {
-		return this.songs;
+	public String getGenre() {
+		return this.genre;
 	}
+	public List<String> getAlbumSongs() {
+		return this.songIds;
+	}
+	
+	public void setAlbumId(String albumId) { 
+		this.albumId = albumId; 
+	}
+	
+    public void setTitle(String title) { 
+    	this.title = title; 
+    }
+    
+    public void setArtist(String artist) { 
+    	this.artist = artist; 
+    }
+    
+    public void setReleaseYear(int releaseYear) { 
+    	this.releaseYear = releaseYear; 
+    }
+    
+    public void setImageURL(String imageURL) { 
+    	this.imageURL = imageURL; 
+    }
+    
+    public void setGenre(String genre) { 
+    	this.genre = genre; 
+    }
+    
+    public void setSongIds(List<String> songIds) { 
+    	this.songIds = songIds; 
+    }
+	
+    public void addSongId(String songId) {
+        if (!this.songIds.contains(songId)) {
+            this.songIds.add(songId);
+        }
+    }
 }

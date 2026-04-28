@@ -1,5 +1,7 @@
 package com.musicapp.model;
 
+import java.util.ArrayList;
+
 public class Song implements Comparable<Song> {
 	private String songId;
 	private String title;
@@ -9,7 +11,10 @@ public class Song implements Comparable<Song> {
 	private int releaseYear;
 	private String audioURL;
 	private String imageURL;
-
+	
+	public Song() {
+	}
+	
 	public Song(String songId, String title, String artist, String genre, int duration, int releaseYear, String audioURL, String imageURL) {
 		this.songId = songId;
 		this.title = title;
@@ -52,7 +57,39 @@ public class Song implements Comparable<Song> {
 	public String getImageURL() {
 		return imageURL;
 	}
-
+	
+	public void setSongId(String songId) { 
+		this.songId = songId; 
+	}
+	
+    public void setTitle(String title) { 
+    	this.title = title; 
+    }
+    
+    public void setArtist(String artist) { 
+    	this.artist = artist; 
+    }
+    
+    public void setGenre(String genre) { 
+    	this.genre = genre; 
+    }
+    
+    public void setDuration(int duration) { 
+    	this.duration = duration; 
+    }
+    
+    public void setReleaseYear(int releaseYear) {
+    	this.releaseYear = releaseYear; 
+    }
+    
+    public void setAudioURL(String audioURL) { 
+    	this.audioURL = audioURL; 
+    }
+    
+    public void setImageURL(String imageURL) { 
+    	this.imageURL = imageURL; 
+    }
+    
 	@Override
 	public String toString() {
 		return title + " - " + artist + " (" + releaseYear + ")";
