@@ -13,9 +13,10 @@ public class Playlist {
 		this.songIds = new ArrayList<>();
 	}
 
-	public Playlist(String name) {
+	public Playlist(String name, String ownerId) {
 		this.playlistId = UUID.randomUUID().toString();
 		this.name = name;
+		this.ownerId = ownerId;
 		this.isPublic = false;
 		this.songIds = new ArrayList<>();
 	}
