@@ -1,5 +1,5 @@
 package com.musicapp.model;
-
+import com.musicapp.model.Song;
 import java.util.*;
 
 public class Playlist {
