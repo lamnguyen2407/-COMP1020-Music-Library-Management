@@ -25,9 +25,15 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     @FXML private HBox newPlaylistRow;
 
     private StackPane contentArea;
+    
+    // Variable to hold the reference to the main hub
+    private MainViewController mainController; 
 
     @Override
     public void setMainController(MainViewController mainController) {
+        // ADDED: Actually save the reference!
+        this.mainController = mainController; 
+        
         // Cố gắng lấy contentArea từ scene
         if (playlistListContainer != null && playlistListContainer.getScene() != null) {
             this.contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
@@ -60,10 +66,15 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     private void addAdminSystemRow(String name, String iconSymbol) {
         HBox row = buildPlaylistRow(name, iconSymbol);
         row.setOnMouseClicked(e -> {
+            if (mainController == null) return; // Safety check
+
             if (name.equals("All Songs")) {
-                loadAdminManagementView();
+                mainController.openSongListView("All Songs", "Library Management", "Admin can add or remove songs here.", null);
+            } else if (name.equals("Today's Hit")) {
+                // Route "Today's Hit" to the exact same view!
+                mainController.openSongListView("Today's Hits", "Top Tracks", "The biggest tracks on everyone's mind.", null);
             } else {
-                loadCompactView(name);
+                loadCompactView(name); 
             }
         });
         playlistListContainer.getChildren().add(row);
@@ -79,40 +90,17 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
     @FXML
     private void onNewPlaylistClicked() {
-        // Sử dụng đường dẫn chuẩn và Controller l thường
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CreatePlaylistModal.fxml"));
             Node view = loader.load();
 
-            // Chú ý: Dùng l thường cho khớp với file mày đã đổi tên
             CreatePlaylistModalController ctrl = loader.getController();
             
-            // Tìm contentArea nếu hiện tại đang null
-            if (contentArea == null && playlistListContainer.getScene() != null) {
-                contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
-            }
-
-            if (contentArea != null) {
-                contentArea.getChildren().setAll(view);
-            }
+            // CLEANED UP: Just use the restored helper method
+            updateMainContent(view);
+            
         } catch (IOException e) {
             System.err.println("[Lỗi] Không load được CreatePlaylistModal.fxml");
-            e.printStackTrace();
-        }
-    }
-
-    private void loadAdminManagementView() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
-            Node view = loader.load();
-
-            SongListController ctrl = loader.getController();
-            ctrl.setData("All Songs", "Library Management", 
-                         "Admin can add or remove songs from the global library here.", 
-                         null, null); 
-            
-            updateMainContent(view);
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -125,18 +113,20 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
             CompactListController ctrl = loader.getController();
             ctrl.setData(title, null);
 
-            updateMainContent(view);
+            // FIXED: Method is restored below
+            updateMainContent(view); 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    // Handles the local view updates for CompactList and Modals
     private void updateMainContent(Node view) {
-        if (playlistListContainer != null && playlistListContainer.getScene() != null) {
-            StackPane area = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
-            if (area != null) {
-                area.getChildren().setAll(view);
-            }
+        if (contentArea == null && playlistListContainer.getScene() != null) {
+            contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
+        }
+        if (contentArea != null) {
+            contentArea.getChildren().setAll(view);
         }
     }
 

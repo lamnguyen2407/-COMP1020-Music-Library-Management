@@ -3,7 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -11,10 +10,10 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="520.0" prefWidth="720.0" style="-fx-background-color: #fdfaf7;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.musicapp.ui.WelcomeViewController">
+<BorderPane prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #fdf8f5;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.musicapp.ui.WelcomeViewController">
 
     <top>
-        <HBox alignment="CENTER_LEFT" prefHeight="64.0" spacing="10.0" style="-fx-background-color: #fdfaf7; -fx-border-color: #e8e0d8; -fx-border-width: 0 0 1 0;" BorderPane.alignment="CENTER">
+        <HBox alignment="CENTER_LEFT" prefHeight="64.0" spacing="10.0" style="-fx-background-color: #fdf8f5; -fx-border-color: #e8e0d8; -fx-border-width: 0 0 1 0;" BorderPane.alignment="CENTER">
             <padding>
                 <Insets bottom="10" left="20" right="20" top="10" />
             </padding>
@@ -25,14 +24,13 @@
             <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2a2a2a;" text="Souleea" />
 
             <Region HBox.hgrow="ALWAYS" />
-            <Region HBox.hgrow="ALWAYS" />
 
-            <Button mnemonicParsing="false" style="-fx-background-color: #c07840; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 16; -fx-border-width: 0; -fx-padding: 8 18 8 18; -fx-cursor: hand;" text="👤  Sign Up" />
+            <Button mnemonicParsing="false" onAction="#goToSignUp" style="-fx-background-color: #c07840; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 16; -fx-border-width: 0; -fx-padding: 8 18 8 18; -fx-cursor: hand;" text="👤  Sign Up" />
         </HBox>
     </top>
 
     <center>
-        <HBox alignment="CENTER" spacing="0" style="-fx-background-color: #fdfaf7;" BorderPane.alignment="CENTER">
+        <HBox alignment="CENTER" spacing="0" style="-fx-background-color: #fdf8f5;" BorderPane.alignment="CENTER">
 
             <VBox alignment="CENTER_LEFT" spacing="20.0" HBox.hgrow="ALWAYS">
                 <padding>
@@ -43,14 +41,12 @@
 
                 <Region prefHeight="10.0" />
 
-                <Button mnemonicParsing="false" onAction="#handleStart" style="-fx-background-color: #c07840; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-width: 0; -fx-padding: 12 28 12 28; -fx-cursor: hand;" text="Try loging in" />
+                <Button mnemonicParsing="false" onAction="#handleStart" style="-fx-background-color: #c07840; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-width: 0; -fx-padding: 12 28 12 28; -fx-cursor: hand;" text="Try logging in" />
             </VBox>
 
             <StackPane prefHeight="380.0" prefWidth="340.0" HBox.hgrow="ALWAYS">
                 <ImageView fx:id="heroImage" fitHeight="340.0" fitWidth="320.0" preserveRatio="true" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 20, 0, 0, 6);">
-               <image>
-                  <Image url="@../../../../../../../Downloads/jason-leung-xR4JHzr69Og-unsplash%201.png" />
-               </image></ImageView>
+                </ImageView>
             </StackPane>
 
         </HBox>
