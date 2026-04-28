@@ -1,5 +1,6 @@
 package com.musicapp.ui;
 
+import com.musicapp.Main;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -18,20 +20,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-/**
- * MainViewController.java
- *
- * Controller cho MainView.fxml — khung shell chính của ứng dụng.
- *
- * Chức năng:
- *  - Quản lý điều hướng sidebar (Home, Account, Search, Playlists, Settings)
- *  - Load/inject các View con vào contentArea (StackPane)
- *  - Điều khiển PlayerBar (play/pause, prev, next, shuffle, repeat, seek, volume, like)
- *  - Toggle giữa TopBar và PlayerBar
- *
- * package com.musicapp.ui;
- * FXML:    resources/fxml/MainView.fxml
- */
 public class MainViewController implements Initializable {
 
     // ══════════════════════════════════════════
@@ -39,7 +27,7 @@ public class MainViewController implements Initializable {
     // ══════════════════════════════════════════
     @FXML private HBox      topBar;
     @FXML private TextField searchField;
-    @FXML private Label     userNameLabel;
+    @FXML private Label      userNameLabel;
     @FXML private ImageView userImageView;
 
     // ══════════════════════════════════════════
@@ -47,16 +35,16 @@ public class MainViewController implements Initializable {
     // ══════════════════════════════════════════
     @FXML private HBox      playerBar;
     @FXML private ImageView playerArtImage;
-    @FXML private Label     playerSongTitle;
-    @FXML private Label     playerArtistName;
+    @FXML private Label      playerSongTitle;
+    @FXML private Label      playerArtistName;
     @FXML private Button    btnLike;
     @FXML private Button    btnShuffle;
     @FXML private Button    btnPrev;
     @FXML private Button    btnPlayPause;
     @FXML private Button    btnNext;
     @FXML private Button    btnRepeat;
-    @FXML private Label     labelCurrentTime;
-    @FXML private Label     labelTotalTime;
+    @FXML private Label      labelCurrentTime;
+    @FXML private Label      labelTotalTime;
     @FXML private Slider    progressSlider;
     @FXML private Slider    volumeSlider;
 
@@ -77,17 +65,17 @@ public class MainViewController implements Initializable {
     // State
     // ══════════════════════════════════════════
     private boolean isPlaying   = false;
-    private boolean isLiked     = false;
+    private boolean isLiked      = false;
     private boolean isShuffled  = false;
     private boolean isRepeating = false;
 
     // ══════════════════════════════════════════
-    // FXML paths cho các View con
+    // FXML paths (Đã dọn dẹp các dòng trùng lặp)
     // ══════════════════════════════════════════
- // ✅ Đúng
     private static final String FXML_DISCOVERY = "/DiscoveryView.fxml";
     private static final String FXML_ACCOUNT   = "/AccountView.fxml";
     private static final String FXML_PLAYLIST  = "/PlaylistOverview.fxml";
+    private static final String FXML_SETTINGS  = "/SettingsView.fxml";
 
     // ══════════════════════════════════════════
     // Initializable
@@ -95,196 +83,155 @@ public class MainViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Load trang Home mặc định khi app khởi động
+        
+        if (Main.isAdmin) {
+            userNameLabel.setText("Admin View");
+        } else {
+            userNameLabel.setText("User View");
+        }
+        
         loadView(FXML_DISCOVERY);
 
-        // Gắn listener cho search field:
-        // Khi user bắt đầu gõ → focus vào search field và highlight nav-btn Search
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal.isBlank()) {
-                setActiveNav(btnSearch);
-            }
-        });
-
-        // Focus vào search field khi click vào nó
-        searchField.setOnMouseClicked(e -> setActiveNav(btnSearch));
-
-        // Volume mặc định
-        volumeSlider.setValue(70);
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (!newVal.isBlank()) {
+                    setActiveNav(btnSearch);
+                }
+            });
+            searchField.setOnMouseClicked(e -> setActiveNav(btnSearch));
+            searchField.setOnAction(e -> handleSearchRequest());
+        }
+        
+        if (volumeSlider != null) volumeSlider.setValue(70);
     }
 
     // ══════════════════════════════════════════
     // NAVIGATION HANDLERS
     // ══════════════════════════════════════════
 
-    /**
-     * Bấm "Home" → load DiscoveryView vào contentArea
-     */
     @FXML
     private void onNavHome() {
         setActiveNav(btnHome);
         loadView(FXML_DISCOVERY);
     }
 
-    /**
-     * Bấm "Account" → load AccountView vào contentArea
-     */
     @FXML
     private void onNavAccount() {
         setActiveNav(btnAccount);
         loadView(FXML_ACCOUNT);
     }
 
-    /**
-     * Bấm "Search" → focus vào search bar, không chuyển trang
-     * (User gõ từ khóa trực tiếp vào searchField trên TopBar)
-     */
     @FXML
     private void onNavSearch() {
         setActiveNav(btnSearch);
-        searchField.requestFocus();
-        searchField.selectAll();
+        if (searchField != null) {
+            searchField.requestFocus();
+            searchField.selectAll();
+        }
     }
 
-    /**
-     * Bấm "Playlists" → load PlaylistOverview vào contentArea
-     */
     @FXML
     private void onNavPlaylists() {
         setActiveNav(btnPlaylists);
         loadView(FXML_PLAYLIST);
     }
 
-    /**
-     * Bấm "Settings" → load SettingsView vào contentArea (nếu có)
-     */
-
-
-    // ══════════════════════════════════════════
-    // PLAYER BAR HANDLERS
-    // ══════════════════════════════════════════
-
-    /**
-     * Toggle Play / Pause
-     */
     @FXML
-    private void onPlayPause() {
-        isPlaying = !isPlaying;
-        btnPlayPause.setText(isPlaying ? "⏸" : "▶");
-        // TODO: gọi MediaPlayer.play() / MediaPlayer.pause() ở đây
-    }
-
-    /**
-     * Bài trước
-     */
-    @FXML
-    private void onPrev() {
-        // TODO: PlayerService.previous()
-        System.out.println("[Player] Previous track");
-    }
-
-    /**
-     * Bài tiếp theo
-     */
-    @FXML
-    private void onNext() {
-        // TODO: PlayerService.next()
-        System.out.println("[Player] Next track");
-    }
-
-    /**
-     * Toggle Shuffle
-     */
-    @FXML
-    private void onShuffle() {
-        isShuffled = !isShuffled;
-        btnShuffle.setStyle(isShuffled ? "-fx-opacity: 1;" : "-fx-opacity: 0.5;");
-        // TODO: PlayerService.setShuffle(isShuffled)
-    }
-
-    /**
-     * Toggle Repeat
-     */
-    @FXML
-    private void onRepeat() {
-        isRepeating = !isRepeating;
-        btnRepeat.setStyle(isRepeating ? "-fx-opacity: 1;" : "-fx-opacity: 0.5;");
-        // TODO: PlayerService.setRepeat(isRepeating)
-    }
-
-    /**
-     * Seek khi user thả chuột khỏi progress slider
-     */
-    @FXML
-    private void onSeek() {
-        double seekTo = progressSlider.getValue(); // 0–100
-        System.out.println("[Player] Seek to: " + seekTo + "%");
-        // TODO: MediaPlayer.seek(Duration.seconds(totalDuration * seekTo / 100))
-    }
-
-    /**
-     * Toggle Like / Unlike bài hát
-     */
-    @FXML
-    private void onToggleLike() {
-        isLiked = !isLiked;
-        btnLike.setText(isLiked ? "♥" : "♡");
-        // TODO: gọi API thêm/xóa khỏi danh sách yêu thích
+    private void onNavSettings() {
+        loadView(FXML_SETTINGS);
     }
 
     // ══════════════════════════════════════════
-    // PUBLIC API — gọi từ các controller con
+    // PLAYER BAR HANDLERS (Stubs)
+    // ══════════════════════════════════════════
+    @FXML private void onPlayPause() { isPlaying = !isPlaying; btnPlayPause.setText(isPlaying ? "⏸" : "▶"); }
+    @FXML private void onPrev() { System.out.println("Prev clicked"); }
+    @FXML private void onNext() { System.out.println("Next clicked"); }
+    @FXML private void onShuffle() { isShuffled = !isShuffled; System.out.println("Shuffle: " + isShuffled); }
+    @FXML private void onRepeat() { isRepeating = !isRepeating; System.out.println("Repeat: " + isRepeating); }
+    @FXML private void onSeek() { System.out.println("Seeking to: " + progressSlider.getValue()); }
+    @FXML private void onToggleLike() { isLiked = !isLiked; btnLike.setText(isLiked ? "❤️" : "♡"); }
+
+    // ══════════════════════════════════════════
+    // PUBLIC API
     // ══════════════════════════════════════════
 
-    /**
-     * Hiện PlayerBar, ẩn TopBar (gọi khi user nhấn Play một bài)
-     * Dùng FadeTransition để transition mượt.
-     */
-    public void showPlayerBar(String songTitle, String artistName) {
-        playerSongTitle.setText(songTitle);
-        playerArtistName.setText(artistName);
+    public void showPlayerBar(String songTitle, String artistName, String imagePath) {
+        if (playerSongTitle != null) playerSongTitle.setText(songTitle);
+        if (playerArtistName != null) playerArtistName.setText(artistName);
+        
+        if (playerArtImage != null && imagePath != null && !imagePath.isEmpty()) {
+            try {
+                URL imageUrl = getClass().getResource(imagePath);
+                if (imageUrl != null) {
+                    playerArtImage.setImage(new Image(imageUrl.toExternalForm()));
+                }
+            } catch (Exception e) {
+                System.err.println("Không load được ảnh bìa trên thanh Bar");
+            }
+        }
 
-        topBar.setVisible(false);
-        topBar.setManaged(false);
+        if (playerBar != null && !playerBar.isVisible()) {
+            playerBar.setManaged(true);
+            playerBar.setVisible(true);
 
-        playerBar.setManaged(true);
-        playerBar.setVisible(true);
-
-        FadeTransition ft = new FadeTransition(Duration.millis(300), playerBar);
-        ft.setFromValue(0);
-        ft.setToValue(1);
-        ft.play();
+            FadeTransition ft = new FadeTransition(Duration.millis(300), playerBar);
+            ft.setFromValue(0);
+            ft.setToValue(1);
+            ft.play();
+        }
 
         isPlaying = true;
-        btnPlayPause.setText("⏸");
+        if (btnPlayPause != null) btnPlayPause.setText("⏸");
     }
 
-    /**
-     * Ẩn PlayerBar, hiện lại TopBar (gọi khi dừng phát hoàn toàn)
-     */
     public void hidePlayerBar() {
-        playerBar.setVisible(false);
-        playerBar.setManaged(false);
-
-        topBar.setManaged(true);
-        topBar.setVisible(true);
-
+        if (playerBar != null) {
+            playerBar.setVisible(false);
+            playerBar.setManaged(false);
+        }
         isPlaying = false;
-        btnPlayPause.setText("▶");
+        if (btnPlayPause != null) btnPlayPause.setText("▶");
     }
 
-    /**
-     * Cập nhật thời gian hiển thị trên progress bar.
-     *
-     * @param currentSeconds thời gian hiện tại (giây)
-     * @param totalSeconds   tổng thời lượng (giây)
-     */
-    public void updateProgress(int currentSeconds, int totalSeconds) {
-        labelCurrentTime.setText(formatTime(currentSeconds));
-        labelTotalTime.setText(formatTime(totalSeconds));
+    // ══════════════════════════════════════════
+    // SEARCH LOGIC
+    // ══════════════════════════════════════════
 
-        if (totalSeconds > 0) {
-            progressSlider.setValue((double) currentSeconds / totalSeconds * 100);
+    private void handleSearchRequest() {
+        String query = searchField.getText();
+        if (query == null || query.trim().isEmpty()) return;
+        navigateToSearchResult(query);
+    }
+
+    private void navigateToSearchResult(String query) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
+            Node view = loader.load();
+
+            SongListController ctrl = loader.getController();
+            if (ctrl instanceof MainViewAware) {
+                ((MainViewAware) ctrl).setMainController(this);
+            }
+            
+            // Logic lọc nhạc (Sử dụng MusicService mày đã viết)
+            var allSongs = MusicService.getGlobalLibrary();
+            var results = javafx.collections.FXCollections.<SongListController.SongItem>observableArrayList();
+            
+            String lowerQuery = query.toLowerCase();
+            for (var song : allSongs) {
+                if (song.title.toLowerCase().contains(lowerQuery) || 
+                    song.artist.toLowerCase().contains(lowerQuery)) {
+                    results.add(song);
+                }
+            }
+
+            ctrl.setData("Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, results);
+            ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE");
+
+            contentArea.getChildren().setAll(view);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -292,89 +239,33 @@ public class MainViewController implements Initializable {
     // PRIVATE HELPERS
     // ══════════════════════════════════════════
 
-    /**
-     * Load một FXML view con vào contentArea với hiệu ứng fade.
-     */
     private void loadView(String fxmlPath) {
         try {
             URL resource = getClass().getResource(fxmlPath);
-            if (resource == null) {
-                System.err.println("[MainViewController] FXML not found: " + fxmlPath);
-                return;
-            }
+            if (resource == null) return;
 
             FXMLLoader loader = new FXMLLoader(resource);
             Node view = loader.load();
 
-            // Truyền tham chiếu MainViewController sang controller con
-            // (nếu controller con implement MainViewAware)
             Object childController = loader.getController();
             if (childController instanceof MainViewAware) {
                 ((MainViewAware) childController).setMainController(this);
             }
 
-            // Fade transition khi chuyển trang
-            view.setOpacity(0);
             contentArea.getChildren().setAll(view);
-
-            FadeTransition ft = new FadeTransition(Duration.millis(250), view);
-            ft.setFromValue(0);
-            ft.setToValue(1);
-            ft.play();
-
         } catch (IOException e) {
-            System.err.println("[MainViewController] Failed to load view: " + fxmlPath);
             e.printStackTrace();
         }
     }
 
-    /**
-     * Đặt trạng thái active cho nav button được chọn,
-     * xóa active khỏi các button còn lại.
-     */
     private void setActiveNav(Button selected) {
         Button[] navButtons = { btnHome, btnAccount, btnSearch, btnPlaylists };
         for (Button btn : navButtons) {
-            if (btn == null) continue;
-            btn.getStyleClass().removeAll("nav-btn-active");
+            if (btn != null) btn.getStyleClass().removeAll("nav-btn-active");
         }
-        if (selected != null && !selected.getStyleClass().contains("nav-btn-active")) {
-            selected.getStyleClass().add("nav-btn-active");
-        }
+        if (selected != null) selected.getStyleClass().add("nav-btn-active");
     }
 
-    /**
-     * Format giây thành chuỗi "m:ss"
-     */
-    private String formatTime(int totalSeconds) {
-        int minutes = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
-        return minutes + ":" + String.format("%02d", seconds);
-    }
-
-    // ══════════════════════════════════════════
-    // INNER INTERFACE — để controller con giao tiếp ngược lại
-    // ══════════════════════════════════════════
-
-    /**
-     * Các controller con (Discovery, Playlist…) implement interface này
-     * để nhận tham chiếu MainViewController và gọi showPlayerBar() khi cần.
-     *
-     * Ví dụ trong DiscoveryViewController:
-     *
-     *   public class DiscoveryViewController implements MainViewAware {
-     *       private MainViewController mainController;
-     *
-     *       @Override
-     *       public void setMainController(MainViewController mc) {
-     *           this.mainController = mc;
-     *       }
-     *
-     *       private void playSong(Song song) {
-     *           mainController.showPlayerBar(song.getTitle(), song.getArtist());
-     *       }
-     *   }
-     */
     public interface MainViewAware {
         void setMainController(MainViewController mainController);
     }

@@ -38,9 +38,16 @@ public class LibraryManager {
 		return new ArrayList<>(songCache.values());
 	}
 	
-	public void addSong(Song song) {
+	public boolean addSong(Song song) {
+		
+		if (songCache.containsKey(song.getSongId())) {
+	        System.out.println("Error: song ID exists");
+	        return false;
+	    }
+		
 		firebaseService.saveSong(song);
 		songCache.put(song.getSongId(), song);
+		return true;
 	}
 	
 	public void removeSong(String id) {

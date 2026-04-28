@@ -1,6 +1,6 @@
 package com.musicapp.ui;
 
-import javafx.collections.FXCollections;
+import com.musicapp.Main;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,95 +11,58 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class CompactListController implements Initializable {
 
-    // ═══════════════════════════════════════════
-    // FXML FIELDS
-    // ═══════════════════════════════════════════
     @FXML private Label titleLabel;
-    @FXML private ListView<SongItem> songListView;
+    private static MediaPlayer currentPlayer;
+    
+    // ĐỔI SANG DÙNG MODEL CHUẨN 8 THUỘC TÍNH
+    @FXML private ListView<SongListController.SongItem> songListView;
 
-    // Content area để navigate tiếp
     private StackPane contentArea;
 
     public void setContentArea(StackPane contentArea) {
         this.contentArea = contentArea;
     }
 
-    // ═══════════════════════════════════════════
-    // MODEL
-    // ═══════════════════════════════════════════
-    public static class SongItem {
-        public String songName;
-        public String artist;
-        public String album;
-        public String time;
-        public String coverPath;
-        public boolean isFavorite;
-
-        public SongItem(String songName, String artist, String album,
-                        String time, String coverPath) {
-            this.songName  = songName;
-            this.artist    = artist;
-            this.album     = album;
-            this.time      = time;
-            this.coverPath = coverPath;
-            this.isFavorite = false;
-        }
-    }
-
-    // ═══════════════════════════════════════════
-    // DATA MẪU — backend thay bằng DB thật
-    // ═══════════════════════════════════════════
-    private final ObservableList<SongItem> sampleSongs =
-            FXCollections.observableArrayList(
-        new SongItem("Going Bad (feat. Drake)",                  "Meek Mill",    "Championships",                 "3:01", null),
-        new SongItem("HIGHEST IN THE ROOM",                     "Travis Scott", "HIGHEST IN THE ROOM – Single",  "2:56", null),
-        new SongItem("Praise The Lord (Da Shine) [feat. Skepta]","A$AP Rocky",  "TESTING",                       "3:26", null),
-        new SongItem("Taste (feat. Offset)",                    "Tyga",         "Taste (feat. Offset) – Single", "3:53", null),
-        new SongItem("Wow.",                                    "Post Malone",  "Wow. – Single",                 "2:30", null),
-        new SongItem("679 (feat. Morty)",                       "Fetty Wap",    "Fetty Wap (Deluxe Edition)",    "3:07", null),
-        new SongItem("Funky Friday",                            "Dave & Fredo", "Funky Friday – Single",         "3:03", null),
-        new SongItem("Sicko Mode",                              "Travis Scott", "ASTROWORLD",                    "5:12", null),
-        new SongItem("Rockstar",                                "Post Malone",  "beerbongs & bentleys",          "3:38", null),
-        new SongItem("God's Plan",                              "Drake",        "Scorpion",                      "3:18", null)
-    );
-
-    // ═══════════════════════════════════════════
-    // INITIALIZE
-    // ═══════════════════════════════════════════
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         titleLabel.setText("Latest Song");
-        songListView.setItems(sampleSongs);
+        
+        // Lấy data "sống" từ MusicService thay vì list hardcode
+        songListView.setItems(MusicService.getGlobalLibrary());
         songListView.setCellFactory(lv -> new CompactSongCell());
     }
 
-    // ═══════════════════════════════════════════
-    // PUBLIC — trang khác gọi để truyền data vào
-    // ═══════════════════════════════════════════
-    public void setData(String title, ObservableList<SongItem> songs) {
+    // ==========================================
+    // PUBLIC API (Data Injection)
+    // ==========================================
+    public void setData(String title, ObservableList<SongListController.SongItem> songs) {
         titleLabel.setText(title);
         if (songs != null) {
             songListView.setItems(songs);
         }
     }
 
-    // ═══════════════════════════════════════════
-    // COMPACT SONG CELL
-    // ═══════════════════════════════════════════
-    private class CompactSongCell extends ListCell<SongItem> {
+    // ==========================================
+    // CUSTOM LIST CELL RENDERER
+    // ==========================================
+    private class CompactSongCell extends ListCell<SongListController.SongItem> {
 
         private final HBox      root        = new HBox(12);
         private final ImageView thumb       = new ImageView();
@@ -116,157 +79,155 @@ public class CompactListController implements Initializable {
             root.setPadding(new Insets(0, 0, 0, 0));
             root.setStyle("-fx-background-color: transparent;");
 
-            // Thumbnail
             thumb.setFitWidth(40);
             thumb.setFitHeight(40);
             thumb.setPreserveRatio(false);
 
-            // Tên bài hát
             nameLabel.setPrefWidth(300);
             nameLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #2C1810; -fx-font-weight: bold;");
 
-            // Trái tim
-            heartBtn.setStyle(
-                "-fx-background-color: transparent;" +
-                "-fx-font-size: 14px;" +
-                "-fx-text-fill: #C0C0C0;" +
-                "-fx-cursor: hand;" +
-                "-fx-padding: 0 8 0 8;"
-            );
+            heartBtn.setStyle("-fx-background-color: transparent; -fx-font-size: 14px; -fx-text-fill: #C0C0C0; -fx-cursor: hand; -fx-padding: 0 8 0 8;");
             heartBtn.setPrefWidth(30);
 
-            // Spacer
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            // Artist
             artistLabel.setPrefWidth(200);
             artistLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #7A6A60;");
 
-            // Album
             albumLabel.setPrefWidth(220);
             albumLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #7A6A60;");
 
-            // Nút dấu +
-            addBtn.setStyle(
-                "-fx-background-color: transparent;" +
-                "-fx-font-size: 16px;" +
-                "-fx-text-fill: #C0703A;" +
-                "-fx-cursor: hand;" +
-                "-fx-padding: 0 4 0 4;"
-            );
+            addBtn.setStyle("-fx-background-color: transparent; -fx-font-size: 16px; -fx-text-fill: #C0703A; -fx-cursor: hand; -fx-padding: 0 4 0 4;");
 
-            // Time
             timeLabel.setPrefWidth(45);
             timeLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #9E8E84;");
 
-            root.getChildren().addAll(
-                thumb, nameLabel, heartBtn,
-                spacer, artistLabel, albumLabel, addBtn, timeLabel
-            );
+            root.getChildren().addAll(thumb, nameLabel, heartBtn, spacer, artistLabel, albumLabel, addBtn, timeLabel);
 
-            // Sự kiện trái tim
-            heartBtn.setOnAction(e -> {
-                SongItem item = getItem();
-                if (item == null) return;
-                item.isFavorite = !item.isFavorite;
-                if (item.isFavorite) {
-                    heartBtn.setText("♥");
-                    heartBtn.setStyle(
-                        "-fx-background-color: transparent;" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-text-fill: #C0703A;" +
-                        "-fx-cursor: hand;" +
-                        "-fx-padding: 0 8 0 8;"
-                    );
-                    // TODO: backend gọi FavoriteService.add(item)
-                    System.out.println("❤ Added to Favorites: " + item.songName);
-                } else {
-                    heartBtn.setText("♡");
-                    heartBtn.setStyle(
-                        "-fx-background-color: transparent;" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-text-fill: #C0C0C0;" +
-                        "-fx-cursor: hand;" +
-                        "-fx-padding: 0 8 0 8;"
-                    );
-                    // TODO: backend gọi FavoriteService.remove(item)
-                    System.out.println("🤍 Removed from Favorites: " + item.songName);
+            if (Main.isAdmin) {
+                heartBtn.setVisible(false);
+                heartBtn.setManaged(false);
+            }
+
+            // Double Click to Play
+            root.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2) {
+                    SongListController.SongItem item = getItem();
+                    if (item != null) {
+                        System.out.println("▶ Đang nạp nhạc: " + item.title);
+                        
+                        try {
+                            // Tắt bài cũ nếu đang phát
+                            if (currentPlayer != null) {
+                                currentPlayer.stop();
+                            }
+
+                            // Chạy bài mới
+                            String path = item.audioURL;
+                            // Nếu là URL web (bắt đầu bằng http)
+                            if (path.startsWith("http")) {
+                                 Media hit = new Media(path);
+                                 currentPlayer = new MediaPlayer(hit);
+                                 currentPlayer.play();
+                            } 
+                            // Nếu là file Local (như /audio/BlankSpace.mp3)
+                            else {
+                                 URL resourceUrl = getClass().getResource(path);
+                                 if (resourceUrl != null) {
+                                     Media hit = new Media(resourceUrl.toString());
+                                     currentPlayer = new MediaPlayer(hit);
+                                     currentPlayer.play();
+                                     System.out.println("🎵 Nhạc đang phát Ting Ting!");
+                                 } else {
+                                     System.err.println("Lỗi: Không tìm thấy file nhạc tại " + path);
+                                 }
+                            }
+
+                            // TODO Mở rộng: Gọi qua MainViewController để hiện cái thanh Player ở dưới cùng
+                            // Main.mainViewController.showPlayerBar(item.title, item.artist);
+
+                        } catch (Exception ex) {
+                            System.err.println("Lỗi phát nhạc!");
+                            ex.printStackTrace();
+                        }
+                    }
                 }
             });
 
-            // Sự kiện dấu +
+            heartBtn.setOnAction(e -> {
+                SongListController.SongItem item = getItem();
+                if (item == null) return;
+                item.isFavorite = !item.isFavorite;
+                updateHeartUI(item.isFavorite);
+            });
+
             addBtn.setOnAction(e -> {
-                SongItem item = getItem();
+                SongListController.SongItem item = getItem();
                 if (item == null) return;
                 showAddMenu(item, addBtn);
             });
         }
 
-        // Popup menu khi bấm dấu +
-        private void showAddMenu(SongItem item, Button anchor) {
+        private void updateHeartUI(boolean isFav) {
+            if (isFav) {
+                heartBtn.setText("♥");
+                heartBtn.setStyle("-fx-background-color: transparent; -fx-font-size: 14px; -fx-text-fill: #C0703A; -fx-cursor: hand; -fx-padding: 0 8 0 8;");
+            } else {
+                heartBtn.setText("♡");
+                heartBtn.setStyle("-fx-background-color: transparent; -fx-font-size: 14px; -fx-text-fill: #C0C0C0; -fx-cursor: hand; -fx-padding: 0 8 0 8;");
+            }
+        }
+
+        // ==========================================
+        // CONTEXT MENU LOGIC (TÍCH HỢP DROPBOX)
+        // ==========================================
+        private void showAddMenu(SongListController.SongItem item, Button anchor) {
             ContextMenu menu = new ContextMenu();
             menu.setStyle("-fx-background-color: white; -fx-border-color: #E0D8D0;");
-
-            MenuItem deleteFromLibrary  = new MenuItem("Delete from Library");
-            MenuItem addToFavorite      = new MenuItem("Add to your favorite songs");
-            MenuItem addToPlaylist      = new MenuItem("Add to Playlist....");
-            MenuItem removeFromPlaylist = new MenuItem("Remove from PlayList");
-            MenuItem playNext           = new MenuItem("Play next");
-
             String menuItemStyle = "-fx-font-size: 13px; -fx-text-fill: #2C1810;";
-            deleteFromLibrary.setStyle(menuItemStyle);
-            addToFavorite.setStyle(menuItemStyle);
-            addToPlaylist.setStyle(menuItemStyle);
-            removeFromPlaylist.setStyle(menuItemStyle);
-            playNext.setStyle(menuItemStyle);
 
-            deleteFromLibrary.setOnAction(e -> {
-                // TODO: backend gọi LibraryService.delete(item)
-                System.out.println("🗑 Delete from Library: " + item.songName);
-            });
+            if (Main.isAdmin) {
+                MenuItem deleteFromLibrary = new MenuItem("Delete from System");
+                deleteFromLibrary.setStyle("-fx-text-fill: #CC3300; -fx-font-weight: bold;");
+                deleteFromLibrary.setOnAction(e -> {
+                    MusicService.removeSong(item);
+                    System.out.println("🗑 Deleted: " + item.title);
+                });
+                menu.getItems().add(deleteFromLibrary);
+            } else {
+                MenuItem addToFavorite = new MenuItem("Add to your favorite songs");
+                
+                // DROPBOX TẠI ĐÂY
+                Menu playlistSubMenu = new Menu("Add to Playlist..."); 
+                String[] userPlaylists = {"My Chill Mix", "Workout 2026", "Roadtrip"};
+                for (String plName : userPlaylists) {
+                    MenuItem plItem = new MenuItem(plName);
+                    plItem.setStyle("-fx-font-size: 12px;");
+                    plItem.setOnAction(e -> System.out.println("[User] Added to: " + plName));
+                    playlistSubMenu.getItems().add(plItem);
+                }
 
-            addToFavorite.setOnAction(e -> {
-                item.isFavorite = true;
-                heartBtn.setText("♥");
-                heartBtn.setStyle(
-                    "-fx-background-color: transparent;" +
-                    "-fx-font-size: 14px;" +
-                    "-fx-text-fill: #C0703A;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-padding: 0 8 0 8;"
-                );
-                // TODO: backend gọi FavoriteService.add(item)
-                System.out.println("❤ Add to Favorite: " + item.songName);
-            });
+                MenuItem removeFromPlaylist = new MenuItem("Remove from PlayList");
+                MenuItem playNext = new MenuItem("Play next");
 
-            addToPlaylist.setOnAction(e -> {
-                // TODO: mở dialog chọn playlist
-                System.out.println("➕ Add to Playlist: " + item.songName);
-            });
+                addToFavorite.setStyle(menuItemStyle);
+                playlistSubMenu.setStyle(menuItemStyle);
+                removeFromPlaylist.setStyle(menuItemStyle);
+                playNext.setStyle(menuItemStyle);
 
-            removeFromPlaylist.setOnAction(e -> {
-                // TODO: backend gọi PlaylistService.remove(item)
-                System.out.println("➖ Remove from Playlist: " + item.songName);
-            });
+                addToFavorite.setOnAction(e -> {
+                    item.isFavorite = true;
+                    updateHeartUI(true);
+                });
 
-            playNext.setOnAction(e -> {
-                // TODO: backend gọi PlaybackService.playNext(item)
-                System.out.println("⏭ Play Next: " + item.songName);
-            });
-
-            menu.getItems().addAll(
-                deleteFromLibrary,
-                addToFavorite,
-                addToPlaylist,
-                removeFromPlaylist,
-                playNext
-            );
+                menu.getItems().addAll(addToFavorite, playlistSubMenu, new SeparatorMenuItem(), removeFromPlaylist, playNext);
+            }
 
             menu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 0);
         }
 
         @Override
-        protected void updateItem(SongItem item, boolean empty) {
+        protected void updateItem(SongListController.SongItem item, boolean empty) {
             super.updateItem(item, empty);
             if (empty || item == null) {
                 setGraphic(null);
@@ -274,12 +235,16 @@ public class CompactListController implements Initializable {
                 return;
             }
 
-            // Thumbnail
-            if (item.coverPath != null && !item.coverPath.isEmpty()) {
+            // Map đúng 8 thuộc tính
+            nameLabel.setText(item.title);
+            artistLabel.setText(item.artist);
+            albumLabel.setText(item.genre); // Dùng genre thay cho album tạm
+            timeLabel.setText(item.getDurationString());
+            updateHeartUI(item.isFavorite);
+
+            if (item.imageURL != null && !item.imageURL.isEmpty()) {
                 try {
-                    thumb.setImage(new Image(
-                            getClass().getResourceAsStream(item.coverPath),
-                            40, 40, false, true));
+                    thumb.setImage(new Image(getClass().getResourceAsStream(item.imageURL), 40, 40, false, true));
                 } catch (Exception ex) {
                     thumb.setImage(null);
                 }
@@ -287,37 +252,8 @@ public class CompactListController implements Initializable {
                 thumb.setImage(null);
             }
 
-            nameLabel.setText(item.songName);
-            artistLabel.setText(item.artist);
-            albumLabel.setText(item.album);
-            timeLabel.setText(item.time);
-
-            // Trạng thái trái tim
-            if (item.isFavorite) {
-                heartBtn.setText("♥");
-                heartBtn.setStyle(
-                    "-fx-background-color: transparent;" +
-                    "-fx-font-size: 14px;" +
-                    "-fx-text-fill: #C0703A;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-padding: 0 8 0 8;"
-                );
-            } else {
-                heartBtn.setText("♡");
-                heartBtn.setStyle(
-                    "-fx-background-color: transparent;" +
-                    "-fx-font-size: 14px;" +
-                    "-fx-text-fill: #C0C0C0;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-padding: 0 8 0 8;"
-                );
-            }
-
-            // Hover effect
-            root.setOnMouseEntered(e ->
-                root.setStyle("-fx-background-color: #F0EAE4; -fx-background-radius: 6;"));
-            root.setOnMouseExited(e ->
-                root.setStyle("-fx-background-color: transparent;"));
+            root.setOnMouseEntered(e -> root.setStyle("-fx-background-color: #F0EAE4; -fx-background-radius: 6;"));
+            root.setOnMouseExited(e -> root.setStyle("-fx-background-color: transparent;"));
 
             setGraphic(root);
             setStyle("-fx-background-color: transparent; -fx-padding: 2 0 2 0;");
