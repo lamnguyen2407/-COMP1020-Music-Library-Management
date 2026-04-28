@@ -19,6 +19,7 @@ import java.util.ResourceBundle;
 
 public class CreatePlaylistModalController implements Initializable {
 
+
     // ==========================================
     // FXML FIELDS
     // ==========================================

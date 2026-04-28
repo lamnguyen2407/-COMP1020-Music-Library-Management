@@ -28,7 +28,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
     @Override
     public void setMainController(MainViewController mainController) {
-        // Fix: Lấy contentArea từ main shell thông qua node thực tế
+        // Cố gắng lấy contentArea từ scene
         if (playlistListContainer != null && playlistListContainer.getScene() != null) {
             this.contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
         }
@@ -40,19 +40,16 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     }
 
     private void setupRoleBasedView() {
+        if (playlistListContainer == null) return;
+        
         if (Main.isAdmin) {
-            // --- LOGIC CHO ADMIN (Ảnh 2 - Nhánh Admin) ---
-            playlistListContainer.getChildren().clear(); // Xóa sạch các row User tĩnh
-
+            playlistListContainer.getChildren().clear(); 
             addAdminSystemRow("Today's Hit", "♫");
             addSeparator();
-            addAdminSystemRow("All Songs", "≡"); // Mục tiêu chính của Ảnh 3
+            addAdminSystemRow("All Songs", "≡");
             addSeparator();
             addAdminSystemRow("All Albums", "◎");
-            
         } else {
-            // --- LOGIC CHO USER ---
-            // Gắn sự kiện cho row "Your favorite songs" (row đầu tiên trong FXML)
             if (!playlistListContainer.getChildren().isEmpty()) {
                 Node favoriteRow = playlistListContainer.getChildren().get(0);
                 favoriteRow.setOnMouseClicked(e -> loadCompactView("Your favorite songs"));
@@ -60,20 +57,15 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         }
     }
 
-    /**
-     * Chèn các dòng đặc quyền của Admin vào danh sách
-     */
     private void addAdminSystemRow(String name, String iconSymbol) {
         HBox row = buildPlaylistRow(name, iconSymbol);
-        
         row.setOnMouseClicked(e -> {
             if (name.equals("All Songs")) {
-                loadAdminManagementView(); // Mở màn hình Quản lý (Ảnh 3)
+                loadAdminManagementView();
             } else {
                 loadCompactView(name);
             }
         });
-        
         playlistListContainer.getChildren().add(row);
     }
 
@@ -85,26 +77,36 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         playlistListContainer.getChildren().add(sep);
     }
 
-    // ==========================================
-    // NAVIGATION HANDLERS
-    // ==========================================
-
     @FXML
     private void onNewPlaylistClicked() {
-        loadView("/CreatePlaylistModal.fxml", "Create Modal");
+        // Sử dụng đường dẫn chuẩn và Controller l thường
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CreatePlaylistModal.fxml"));
+            Node view = loader.load();
+
+            // Chú ý: Dùng l thường cho khớp với file mày đã đổi tên
+            CreatePlaylistModalController ctrl = loader.getController();
+            
+            // Tìm contentArea nếu hiện tại đang null
+            if (contentArea == null && playlistListContainer.getScene() != null) {
+                contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
+            }
+
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(view);
+            }
+        } catch (IOException e) {
+            System.err.println("[Lỗi] Không load được CreatePlaylistModal.fxml");
+            e.printStackTrace();
+        }
     }
 
-    /**
-     * Mở màn hình Quản lý kho nhạc của Admin (Ảnh 3)
-     * Đây là nơi sẽ có 2 nút đỏ ADD và DELETE
-     */
     private void loadAdminManagementView() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
             Node view = loader.load();
 
             SongListController ctrl = loader.getController();
-            // Thiết lập giao diện quản lý cho Admin
             ctrl.setData("All Songs", "Library Management", 
                          "Admin can add or remove songs from the global library here.", 
                          null, null); 
@@ -130,22 +132,13 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     }
 
     private void updateMainContent(Node view) {
-        // Lấy trực tiếp từ Scene ngay tại thời điểm click để không bao giờ bị null
-        if (playlistListContainer.getScene() != null) {
+        if (playlistListContainer != null && playlistListContainer.getScene() != null) {
             StackPane area = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
             if (area != null) {
                 area.getChildren().setAll(view);
-            } else {
-                System.err.println("[Lỗi UI] Không tìm thấy #contentArea để chuyển trang!");
             }
-        } else {
-            System.err.println("[Lỗi UI] Scene hiện tại đang null!");
         }
     }
-
-    // ==========================================
-    // UI BUILDER
-    // ==========================================
 
     public void addNewPlaylist(String playlistName, File coverImageFile) {
         HBox newRow = buildPlaylistRow(playlistName, "♫");
@@ -153,7 +146,6 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         if (insertIndex == -1) insertIndex = playlistListContainer.getChildren().size();
 
         playlistListContainer.getChildren().add(insertIndex, newRow);
-        System.out.println("[Playlist] User added: " + playlistName);
     }
 
     private HBox buildPlaylistRow(String name, String icon) {
@@ -163,7 +155,6 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         row.setPadding(new Insets(8, 0, 8, 0));
         row.setStyle("-fx-cursor: hand;");
 
-        // Icon Box
         StackPane iconBox = new StackPane();
         iconBox.setMinSize(56, 56);
         iconBox.setStyle("-fx-background-color: #D2B48C; -fx-background-radius: 8;");
@@ -171,7 +162,6 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         lblIcon.setStyle("-fx-font-size: 20px; -fx-text-fill: white;");
         iconBox.getChildren().add(lblIcon);
 
-        // Name
         Label nameLabel = new Label(name);
         nameLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2C1810;");
         HBox.setHgrow(nameLabel, Priority.ALWAYS);
@@ -180,22 +170,9 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         chevron.setStyle("-fx-font-size: 20px; -fx-text-fill: #9E8E84;");
 
         row.getChildren().addAll(iconBox, nameLabel, chevron);
-        
-        // Hover effect
         row.setOnMouseEntered(e -> row.setStyle("-fx-background-color: #F0EAE4; -fx-cursor: hand;"));
         row.setOnMouseExited(e -> row.setStyle("-fx-background-color: transparent;"));
 
         return row;
-    }
-
-    private void loadView(String fxmlPath, String errorTag) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Node view = loader.load();
-            updateMainContent(view);
-        } catch (IOException e) {
-            System.err.println("Error loading " + errorTag);
-            e.printStackTrace();
-        }
     }
 }
