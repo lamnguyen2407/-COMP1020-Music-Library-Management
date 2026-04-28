@@ -20,6 +20,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.musicapp.model.Song;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.image.Image;
+import java.util.List;
+
 public class MainViewController implements Initializable {
 
     // ══════════════════════════════════════════
@@ -268,5 +274,46 @@ public class MainViewController implements Initializable {
 
     public interface MainViewAware {
         void setMainController(MainViewController mainController);
+    }
+ // ── Load SongDetailView vào contentArea ───────────────────────────────────
+    public void loadSongDetail(String albumName, String artist, String genre,
+                               int year, String imageURL, List<Song> songs) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AlbumDetailView.fxml"));
+            Parent view = loader.load();
+ 
+            AlbumDetailViewController controller = loader.getController();
+            controller.setMainController(this);
+            controller.setAlbumData(albumName, artist, genre, year, imageURL, songs);
+ 
+            contentArea.getChildren().setAll(view);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+ 
+    // ── Show player bar (gọi từ AlbumViewController) ────────────────────
+    public void showPlayerBar(Song currentSong, List<Song> queue, int index) {
+        playerBar.setVisible(true);
+        playerBar.setManaged(true);
+ 
+        playerSongTitle.setText(currentSong.getTitle());
+        playerArtistName.setText(currentSong.getArtist());
+ 
+        if (currentSong.getImageURL() != null && !currentSong.getImageURL().isEmpty()) {
+            playerArtImage.setImage(new Image(currentSong.getImageURL(), true));
+        }
+ 
+        labelTotalTime.setText(formatDuration(currentSong.getDuration()));
+        labelCurrentTime.setText("0:00");
+ 
+        // TODO: Kết nối PlaybackService để phát nhạc thật
+    }
+ 
+    // ── Helper ────────────────────────────────────────────────────────────────
+    private String formatDuration(int seconds) {
+        int m = seconds / 60;
+        int s = seconds % 60;
+        return m + ":" + String.format("%02d", s);
     }
 }
