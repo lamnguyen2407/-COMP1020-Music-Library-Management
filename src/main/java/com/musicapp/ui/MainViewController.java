@@ -144,7 +144,15 @@ public class MainViewController implements Initializable {
 
     @FXML
     private void onNavSettings() {
-        loadView(FXML_SETTINGS);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/WelcomeView.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) btnSettings.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // ══════════════════════════════════════════
@@ -203,7 +211,7 @@ public class MainViewController implements Initializable {
     // Smoothly transition the main screen to a song list
     public void openSongListView(String title, String subtitle, String desc, javafx.collections.ObservableList<SongListController.SongItem> data) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/A1bumView.fxml"));
             Node view = loader.load();
 
             SongListController ctrl = loader.getController();
@@ -297,10 +305,10 @@ public class MainViewController implements Initializable {
     public void loadSongDetail(String albumName, String artist, String genre,
                                int year, String imageURL, List<Song> songs) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AlbumDetailView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AlbumView.fxml"));
             Parent view = loader.load();
  
-            AlbumDetailViewController controller = loader.getController();
+            AlbumViewController controller = loader.getController();
             controller.setMainController(this);
             controller.setAlbumData(albumName, artist, genre, year, imageURL, songs);
  
@@ -334,4 +342,9 @@ public class MainViewController implements Initializable {
         int s = seconds % 60;
         return m + ":" + String.format("%02d", s);
     }
+ // TEST: load album view
+    List<Song> testSongs = new java.util.ArrayList<>();
+    testSongs.add(new Song("1", "Going Bad", "Meek Mill", "Hip-Hop", 181, 2018, "", ""));
+    testSongs.add(new Song("2", "Amen", "Meek Mill", "Hip-Hop", 196, 2018, "", ""));
+    loadSongDetail("Championship", "Meek Mill", "Hip-Hop", 2018, "", testSongs);
 }
