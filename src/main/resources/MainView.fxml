@@ -55,7 +55,7 @@
                 <Button fx:id="btnSearch" maxWidth="Infinity" onAction="#onNavSearch" styleClass="nav-btn" text="🔍  Search" />
                 <Button fx:id="btnPlaylists" maxWidth="Infinity" onAction="#onNavPlaylists" styleClass="nav-btn" text="🎵  Playlists" />
                 <Region VBox.vgrow="ALWAYS" />
-                <Button fx:id="btnSettings" maxWidth="Infinity" onAction="#onNavSettings" styleClass="nav-btn" text="⚙   Settings" />
+                <Button fx:id="btnSettings" maxWidth="Infinity" onAction="#onNavSettings" styleClass="nav-btn" text="🚪  Sign Out" />
             </VBox>
 
             <ScrollPane fx:id="mainScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll" vbarPolicy="AS_NEEDED" HBox.hgrow="ALWAYS">
