@@ -2,7 +2,7 @@ package com.musicapp.ui;
 
 import com.musicapp.Main;
 import com.musicapp.model.Song;
-import com.musicapp.service.DatabaseManager; // Import để Search nhạc thật
+import com.musicapp.service.DatabaseManager; 
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -20,6 +21,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -42,7 +44,7 @@ public class MainViewController implements Initializable {
     // ══════════════════════════════════════════
     // FXML — Sidebar & Content
     // ══════════════════════════════════════════
-    @FXML private Button btnHome, btnAccount, btnSearch, btnPlaylists;
+    @FXML private Button btnHome, btnAccount, btnSearch, btnPlaylists, btnSettings;
     @FXML private StackPane contentArea;
 
     // ══════════════════════════════════════════
@@ -86,8 +88,28 @@ public class MainViewController implements Initializable {
 
     @FXML private void onNavHome() { setActiveNav(btnHome); loadView(FXML_DISCOVERY); }
     @FXML private void onNavAccount() { setActiveNav(btnAccount); loadView(FXML_ACCOUNT); }
-    @FXML private void onNavPlaylists() { setActiveNav(btnPlaylists); loadView(FXML_PLAYLIST); }
-    @FXML private void onNavSettings() { loadView(FXML_SETTINGS); }
+    
+    @FXML 
+    private void onNavPlaylists() { 
+        setActiveNav(btnPlaylists); 
+        loadView(FXML_PLAYLIST); 
+    }
+    
+    @FXML 
+    private void onNavSettings() { 
+        // Gộp logic: Nếu team mày muốn nút Settings mở ra WelcomeView (Đăng xuất)
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/WelcomeView.fxml"));
+            Parent root = loader.load();
+            // Dùng btnHome để lấy window an toàn, phòng trường hợp btnSettings chưa được gán
+            Stage stage = (Stage) btnHome.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (Exception e) {
+            // Nếu lỗi, fallback về loadView nội bộ như cũ
+            loadView(FXML_SETTINGS);
+        }
+    }
 
     @FXML 
     private void onNavSearch() {
@@ -173,7 +195,7 @@ public class MainViewController implements Initializable {
     }
 
     // ══════════════════════════════════════════
-    // CÁC HÀM SHOW PLAYER BAR (Giữ nguyên cho mọi Controller gọi đến)
+    // CÁC HÀM SHOW PLAYER BAR 
     // ══════════════════════════════════════════
 
     // 1. Hàm cũ (Cập nhật UI chay)
@@ -325,4 +347,14 @@ public class MainViewController implements Initializable {
     }
 
     public interface MainViewAware { void setMainController(MainViewController mainController); }
+
+    // ══════════════════════════════════════════
+    // Đã gói lại để sửa lỗi cú pháp tơ hơ ở cuối file
+    // ══════════════════════════════════════════
+    private void testLoadAlbum() {
+        List<Song> testSongs = new java.util.ArrayList<>();
+        testSongs.add(new Song("1", "Going Bad", "Meek Mill", "Hip-Hop", 181, 2018, "", ""));
+        testSongs.add(new Song("2", "Amen", "Meek Mill", "Hip-Hop", 196, 2018, "", ""));
+        loadSongDetail("Championship", "Meek Mill", "Hip-Hop", 2018, "", testSongs);
+    }
 }
