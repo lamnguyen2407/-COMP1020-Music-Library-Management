@@ -54,11 +54,17 @@
     <HBox style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
         <Label fx:id="checkHeader" prefWidth="30" text="[ ]" visible="false" managed="false"/>
         
-        <Label prefWidth="36" text="#" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        <Label prefWidth="40" text="#" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        
         <Label fx:id="col1Header" prefWidth="300" text="SONG" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col2Header" prefWidth="180" text="ARTIST" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col3Header" prefWidth="200" text="ALBUM" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
-        <Label prefWidth="60" text="TIME" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        
+        <Label fx:id="col2Header" prefWidth="200" text="ARTIST" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        
+        <Label fx:id="col3Header" prefWidth="150" text="GENRE" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        
+        <Region HBox.hgrow="ALWAYS" />
+        
+        <Label prefWidth="60" alignment="CENTER_RIGHT" text="TIME" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
     </HBox>
 
     <ListView fx:id="songListView" fixedCellSize="62" VBox.vgrow="ALWAYS" 
