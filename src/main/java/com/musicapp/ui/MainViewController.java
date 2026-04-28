@@ -193,7 +193,25 @@ public class MainViewController implements Initializable {
         isPlaying = false;
         if (btnPlayPause != null) btnPlayPause.setText("▶");
     }
+    
+    // Smoothly transition the main screen to a song list
+    public void openSongListView(String title, String subtitle, String desc, javafx.collections.ObservableList<SongListController.SongItem> data) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
+            Node view = loader.load();
 
+            SongListController ctrl = loader.getController();
+            // Connect the child back to this hub
+            ctrl.setMainController(this); 
+            // Pass the data to the view
+            ctrl.setData(title, subtitle, desc, null, data);
+
+            // Safely swap the content in the central area
+            contentArea.getChildren().setAll(view);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     // ══════════════════════════════════════════
     // SEARCH LOGIC
     // ══════════════════════════════════════════
