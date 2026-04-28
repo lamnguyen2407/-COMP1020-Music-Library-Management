@@ -15,6 +15,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
+import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
@@ -74,6 +76,7 @@ public class MainViewController implements Initializable {
     private boolean isLiked      = false;
     private boolean isShuffled  = false;
     private boolean isRepeating = false;
+    private MediaPlayer mediaPlayer;
 
     // ══════════════════════════════════════════
     // FXML paths (Đã dọn dẹp các dòng trùng lặp)
@@ -150,12 +153,9 @@ public class MainViewController implements Initializable {
     // ══════════════════════════════════════════
     // PLAYER BAR HANDLERS (Stubs)
     // ══════════════════════════════════════════
-    @FXML private void onPlayPause() { isPlaying = !isPlaying; btnPlayPause.setText(isPlaying ? "⏸" : "▶"); }
-    @FXML private void onPrev() { System.out.println("Prev clicked"); }
-    @FXML private void onNext() { System.out.println("Next clicked"); }
+  
     @FXML private void onShuffle() { isShuffled = !isShuffled; System.out.println("Shuffle: " + isShuffled); }
     @FXML private void onRepeat() { isRepeating = !isRepeating; System.out.println("Repeat: " + isRepeating); }
-    @FXML private void onSeek() { System.out.println("Seeking to: " + progressSlider.getValue()); }
     @FXML private void onToggleLike() { isLiked = !isLiked; btnLike.setText(isLiked ? "❤️" : "♡"); }
 
     // ══════════════════════════════════════════
@@ -300,7 +300,7 @@ public class MainViewController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AlbumDetailView.fxml"));
             Parent view = loader.load();
  
-            AlbumDetailViewController controller = loader.getController();
+            AlbumViewController controller = loader.getController();
             controller.setMainController(this);
             controller.setAlbumData(albumName, artist, genre, year, imageURL, songs);
  
@@ -333,5 +333,104 @@ public class MainViewController implements Initializable {
         int m = seconds / 60;
         int s = seconds % 60;
         return m + ":" + String.format("%02d", s);
+    }
+    
+    public void setMediaPlayer(MediaPlayer player) {
+        if (this.mediaPlayer != null) {
+            this.mediaPlayer.stop(); // Dừng bài cũ nếu có
+        }
+        this.mediaPlayer = player;
+
+        // Tự động cập nhật thanh Slider khi nhạc chạy
+        this.mediaPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) -> {
+            updateProgress(newTime);
+        });
+
+        // Khi hết bài thì tự động Next
+        this.mediaPlayer.setOnEndOfMedia(this::onNext);
+
+        isPlaying = true;
+        btnPlayPause.setText("⏸");
+    }
+    
+ // Hàm này sẽ được gọi liên tục mỗi khi bài nhạc chạy thêm 1 giây
+ // ══════════════════════════════════════════
+    // PLAYER BAR HANDLERS (Sửa lại logic thật)
+    // ══════════════════════════════════════════
+
+   
+
+   
+    // Cập nhật Slider và Label thời gian
+    private void updateProgress(Duration currentTime) {
+        if (mediaPlayer == null) return;
+        
+        double current = currentTime.toSeconds();
+        double total = mediaPlayer.getTotalDuration().toSeconds();
+
+        progressSlider.setMax(total);
+        progressSlider.setValue(current);
+        
+        labelCurrentTime.setText(formatDuration((int)current));
+        labelTotalTime.setText(formatDuration((int)total));
+    }
+
+    // ... Các hàm Navigation cũ giữ nguyên ...
+    @FXML 
+    private void onPlayPause() { 
+        if (mediaPlayer == null) return;
+
+        if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
+            mediaPlayer.pause();
+            isPlaying = false;
+            btnPlayPause.setText("▶");
+        } else {
+            mediaPlayer.play();
+            isPlaying = true;
+            btnPlayPause.setText("⏸");
+        }
+    }
+
+    @FXML 
+    private void onNext() { 
+        System.out.println("Next clicked");
+        // Gọi thằng SongList lấy bài tiếp theo
+        if (SongListController.instance != null) {
+            SongListController.instance.playNext(); 
+        }
+    }
+
+    @FXML 
+    private void onPrev() { 
+        System.out.println("Prev clicked");
+        // Gọi thằng SongList quay lại bài trước
+        if (SongListController.instance != null) {
+            SongListController.instance.playPrevious();
+        }
+    }
+
+    @FXML 
+    private void onSeek() { 
+        if (mediaPlayer != null) {
+            // Tua nhạc dựa trên vị trí Slider
+            double seekTime = progressSlider.getValue();
+            mediaPlayer.seek(Duration.seconds(seekTime));
+        }
+    }
+    // Sửa lại hàm showPlayerBar để nhận cả MediaPlayer
+    public void showPlayerBar(String songTitle, String artistName, String imagePath, MediaPlayer player) {
+        setMediaPlayer(player); // Gắn nhạc vào bộ điều khiển
+        
+        playerSongTitle.setText(songTitle);
+        playerArtistName.setText(artistName);
+        
+        if (imagePath != null && !imagePath.isEmpty()) {
+            playerArtImage.setImage(new Image(imagePath, true));
+        }
+
+        if (!playerBar.isVisible()) {
+            playerBar.setVisible(true);
+            playerBar.setManaged(true);
+        }
     }
 }
