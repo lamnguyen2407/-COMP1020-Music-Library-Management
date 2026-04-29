@@ -56,7 +56,7 @@
         
         <Label prefWidth="40" text="#" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
         
-        <Label fx:id="col1Header" prefWidth="300" text="SONG" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        <Label fx:id="col1Header" prefWidth="280" text="SONG" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold; -fx-padding: 0 0 0 50;" />
         
         <Label fx:id="col2Header" prefWidth="200" text="ARTIST" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
         
