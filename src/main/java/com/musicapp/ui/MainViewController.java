@@ -226,8 +226,7 @@ public class MainViewController implements Initializable {
                 }
             }
 
-            ctrl.setData("Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, results);
-            ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE");
+            ctrl.setData("Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, 0, "", results);            ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE");
 
             contentArea.getChildren().setAll(view);
         } catch (IOException e) {

@@ -62,6 +62,8 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         row.setOnMouseClicked(e -> {
             if (name.equals("All Songs")) {
                 loadAdminManagementView();
+            } else if (name.equals("All Albums")) { // BẮT SỰ KIỆN CLICK VÀO ALL ALBUMS Ở ĐÂY
+                loadNewAlbumReleaseView();
             } else {
                 loadCompactView(name);
             }
@@ -79,15 +81,12 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
     @FXML
     private void onNewPlaylistClicked() {
-        // Sử dụng đường dẫn chuẩn và Controller l thường
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CreatePlaylistModal.fxml"));
             Node view = loader.load();
 
-            // Chú ý: Dùng l thường cho khớp với file mày đã đổi tên
             CreatePlaylistModalController ctrl = loader.getController();
             
-            // Tìm contentArea nếu hiện tại đang null
             if (contentArea == null && playlistListContainer.getScene() != null) {
                 contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
             }
@@ -107,12 +106,28 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
             Node view = loader.load();
 
             SongListController ctrl = loader.getController();
-            ctrl.setData("All Songs", "Library Management", 
-                         "Admin can add or remove songs from the global library here.", 
-                         null, null); 
+            ctrl.setData("All Songs", "Library Management",
+            	    "Admin can add or remove songs from the global library here.",
+            	    null, 0, null, null);
             
             updateMainContent(view);
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // HÀM MỚI: DÙNG ĐỂ LOAD GIAO DIỆN NEW ALBUM RELEASE
+    private void loadNewAlbumReleaseView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/NewAlbumReleaseView.fxml"));
+            Node view = loader.load();
+
+            // Nếu sau này cần truyền data cho NewAlbumReleaseController thì lấy ra ở đây
+            // NewAlbumReleaseController ctrl = loader.getController();
+
+            updateMainContent(view);
+        } catch (IOException e) {
+            System.err.println("[Lỗi] Không load được NewAlbumReleaseView.fxml");
             e.printStackTrace();
         }
     }

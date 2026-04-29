@@ -14,7 +14,7 @@
     <VBox alignment="TOP_CENTER" spacing="0" maxWidth="560.0" StackPane.alignment="CENTER">
 
         <StackPane prefWidth="560.0" prefHeight="300.0">
-            <ImageView
+            <ImageViewff
                 fx:id="albumArtView"
                 fitWidth="560.0" fitHeight="300.0"
                 preserveRatio="false"

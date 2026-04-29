@@ -51,16 +51,19 @@
 
     <Separator style="-fx-opacity: 0.3;"><padding><Insets left="40" right="40" /></padding></Separator>
 
-    <HBox style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
-        <Label fx:id="checkHeader" prefWidth="30" text="[ ]" visible="false" managed="false"/>
+   <HBox spacing="0" alignment="CENTER_LEFT" style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
+        <Label fx:id="checkHeader" minWidth="35" prefWidth="35" maxWidth="35" text="[ ]" visible="false" managed="false"/>
         
-        <Label prefWidth="36" text="#" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col1Header" prefWidth="300" text="SONG" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col2Header" prefWidth="180" text="ARTIST" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
-        <Label fx:id="col3Header" prefWidth="200" text="ALBUM" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
-        <Label prefWidth="60" text="TIME" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" />
+        <Label minWidth="35" prefWidth="35" maxWidth="35" text="#" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold; -fx-padding: 0;" />
+        
+        <Label fx:id="col1Header" minWidth="300" prefWidth="300" maxWidth="300" text="SONG" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold; -fx-padding: 0 0 0 52;" />
+        
+        <Label fx:id="col2Header" minWidth="180" prefWidth="180" maxWidth="180" text="ARTIST" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold; -fx-padding: 0;" />
+        
+        <Label fx:id="col3Header" minWidth="200" prefWidth="200" maxWidth="200" text="ALBUM" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold; -fx-padding: 0;" />
+        
+        <Label minWidth="80" prefWidth="80" maxWidth="80" text="TIME" style="-fx-alignment: center-right; -fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold; -fx-padding: 0;" />
     </HBox>
-
-    <ListView fx:id="songListView" fixedCellSize="62" VBox.vgrow="ALWAYS" 
-              style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0 40 20 40; -fx-border-color: transparent;" />
+   <ListView fx:id="songListView" fixedCellSize="62" VBox.vgrow="ALWAYS" 
+              style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0 0 20 0; -fx-border-color: transparent;" />
 </VBox>

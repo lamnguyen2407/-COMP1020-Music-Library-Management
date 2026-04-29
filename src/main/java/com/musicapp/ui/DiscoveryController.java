@@ -77,8 +77,7 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
                 System.out.println("✅ Discovery đã truyền mainController sang SongList!");
             }
             
-            ctrl.setData(listTitle, "2026 Global Chart", "Top trending songs worldwide.", null, TRENDING_SONGS);
-            updateMainContent(view);
+            ctrl.setData(listTitle, "2026 Global Chart", "Top trending songs worldwide.", null, 0, null, TRENDING_SONGS);            updateMainContent(view);
 
         } catch (IOException ex) {
             ex.printStackTrace();

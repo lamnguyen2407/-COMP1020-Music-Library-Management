@@ -62,7 +62,7 @@ public class SongListController implements Initializable, MainViewController.Mai
         public String imageURL;     // 8
         
         public boolean isFavorite = false;
-        public boolean isSelected = false; // Used for Delete checkbox
+        public boolean isSelected = false; // Used forcheckbox
 
         public SongItem(String id, String title, String artist, String genre, int duration, int year, String audio, String image) {
             this.songId = id; this.title = title; this.artist = artist;
@@ -121,27 +121,35 @@ public class SongListController implements Initializable, MainViewController.Mai
     // ACTION HANDLERS
     // ==========================================
 
+  
     @FXML
     private void onAddSongClicked() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddSongModal.fxml"));
             Parent root = loader.load();
             
+            // LẤY CONTROLLER CỦA MODAL
+            AddSongModalController modalCtrl = loader.getController();
+            
+            // BƠM 4 DỮ LIỆU VÀO MODAL
+            if (!"All Songs".equals(currentAlbumTitle)) {
+                // Truyền: Artist, Genre, Year, Cover
+                modalCtrl.setPredefinedData(currentArtist, currentGenre, currentYear, currentCover);
+            }
+            
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL); 
-            stage.setTitle("Admin - Add New Track");
+            stage.setTitle("Admin - Add New Track to " + currentAlbumTitle);
             stage.setScene(new Scene(root));
             stage.setResizable(false);
-            stage.showAndWait(); 
             
-            // Refresh list after modal closes (in case MusicService was updated)
-            songs.setAll(MusicService.getGlobalLibrary());
+            stage.showAndWait(); 
+            refreshListData();
             
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
     @FXML
     private void onDeleteToggleClicked() {
         isDeleteMode = !isDeleteMode;
@@ -153,7 +161,7 @@ public class SongListController implements Initializable, MainViewController.Mai
             deleteBtn.setText("CONFIRM");
             deleteBtn.setStyle("-fx-background-color: #CC3300; -fx-text-fill: white;");
         } else {
-            // Remove selected songs from both the local view and the global service
+            // Xoá bài hát đã chọn
             songs.removeIf(s -> {
                 if (s.isSelected) {
                     MusicService.removeSong(s);
@@ -161,17 +169,71 @@ public class SongListController implements Initializable, MainViewController.Mai
                 }
                 return false;
             });
+            
+            // Sau khi xoá xong, gọi lại refresh để đảm bảo dữ liệu đồng bộ
+            refreshListData();
+            
             deleteBtn.setText("DELETE");
             deleteBtn.setStyle("-fx-background-color: #C0703A; -fx-text-fill: white;");
         }
     }
+    private String currentAlbumTitle;
+    private String currentArtist;
+    private int currentYear;       // <-- Thêm dòng này
+    private String currentGenre;   // <-- Thêm dòng này
+    private String currentCover;   // <-- Thêm dòng này
+    
+    public void setData(String title, String sub, String desc, String cover, int year, String genre, ObservableList<SongItem> data) {
+        this.currentAlbumTitle = title;
+        this.currentArtist = sub; 
+        this.currentYear = year;     // <-- Lưu năm
+        this.currentGenre = genre;   // <-- Lưu thể loại
+        this.currentCover = cover;   // <-- Lưu link ảnh
 
-    public void setData(String title, String sub, String desc, String cover, ObservableList<SongItem> data) {
         titleLabel.setText(title);
         subtitleLabel.setText(sub);
         descriptionLabel.setText(desc);
-        if (data != null) songs.setAll(data);
+        
+        // Nạp ảnh bìa (giữ nguyên logic cũ của bạn)
+        if (coverImageView != null && cover != null && !cover.trim().isEmpty()) {
+            try {
+                if (cover.startsWith("http")) {
+                    coverImageView.setImage(new Image(cover, true)); 
+                } else {
+                    URL imageURL = getClass().getResource(cover);
+                    if (imageURL != null) coverImageView.setImage(new Image(imageURL.toExternalForm()));
+                }
+            } catch (Exception e) { e.printStackTrace(); }
+        }
+
+        if (data != null) {
+            songs.setAll(data);
+        }
+
+        // Hiện nút Add/Delete cho Admin
+        if (Main.isAdmin) {
+            boolean canEdit = "All Songs".equals(title) || "Album detail view".equals(desc);
+            addBtn.setVisible(canEdit); addBtn.setManaged(canEdit);
+            deleteBtn.setVisible(canEdit); deleteBtn.setManaged(canEdit);
+        }
     }
+    private void refreshListData() {
+        if ("All Songs".equals(currentAlbumTitle)) {
+            // Nếu là trang All Songs thì load tất cả
+            songs.setAll(MusicService.getGlobalLibrary());
+        } else {
+            // Nếu là trang Album, lọc lại toàn bộ kho nhạc lấy đúng bài của Album này
+            ObservableList<SongItem> filteredSongs = FXCollections.observableArrayList();
+            for (SongItem s : MusicService.getGlobalLibrary()) {
+                // Lọc theo Artist (hoặc theo Album title nếu bạn có trường đó)
+                if (s.artist.equals(currentArtist)) {
+                    filteredSongs.add(s);
+                }
+            }
+            songs.setAll(filteredSongs);
+        }
+    }
+    
     
     public void setColumnHeaders(String c1, String c2, String c3) {
         col1Header.setText(c1);
@@ -179,38 +241,64 @@ public class SongListController implements Initializable, MainViewController.Mai
         col3Header.setText(c3);
     }
 
+    // =========================================
+    // CUSTOM CELL (Inner Class)
     // ==========================================
+ // =========================================
     // CUSTOM CELL (Inner Class)
     // ==========================================
     private class SongCell extends ListCell<SongItem> {
-        private final HBox root = new HBox(12);
+        private final HBox root = new HBox(0); // BẮT BUỘC KHOẢNG CÁCH = 0
         private final CheckBox checkBox = new CheckBox();
         private final Label indexLabel = new Label();
         private final ImageView thumb = new ImageView();
         private final Label nameLabel = new Label();
         private final Button heartBtn = new Button("♡");
-        private final Region spacer = new Region();
         private final Label artistLabel = new Label();
         private final Label albumLabel = new Label();
         private final Button addBtnRow = new Button("+");
         private final Label timeLabel = new Label();
 
         SongCell() {
+            // 1. THÊM DÒNG NÀY: Ép JavaFX xoá bỏ lề ảo (default padding) của ListCell
+            this.setPadding(new Insets(0)); 
+            
             root.setAlignment(Pos.CENTER_LEFT);
-            root.setPadding(new Insets(0, 40, 0, 40));
-            thumb.setFitWidth(40);
-            thumb.setFitHeight(40);
-            nameLabel.setPrefWidth(240); nameLabel.setStyle("-fx-font-weight: bold;");
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-            artistLabel.setPrefWidth(180); albumLabel.setPrefWidth(200);
-            heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0C0C0;");
-            addBtnRow.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 18px; -fx-cursor: hand;");
+            // 2. SỬA DÒNG NÀY: Trả lại lề trái/phải 40px để HBox này thẳng tắp với Header HBox
+            root.setPadding(new Insets(0, 40, 0, 40)); 
 
-            root.getChildren().addAll(checkBox, indexLabel, thumb, nameLabel, heartBtn, spacer, artistLabel, albumLabel, addBtnRow, timeLabel);
+            // CỘT 0: Checkbox (Khóa cứng 35px)
+            checkBox.setPrefWidth(35); checkBox.setMinWidth(35); checkBox.setMaxWidth(35);
+            
+            // ... (Giữ nguyên toàn bộ phần khóa cứng kích thước các cột ở bên dưới)
+            // CỘT 1: Index (#) (Khóa cứng 35px)
+            indexLabel.setPrefWidth(35); indexLabel.setMinWidth(35); indexLabel.setMaxWidth(35);
+
+            // CỘT 2: SONG (Gom Ảnh + Tên bài + Nút tim vào 1 HBox 300px)
+            thumb.setFitWidth(40); thumb.setFitHeight(40);
+            nameLabel.setPrefWidth(210); nameLabel.setStyle("-fx-font-weight: bold;");
+            heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0C0C0; -fx-cursor: hand;");
+            
+            HBox songInfoBox = new HBox(12, thumb, nameLabel, heartBtn);
+            songInfoBox.setAlignment(Pos.CENTER_LEFT);
+            songInfoBox.setPrefWidth(300); songInfoBox.setMinWidth(300); songInfoBox.setMaxWidth(300);
+
+            // CỘT 3: ARTIST (Khóa cứng 180px)
+            artistLabel.setPrefWidth(180); artistLabel.setMinWidth(180); artistLabel.setMaxWidth(180);
+
+            // CỘT 4: ALBUM (Khóa cứng 200px)
+            albumLabel.setPrefWidth(200); albumLabel.setMinWidth(200); albumLabel.setMaxWidth(200);
+
+            // CỘT 5: TIME (Khóa cứng 80px)
+            addBtnRow.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 18px; -fx-cursor: hand;");
+            HBox timeBox = new HBox(15, addBtnRow, timeLabel);
+            timeBox.setAlignment(Pos.CENTER_RIGHT); 
+            timeBox.setPrefWidth(80); timeBox.setMinWidth(80); timeBox.setMaxWidth(80);
+
+            // Gom tất cả vào root (KHÔNG CÒN BIẾN SPACER NỮA)
+            root.getChildren().addAll(checkBox, indexLabel, songInfoBox, artistLabel, albumLabel, timeBox);
 
             // Double click to play
-         // Bơm máy hát vào sự kiện Double Click
-         // Double click to play
             root.setOnMouseClicked(e -> {
                 if (e.getClickCount() == 2 && getItem() != null) {
                     SongItem item = getItem();
@@ -245,16 +333,11 @@ public class SongListController implements Initializable, MainViewController.Mai
                              }
                         }
 
-                        // ==========================================
-                        // 👉 THÊM ĐOẠN NÀY ĐỂ HIỆN THANH PLAYER BAR
-                        // ==========================================
                         if (mainController != null) {
                             mainController.showPlayerBar(item.title, item.artist, item.imageURL);
                         } else {
                             System.err.println("⚠️ mainController đang null, không thể hiện Bar!");
                         }
-                        // ==========================================
-
                     } catch (Exception ex) {
                         System.err.println("❌ Lỗi MediaPlayer!");
                         ex.printStackTrace();
@@ -262,7 +345,7 @@ public class SongListController implements Initializable, MainViewController.Mai
                 }
             });
 
-            // Context Menu (Image 5 logic)
+            // Context Menu
             addBtnRow.setOnAction(e -> showActionMenu(getItem(), addBtnRow));
         }
 
@@ -291,15 +374,11 @@ public class SongListController implements Initializable, MainViewController.Mai
                 }
 
                 MenuItem remove = new MenuItem("Remove from this PlayList");
-                
                 String itemStyle = "-fx-font-size: 13px; -fx-text-fill: #2C1810;";
-                fav.setStyle(itemStyle);
-                playlistSubMenu.setStyle(itemStyle);
-                remove.setStyle(itemStyle);
+                fav.setStyle(itemStyle); playlistSubMenu.setStyle(itemStyle); remove.setStyle(itemStyle);
 
                 menu.getItems().addAll(fav, playlistSubMenu, new SeparatorMenuItem(), remove);
             }
-
             menu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 0);
         }
 
@@ -309,8 +388,7 @@ public class SongListController implements Initializable, MainViewController.Mai
             if (empty || item == null) {
                 setGraphic(null);
             } else {
-                checkBox.setVisible(isDeleteMode);
-                checkBox.setManaged(isDeleteMode);
+                checkBox.setVisible(isDeleteMode); checkBox.setManaged(isDeleteMode);
                 checkBox.setSelected(item.isSelected);
                 checkBox.setOnAction(e -> item.isSelected = checkBox.isSelected());
 
@@ -321,9 +399,7 @@ public class SongListController implements Initializable, MainViewController.Mai
                 timeLabel.setText(item.getDurationString());
                 
                 heartBtn.setVisible(!Main.isAdmin); 
-                
                 setGraphic(root);
             }
         }
-    }
-}
+    } }

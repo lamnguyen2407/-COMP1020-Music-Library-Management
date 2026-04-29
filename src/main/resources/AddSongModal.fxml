@@ -39,7 +39,7 @@
         <TextField fx:id="genreField" promptText="Pop, Rock, EDM..." GridPane.columnIndex="1" GridPane.rowIndex="3" styleClass="admin-input"/>
 
         <Label text="Release Year:" GridPane.rowIndex="4" />
-        <TextField fx:id="yearField" text="2026" GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="admin-input"/>
+        <TextField fx:id="yearField" promptText="2026" GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="admin-input"/>
 
         <Label text="Duration (sec):" GridPane.rowIndex="5" />
         <TextField fx:id="durationField" promptText="e.g. 180" GridPane.columnIndex="1" GridPane.rowIndex="5" styleClass="admin-input"/>

@@ -34,7 +34,7 @@ public class AddSongModalController {
             System.out.println("Image: " + image);
             System.out.println("-------------------------------------");
             
-         // ... lấy 8 thuộc tính từ TextField ...
+            // ... lấy 8 thuộc tính từ TextField ...
             SongListController.SongItem newSong = new SongListController.SongItem(
                 id, title, artist, genre, duration, year, audio, image
             );
@@ -42,18 +42,17 @@ public class AddSongModalController {
             // Lưu vào kho nhạc chung
             MusicService.addSong(newSong);
 	            
-	         // Refresh màn hình CompactList đang mở
-	         // Lấy lại danh sách mới nhất
-	         ObservableList<SongListController.SongItem> updatedList = MusicService.getGlobalLibrary();
+            // Refresh màn hình CompactList đang mở
+            // Lấy lại danh sách mới nhất
+            ObservableList<SongListController.SongItem> updatedList = MusicService.getGlobalLibrary();
 	
-	         // (Cách dễ nhất) Mày đóng cái Modal lại, 
-	         // Khi Admin quay ra nhấn "All Albums" hoặc "Latest Song", nó sẽ load lại list mới.
-	         closeModal();
+            // (Cách dễ nhất) Mày đóng cái Modal lại, 
+            // Khi Admin quay ra nhấn "All Albums" hoặc "Latest Song", nó sẽ load lại list mới.
+            closeModal();
 	            
             // 3. Sau này mày sẽ gọi Firebase hoặc DB ở đây:
             // Database.save(new Song(id, title, artist, ...));
 
-            closeModal();
         } catch (NumberFormatException e) {
             // Xử lý nếu Admin nhập chữ vào ô Year hoặc Duration
             System.err.println("Error: Year and Duration must be numbers!");
@@ -69,4 +68,19 @@ public class AddSongModalController {
         Stage stage = (Stage) idField.getScene().getWindow();
         stage.close();
     }
-}
+
+    // ====================================================
+    // HÀM MỚI THÊM ĐỂ TỰ ĐỘNG ĐIỀN DATA TỪ ALBUM TRUYỀN SANG
+    // ====================================================
+ // Thêm hàm này vào AddSongModalController
+ // Hàm nạp dữ liệu điền sẵn đã được sửa lại đúng tên biến
+    public void setPredefinedData(String artist, String genre, int year, String imageUrl) {
+        if (artistField != null) artistField.setText(artist);
+        if (genreField != null) genreField.setText(genre);
+        if (yearField != null) yearField.setText(String.valueOf(year)); // Đã sửa thành yearField
+        if (imageUrlField != null) imageUrlField.setText(imageUrl);
+        
+        // (Tuỳ chọn) Khoá các ô này lại không cho Admin sửa
+        // artistField.setEditable(false);
+        // imageUrlField.setEditable(false);
+    } }

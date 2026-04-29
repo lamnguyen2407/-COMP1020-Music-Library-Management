@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" prefWidth="500.0" 
+      style="-fx-background-color: #FAF7F4; -fx-border-color: #D2B48C; -fx-border-width: 2; -fx-background-radius: 15; -fx-border-radius: 15;" 
+      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" 
+      fx:controller="com.musicapp.ui.AddAlbumModalController">
+    
+    <padding>
+        <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+    </padding>
+
+    <VBox spacing="5.0">
+        <Label text="ADD NEW ALBUM" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C1810;" />
+        <Label text="Fill in all 5 attributes to update the system library" style="-fx-font-size: 12px; -fx-text-fill: #7A6A60;" />
+        <Separator prefWidth="200.0" style="-fx-padding: 10 0 10 0;" />
+    </VBox>
+
+    <GridPane vgap="12.0" hgap="15.0">
+        <columnConstraints>
+            <ColumnConstraints prefWidth="120" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <Label text="Album Title:"
+               style="-fx-text-fill: #2C1810;"
+               GridPane.rowIndex="0" />
+        <TextField fx:id="albumTitleField" promptText="e.g. Abbey Road"
+                   styleClass="admin-input"
+                   GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label text="Artist:"
+               style="-fx-text-fill: #2C1810;"
+               GridPane.rowIndex="1" />
+        <TextField fx:id="artistField" promptText="Singer/Band"
+                   styleClass="admin-input"
+                   GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label text="Release Year:"
+               style="-fx-text-fill: #2C1810;"
+               GridPane.rowIndex="2" />
+        <TextField fx:id="releaseYearField" promptText="2026"
+                   styleClass="admin-input"
+                   GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <Label text="Genre:"
+               style="-fx-text-fill: #2C1810;"
+               GridPane.rowIndex="3" />
+        <TextField fx:id="genreField" promptText="Pop, Rock, EDM..."
+                   styleClass="admin-input"
+                   GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+        <Label text="Image URL:"
+               style="-fx-text-fill: #2C1810;"
+               GridPane.rowIndex="4" />
+        <TextField fx:id="imageUrlField" promptText="Link to cover art"
+                   styleClass="admin-input"
+                   GridPane.columnIndex="1" GridPane.rowIndex="4" />
+    </GridPane>
+
+    <Region VBox.vgrow="ALWAYS" prefHeight="20"/>
+
+    <HBox alignment="CENTER_RIGHT" spacing="15.0">
+        <Button onAction="#onCancel" text="CANCEL" 
+                style="-fx-background-color: transparent; -fx-text-fill: #7A6A60; -fx-font-weight: bold; -fx-cursor: hand;" />
+        <Button onAction="#onSave" text="SAVE TO DATABASE" prefHeight="45" prefWidth="200" 
+                style="-fx-background-color: #C0703A; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);" />
+    </HBox>
+</VBox>
