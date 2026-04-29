@@ -261,8 +261,7 @@ public class MainViewController implements Initializable {
             Node view = loader.load();
             SongListController ctrl = loader.getController();
             ctrl.setMainController(this); 
-            ctrl.setData(title, subtitle, desc, null, data);
-            contentArea.getChildren().setAll(view);
+            ctrl.setData(title, subtitle, desc, null, 0, "", data);            contentArea.getChildren().setAll(view);
         } catch (IOException e) { e.printStackTrace(); }
     }
 
@@ -295,29 +294,16 @@ public class MainViewController implements Initializable {
             
             if (ctrl instanceof MainViewAware) ((MainViewAware) ctrl).setMainController(this);
             
-<<<<<<< HEAD
-            String lowerQuery = query.toLowerCase();
-            for (var song : allSongs) {
-                if (song.title.toLowerCase().contains(lowerQuery) || 
-                    song.artist.toLowerCase().contains(lowerQuery)) {
-                    results.add(song);
-                }
-            }
-
-            ctrl.setData("Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, 0, "", results);            ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE");
-
-=======
-            ctrl.setData("Search Results", "Results for: \"" + query + "\"", "Searching...", null, null);
-            
+            // Set initial loading state with 7 arguments
+            ctrl.setData("Search Results", "Results for: \"" + query + "\"", "Searching...", null, 0, "", null);
             ctrl.setColumnHeaders("ARTIST", "GENRE", "TIME"); 
->>>>>>> f5e617433d1fdddb1cc42de8c9109a5561116b51
             contentArea.getChildren().setAll(view);
 
             new Thread(() -> {
                 try {
                     List<Song> allSongs = DatabaseManager.getInstance().getService().fetchSongs();
                     var results = javafx.collections.FXCollections.<SongListController.SongItem>observableArrayList();
-                    String lowerQuery = query.toLowerCase();
+                    String lowerQuery = query.toLowerCase(); // No longer redeclared
                     
                     for (Song song : allSongs) {
                         if (song.getTitle().toLowerCase().contains(lowerQuery) || 
@@ -330,13 +316,13 @@ public class MainViewController implements Initializable {
                         }
                     }
                     
-                    Platform.runLater(() -> ctrl.setData("Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, results));
+                    // Update UI with the final results using 7 arguments
+                    Platform.runLater(() -> ctrl.setData("Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, 0, "", results));
                 } catch (Exception e) { e.printStackTrace(); }
             }).start();
 
         } catch (IOException e) { e.printStackTrace(); }
     }
-
     // ══════════════════════════════════════════
     // HELPERS
     // ══════════════════════════════════════════
