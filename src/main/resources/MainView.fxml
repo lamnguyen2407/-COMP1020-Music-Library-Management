@@ -16,7 +16,6 @@
 <?import javafx.scene.shape.Circle?>
 
 <BorderPane prefHeight="800" prefWidth="1280" styleClass="root-pane" 
-            stylesheets="@../styles/main.css" 
             xmlns="http://javafx.com/javafx" 
             xmlns:fx="http://javafx.com/fxml" 
             fx:controller="com.musicapp.ui.MainViewController">
@@ -26,9 +25,9 @@
             <padding><Insets bottom="14" left="24" right="24" top="14" /></padding>
             
             <HBox alignment="CENTER" prefWidth="80" styleClass="logo-box">
-                <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                    <image><Image url="@../images/logo.png" /></image>
-                </ImageView>
+                <StackPane prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: #c07840; -fx-background-radius: 8;">
+                    <Label style="-fx-text-fill: white; -fx-font-size: 20px;" text="♪" />
+                </StackPane>
             </HBox>
 
             <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
@@ -56,7 +55,7 @@
                 <Button fx:id="btnSearch" maxWidth="Infinity" onAction="#onNavSearch" styleClass="nav-btn" text="🔍  Search" />
                 <Button fx:id="btnPlaylists" maxWidth="Infinity" onAction="#onNavPlaylists" styleClass="nav-btn" text="🎵  Playlists" />
                 <Region VBox.vgrow="ALWAYS" />
-                <Button fx:id="btnSettings" maxWidth="Infinity" onAction="#onNavSettings" styleClass="nav-btn" text="⚙   Settings" />
+                <Button fx:id="btnSettings" maxWidth="Infinity" onAction="#onNavSettings" styleClass="nav-btn" text="🚪  Sign Out" />
             </VBox>
 
             <ScrollPane fx:id="mainScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll" vbarPolicy="AS_NEEDED" HBox.hgrow="ALWAYS">

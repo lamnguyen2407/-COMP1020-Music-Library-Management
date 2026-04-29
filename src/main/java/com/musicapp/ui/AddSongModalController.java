@@ -1,61 +1,62 @@
 package com.musicapp.ui;
 
-import javafx.collections.ObservableList;
+import com.musicapp.model.Song;
+import com.musicapp.service.DatabaseManager;
+import com.musicapp.service.FirebaseService;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class AddSongModalController {
 
-    @FXML private TextField idField, titleField, artistField, genreField, yearField, durationField, audioUrlField, imageUrlField;
+    @FXML private TextField idField; 
+    @FXML private TextField titleField;
+    @FXML private TextField artistField;
+    @FXML private TextField genreField;
+    @FXML private TextField yearField;
+    @FXML private TextField durationField;
+    
+    @FXML private TextField audioUrlField; 
+    @FXML private TextField imageUrlField;
+
+    @FXML private Button saveBtn;
 
     @FXML
     private void onSave() {
         try {
-            // 1. Thu thập trọn bộ 8 thuộc tính từ UI
-            String id = idField.getText();
-            String title = titleField.getText();
-            String artist = artistField.getText();
-            String genre = genreField.getText();
-            int year = Integer.parseInt(yearField.getText());
-            int duration = Integer.parseInt(durationField.getText());
-            String audio = audioUrlField.getText();
-            String image = imageUrlField.getText();
-
-            // 2. LOGIC DEMO: In ra console để thầy cô thấy data đã được xử lý
-            System.out.println("--- ADMIN ACTION: ADDING NEW SONG ---");
-            System.out.println("ID: " + id);
-            System.out.println("Title: " + title);
-            System.out.println("Artist: " + artist);
-            System.out.println("Genre: " + genre);
-            System.out.println("Year: " + year);
-            System.out.println("Duration: " + duration + "s");
-            System.out.println("Audio: " + audio);
-            System.out.println("Image: " + image);
-            System.out.println("-------------------------------------");
+            String id = idField.getText().trim();
+            String title = titleField.getText().trim();
+            String artist = artistField.getText().trim();
+            String genre = genreField.getText().trim();
             
-            // ... lấy 8 thuộc tính từ TextField ...
-            SongListController.SongItem newSong = new SongListController.SongItem(
-                id, title, artist, genre, duration, year, audio, image
-            );
+            // Lấy code ép kiểu và xử lý link Drive của nhóm
+            int year = Integer.parseInt(yearField.getText().trim());
+            int duration = Integer.parseInt(durationField.getText().trim());
 
-            // Lưu vào kho nhạc chung
-            MusicService.addSong(newSong);
-	            
-            // Refresh màn hình CompactList đang mở
-            // Lấy lại danh sách mới nhất
-            ObservableList<SongListController.SongItem> updatedList = MusicService.getGlobalLibrary();
-	
-            // (Cách dễ nhất) Mày đóng cái Modal lại, 
-            // Khi Admin quay ra nhấn "All Albums" hoặc "Latest Song", nó sẽ load lại list mới.
+            String rawAudioUrl = audioUrlField.getText().trim();
+            String rawImageUrl = imageUrlField.getText().trim();
+            
+            String directAudioUrl = convertToDirectLink(rawAudioUrl);
+            String directImageUrl = convertToDirectLink(rawImageUrl);
+
+            // Lưu thẳng vào Database thật (thay cho dòng Mock của bạn)
+            Song newSong = new Song(id, title, artist, genre, duration, year, directAudioUrl, directImageUrl);
+            DatabaseManager.getInstance().getService().saveSong(newSong);
+            
+            // Refresh lại danh sách hiển thị
+            if (SongListController.instance != null) {
+                SongListController.instance.refreshData();
+            }
+
+            // Lấy code của bạn: Đóng popup sau khi lưu xong cho mượt UX
             closeModal();
-	            
-            // 3. Sau này mày sẽ gọi Firebase hoặc DB ở đây:
-            // Database.save(new Song(id, title, artist, ...));
 
         } catch (NumberFormatException e) {
-            // Xử lý nếu Admin nhập chữ vào ô Year hoặc Duration
-            System.err.println("Error: Year and Duration must be numbers!");
+            showAlert(Alert.AlertType.ERROR, "Lỗi định dạng", "Năm và thời lượng phải là số!");
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", e.getMessage());
         }
     }
 
@@ -65,22 +66,55 @@ public class AddSongModalController {
     }
 
     private void closeModal() {
-        Stage stage = (Stage) idField.getScene().getWindow();
+        Stage stage = (Stage) titleField.getScene().getWindow();
         stage.close();
     }
 
     // ====================================================
-    // HÀM MỚI THÊM ĐỂ TỰ ĐỘNG ĐIỀN DATA TỪ ALBUM TRUYỀN SANG
+    // HÀM CỦA BẠN: TỰ ĐỘNG ĐIỀN DATA TỪ ALBUM TRUYỀN SANG
     // ====================================================
- // Thêm hàm này vào AddSongModalController
- // Hàm nạp dữ liệu điền sẵn đã được sửa lại đúng tên biến
     public void setPredefinedData(String artist, String genre, int year, String imageUrl) {
         if (artistField != null) artistField.setText(artist);
         if (genreField != null) genreField.setText(genre);
-        if (yearField != null) yearField.setText(String.valueOf(year)); // Đã sửa thành yearField
+        if (yearField != null) yearField.setText(String.valueOf(year)); 
         if (imageUrlField != null) imageUrlField.setText(imageUrl);
         
         // (Tuỳ chọn) Khoá các ô này lại không cho Admin sửa
         // artistField.setEditable(false);
         // imageUrlField.setEditable(false);
-    } }
+    }
+
+    // ====================================================
+    // HÀM CỦA NHÓM: XỬ LÝ THÔNG BÁO VÀ CONVERT LINK DRIVE
+    // ====================================================
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+    
+    private String convertToDirectLink(String driveUrl) {
+        if (driveUrl == null || !driveUrl.contains("drive.google.com")) {
+            return driveUrl; // Nếu không phải link Drive thì giữ nguyên
+        }
+        
+        try {
+            String fileId = "";
+            if (driveUrl.contains("/d/")) {
+                fileId = driveUrl.split("/d/")[1].split("/")[0];
+            } else if (driveUrl.contains("id=")) {
+                fileId = driveUrl.split("id=")[1].split("&")[0];
+            }
+            
+            if (!fileId.isEmpty()) {
+                return "https://drive.google.com/uc?export=download&id=" + fileId;
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi chuyển đổi link Drive: " + e.getMessage());
+        }
+        
+        return driveUrl;
+    }
+}

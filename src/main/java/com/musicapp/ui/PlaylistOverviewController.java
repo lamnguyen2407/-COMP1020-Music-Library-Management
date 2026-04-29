@@ -1,11 +1,9 @@
 package com.musicapp.ui;
 
+import javafx.application.Platform;
 import com.musicapp.Main;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
-
+import com.musicapp.model.Song;
+import com.musicapp.service.DatabaseManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -13,22 +11,37 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class PlaylistOverviewController implements Initializable, MainViewController.MainViewAware {
 
-    @FXML private VBox playlistListContainer;
-    @FXML private HBox newPlaylistRow;
+    // Singleton để các Modal gọi refreshData()
+    public static PlaylistOverviewController instance;
 
-    private StackPane contentArea;
+    @FXML private VBox playlistListContainer;
+    @FXML private HBox newPlaylistRow; // Cái hàng để bấm tạo Playlist mới
+    @FXML private StackPane contentArea;
+    @FXML private TableView<Song> tableView;
+    @FXML private TableColumn<Song, String> titleColumn;
+    @FXML private TableColumn<Song, String> artistColumn;
+    @FXML private TableColumn<Song, String> audioColumn;
+
+    private MainViewController mainController;
 
     @Override
     public void setMainController(MainViewController mainController) {
-        // Cố gắng lấy contentArea từ scene
+        this.mainController = mainController;
+        // Cố gắng lấy contentArea từ scene nếu chưa có
         if (playlistListContainer != null && playlistListContainer.getScene() != null) {
             this.contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
         }
@@ -36,24 +49,61 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        instance = this;
+
+        // Map Column cho TableView (Dùng cho Admin hoặc các list nhạc)
+        if (titleColumn != null) titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        if (artistColumn != null) artistColumn.setCellValueFactory(new PropertyValueFactory<>("artist"));
+        if (audioColumn != null) audioColumn.setCellValueFactory(new PropertyValueFactory<>("audioURL"));
+
+        refreshData();
         setupRoleBasedView();
+    }
+
+    // --- HÀM FIX LỖI: Thêm Playlist mới vào giao diện (Gọi từ CreatePlaylistModal) ---
+    public void addNewPlaylist(String playlistName, File coverImageFile) {
+        HBox newRow = buildPlaylistRow(playlistName, "♫");
+        
+        // Chèn vào ngay trước cái nút "New Playlist"
+        int insertIndex = playlistListContainer.getChildren().indexOf(newPlaylistRow);
+        if (insertIndex == -1) insertIndex = playlistListContainer.getChildren().size();
+
+        playlistListContainer.getChildren().add(insertIndex, newRow);
+        System.out.println("[Success] Đã thêm playlist mới vào UI: " + playlistName);
+    }
+
+    // --- HÀM FIX LỖI: Load nhạc từ Firebase ---
+    public void refreshData() {
+        new Thread(() -> {
+            try {
+                List<Song> updatedSongs = DatabaseManager.getInstance().getService().fetchSongs();
+                Platform.runLater(() -> {
+                    if (tableView != null) {
+                        tableView.getItems().setAll(updatedSongs);
+                        System.out.println("[Success] Đã nạp " + updatedSongs.size() + " bài hát từ Firebase.");
+                    }
+                });
+            } catch (Exception e) {
+                System.err.println("[Error] Lỗi khi load nhạc: " + e.getMessage());
+            }
+        }).start();
     }
 
     private void setupRoleBasedView() {
         if (playlistListContainer == null) return;
         
         if (Main.isAdmin) {
+            // Lưu lại cái bảng trước khi clear nếu cần hiện nó cho Admin
+            Node tableNode = tableView;
             playlistListContainer.getChildren().clear(); 
+            
+            if (tableNode != null) playlistListContainer.getChildren().add(tableNode);
+
             addAdminSystemRow("Today's Hit", "♫");
             addSeparator();
             addAdminSystemRow("All Songs", "≡");
             addSeparator();
             addAdminSystemRow("All Albums", "◎");
-        } else {
-            if (!playlistListContainer.getChildren().isEmpty()) {
-                Node favoriteRow = playlistListContainer.getChildren().get(0);
-                favoriteRow.setOnMouseClicked(e -> loadCompactView("Your favorite songs"));
-            }
         }
     }
 
@@ -84,16 +134,9 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CreatePlaylistModal.fxml"));
             Node view = loader.load();
-
-            CreatePlaylistModalController ctrl = loader.getController();
             
-            if (contentArea == null && playlistListContainer.getScene() != null) {
-                contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
-            }
-
-            if (contentArea != null) {
-                contentArea.getChildren().setAll(view);
-            }
+            // CreatePlaylistModalController ctrl = loader.getController(); // Lấy controller nếu cần thiết lập data
+            updateMainContent(view);
         } catch (IOException e) {
             System.err.println("[Lỗi] Không load được CreatePlaylistModal.fxml");
             e.printStackTrace();
@@ -107,8 +150,8 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
             SongListController ctrl = loader.getController();
             ctrl.setData("All Songs", "Library Management",
-            	    "Admin can add or remove songs from the global library here.",
-            	    null, 0, null, null);
+                    "Admin can add or remove songs from the global library here.",
+                    null, 0, null, null);
             
             updateMainContent(view);
         } catch (IOException e) {
@@ -136,31 +179,19 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CompactListView.fxml"));
             Node view = loader.load();
-
-            CompactListController ctrl = loader.getController();
-            ctrl.setData(title, null);
-
-            updateMainContent(view);
+            updateMainContent(view); 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void updateMainContent(Node view) {
-        if (playlistListContainer != null && playlistListContainer.getScene() != null) {
-            StackPane area = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
-            if (area != null) {
-                area.getChildren().setAll(view);
-            }
+        if (contentArea == null && playlistListContainer.getScene() != null) {
+            contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
         }
-    }
-
-    public void addNewPlaylist(String playlistName, File coverImageFile) {
-        HBox newRow = buildPlaylistRow(playlistName, "♫");
-        int insertIndex = playlistListContainer.getChildren().indexOf(newPlaylistRow);
-        if (insertIndex == -1) insertIndex = playlistListContainer.getChildren().size();
-
-        playlistListContainer.getChildren().add(insertIndex, newRow);
+        if (contentArea != null) {
+            contentArea.getChildren().setAll(view);
+        }
     }
 
     private HBox buildPlaylistRow(String name, String icon) {
@@ -185,8 +216,8 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         chevron.setStyle("-fx-font-size: 20px; -fx-text-fill: #9E8E84;");
 
         row.getChildren().addAll(iconBox, nameLabel, chevron);
-        row.setOnMouseEntered(e -> row.setStyle("-fx-background-color: #F0EAE4; -fx-cursor: hand;"));
-        row.setOnMouseExited(e -> row.setStyle("-fx-background-color: transparent;"));
+        row.setOnMouseEntered(ev -> row.setStyle("-fx-background-color: #F0EAE4; -fx-cursor: hand;"));
+        row.setOnMouseExited(ev -> row.setStyle("-fx-background-color: transparent;"));
 
         return row;
     }

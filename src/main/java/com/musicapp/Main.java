@@ -15,7 +15,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         // BYPASS: Loading MainView.fxml directly instead of WelcomeView
-        URL fxmlLocation = getClass().getResource("/MainView.fxml");
+        URL fxmlLocation = getClass().getResource("/WelcomeView.fxml");
         if (fxmlLocation == null) {
             System.err.println("CRITICAL ERROR: MainView.fxml not found in resources!");
             return;

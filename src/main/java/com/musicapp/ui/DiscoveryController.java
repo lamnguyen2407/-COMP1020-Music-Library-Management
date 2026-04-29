@@ -21,6 +21,8 @@ import java.util.ResourceBundle;
 public class DiscoveryController implements Initializable, MainViewController.MainViewAware {
 
     @FXML private StackPane trendingCard1, trendingCard2, trendingCard3, trendingCard4;
+    @FXML private StackPane trending1PlayBtn;
+    @FXML private StackPane todaysHitBanner;
     @FXML private Label trending1Title, trending1Artist, trending2Title, trending2Artist;
     @FXML private Label gotoTitle, gotoArtist;
     @FXML private Label latest1Title, latest1Artist; 
@@ -57,6 +59,26 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
     private void setupClickHandlers() {
         if (trendingCard1 != null) {
             trendingCard1.setOnMouseClicked(e -> openDetailedSongList("Trending Hits"));
+        }
+        // The transition to hit songs when clicking today's hit banner
+        if(todaysHitBanner != null) {
+        	todaysHitBanner.setOnMouseClicked(e -> {
+        		if(mainController != null) {
+        			mainController.openSongListView("Today's Hits", "Top tracks", "The biggest track on everyone's mind", null);
+        		}
+        	});
+        }
+        // The play button to show ONLY the bottom bar
+        if(trending1PlayBtn != null) {
+        	trending1PlayBtn.setOnMouseClicked(e -> {
+        		e.consume();
+        		if(mainController != null) {
+        			// Get 1st song (demo)
+        			SongListController.SongItem song = TRENDING_SONGS.get(0);
+        			// Call the API to show play bar
+        			mainController.showPlayerBar(song.title, song.artist, song.imageURL);
+        		}
+        	});
         }
         // Admin click vào bài hát để quản lý, User click để nghe
         if (latest1Title != null) {
