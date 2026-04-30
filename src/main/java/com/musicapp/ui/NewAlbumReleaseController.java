@@ -205,15 +205,16 @@ public class NewAlbumReleaseController implements Initializable {
         coverImage.setClip(clip);
 
         boolean hasImage = false;
-        if (album.imageURL() != null && !album.imageURL().trim().isEmpty()) {
+        if (album.getImageURL() != null && !album.getImageURL().trim().isEmpty()) {
             try {
-                URL imageURL = getClass().getResource(album.imageURL());
+                URL imageURL = getClass().getResource(album.getImageURL());
                 if (imageURL != null) {
                     coverImage.setImage(new Image(imageURL.toExternalForm()));
                     hasImage = true;
                 }
             } catch (Exception e) {
-                System.out.println("Lỗi load ảnh: " + album.imageURL());
+                // Changed album.imageURL() to album.getImageURL() to match Album.java
+                System.out.println("Lỗi load ảnh: " + album.getImageURL()); 
             }
         }
         
@@ -229,8 +230,7 @@ public class NewAlbumReleaseController implements Initializable {
         titleLabel.setPrefWidth(140);
         titleLabel.setAlignment(Pos.CENTER);
 
-        Label artistLabel = new Label(album.getArtist() + " • " + album.releaseYear());
-        artistLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 12px;");
+        Label artistLabel = new Label(album.getArtist() + " • " + album.getReleaseYear());        artistLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 12px;");
 
         textContainer.getChildren().addAll(titleLabel, artistLabel);
         card.getChildren().addAll(imageContainer, textContainer);
@@ -278,8 +278,8 @@ public class NewAlbumReleaseController implements Initializable {
                     selectedAlbum.getTitle(), 
                     selectedAlbum.getArtist(), 
                     "Album detail view", 
-                    selectedAlbum.imageURL(), 
-                    selectedAlbum.releaseYear(), 
+                    selectedAlbum.getImageURL(), 
+                    selectedAlbum.getReleaseYear(),
                     selectedAlbum.getGenre(),   // Lưu ý: Nếu class Album của bạn không có hàm getGenre() thì hãy đổi thành selectedAlbum.genre() tuỳ vào code của bạn
                     albumSongs
                 );
