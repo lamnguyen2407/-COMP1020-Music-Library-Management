@@ -222,9 +222,10 @@ public class SongListController implements Initializable, MainViewController.Mai
             
             AddSongModalController modalCtrl = loader.getController();
             
-            // Nối dây: Truyền ID Album sang để Modal biết đường mà lưu link
+            // ĐOẠN NÀY LÀ CHÌA KHÓA:
             if (currentAlbumId != null) {
                 modalCtrl.setTargetAlbumId(currentAlbumId);
+                // currentCover chính là URL ảnh bìa của Album đang xem!
                 modalCtrl.setPredefinedData(currentArtist, currentGenre, currentYear, currentCover);
             }
             

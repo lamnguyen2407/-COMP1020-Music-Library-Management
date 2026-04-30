@@ -1,8 +1,9 @@
 package com.musicapp.ui;
 
 import com.musicapp.model.Album;
-import com.musicapp.service.DatabaseManager; // Cần cái này để gọi Firebase
+import com.musicapp.service.DatabaseManager;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -19,40 +20,38 @@ public class AddAlbumModalController {
     @FXML
     private void onSave() {
         try {
-            // 1. Thu thập dữ liệu từ UI
-            String title = albumTitleField.getText();
-            String artist = artistField.getText();
-            String yearStr = releaseYearField.getText();
-            String genre = genreField.getText();
-            String image = imageUrlField.getText();
+            String title = albumTitleField.getText().trim();
+            String artist = artistField.getText().trim();
+            String yearStr = releaseYearField.getText().trim();
+            String genre = genreField.getText().trim();
+            
+            // Lấy link gốc người dùng nhập
+            String rawImage = imageUrlField.getText().trim();
 
-            // Kiểm tra dữ liệu trống (Validation cơ bản)
             if (title.isBlank() || artist.isBlank() || yearStr.isBlank()) {
-                System.err.println("Error: Please fill in Title, Artist and Year!");
+                showAlert(Alert.AlertType.WARNING, "Thiếu thông tin", "Vui lòng nhập đầy đủ Title, Artist và Release Year!");
                 return;
             }
 
             int year = Integer.parseInt(yearStr);
 
-            // 2. Tạo đối tượng Album mới bằng Constructor tự sinh ID (UUID)
-            // Constructor này mày vừa thêm vào class Album: title, artist, year, image, genre
-            newAlbum = new Album(title, artist, year, image, genre);
+            // BÍ QUYẾT Ở ĐÂY: Chuyển đổi link Drive /view thành link tải trực tiếp
+            String directImage = convertToDirectLink(rawImage);
 
+            // Tạo Album với link đã được convert
+            newAlbum = new Album(title, artist, year, directImage, genre);
             System.out.println("--- ADMIN ACTION: PUSHING TO FIREBASE ---");
             
-            // 3. ĐẨY DỮ LIỆU LÊN FIREBASE REALTIME DATABASE
-            // Hàm này sẽ chọc vào node "albums" và lưu theo albumId đã tự sinh
             DatabaseManager.getInstance().getService().saveAlbum(newAlbum);
+            System.out.println("✅ Đã lưu thành công: " + newAlbum.getTitle());
 
-            System.out.println("✅ Đã lưu thành công lên Firebase: " + newAlbum.getTitle());
-
-            // Đóng Modal
             closeModal();
             
         } catch (NumberFormatException e) {
-            System.err.println("Error: Release Year must be a valid number!");
+            showAlert(Alert.AlertType.ERROR, "Lỗi định dạng", "Release Year (Năm) phải là một con số!");
         } catch (Exception e) {
-            System.err.println("Error saving to Firebase: " + e.getMessage());
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi hệ thống", "Không thể lưu vào Firebase: " + e.getMessage());
         }
     }
 
@@ -71,5 +70,32 @@ public class AddAlbumModalController {
 
     public Album getNewAlbum() {
         return newAlbum;
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    // THÊM HÀM NÀY: Hàm thần thánh chuyển link Drive thành link ảnh trực tiếp
+    private String convertToDirectLink(String driveUrl) {
+        if (driveUrl == null || !driveUrl.contains("drive.google.com")) return driveUrl;
+        try {
+            String fileId = "";
+            if (driveUrl.contains("/d/")) {
+                fileId = driveUrl.split("/d/")[1].split("/")[0];
+            } else if (driveUrl.contains("id=")) {
+                fileId = driveUrl.split("id=")[1].split("&")[0];
+            }
+            if (!fileId.isEmpty()) {
+                return "https://drive.google.com/uc?export=download&id=" + fileId;
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi convert link: " + e.getMessage());
+        }
+        return driveUrl;
     }
 }

@@ -78,8 +78,10 @@ public class AddSongModalController {
     public void setPredefinedData(String artist, String genre, int year, String imageUrl) {
         if (artistField != null) artistField.setText(artist);
         if (genreField != null) genreField.setText(genre);
-        if (yearField != null) yearField.setText(String.valueOf(year)); 
-        if (imageUrlField != null) imageUrlField.setText(imageUrl);
+        if (yearField != null) yearField.setText(String.valueOf(year));
+        
+        // Nó TỰ ĐỘNG dán Link ảnh của Album vào TextField Ảnh bìa bài hát!
+        if (imageUrlField != null) imageUrlField.setText(imageUrl); 
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
