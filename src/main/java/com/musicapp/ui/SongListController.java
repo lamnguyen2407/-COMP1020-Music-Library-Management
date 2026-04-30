@@ -26,12 +26,12 @@ import javafx.scene.media.MediaPlayer;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class SongListController implements Initializable, MainViewController.MainViewAware {
     
-    // Biến quản lý vị trí bài hát đang phát
     private int currentIndex = -1; 
     public static SongListController instance; 
     
@@ -47,11 +47,13 @@ public class SongListController implements Initializable, MainViewController.Mai
     private boolean isDeleteMode = false;
     private final ObservableList<SongItem> songs = FXCollections.observableArrayList();
 
+    private String currentAlbumId; // BIẾN MỚI: Để định danh Album đang xem
     private String currentAlbumTitle;
     private String currentArtist;
     private int currentYear;       
     private String currentGenre;   
     private String currentCover;   
+    private List<String> currentSongIdList = new ArrayList<>(); // BIẾN MỚI: Danh sách ID bài hát của Album
 
     // ==========================================
     // DATA MODEL
@@ -66,7 +68,7 @@ public class SongListController implements Initializable, MainViewController.Mai
         public String audioURL;
         public String imageURL;
         public boolean isFavorite = false;
-        public boolean isSelected = false; // Used for checkbox
+        public boolean isSelected = false; 
 
         public SongItem(String id, String title, String artist, String genre, int duration, int year, String audio, String image) {
             this.songId = id; this.title = title; this.artist = artist;
@@ -96,9 +98,8 @@ public class SongListController implements Initializable, MainViewController.Mai
     }
 
     // ==========================================
-    // CÁC HÀM PHÁT NHẠC
+    // CÁC HÀM PHÁT NHẠC (ĐÃ FIX AN TOÀN)
     // ==========================================
-    
     public void playNext() {
         if (songs.isEmpty()) return;
         currentIndex++;
@@ -122,184 +123,185 @@ public class SongListController implements Initializable, MainViewController.Mai
 
     public void startPlaying(SongItem item) {
         try {
-            if (currentPlayer != null) currentPlayer.stop();
-
-            String path = item.audioURL;
-            if (path == null || path.isEmpty()) {
-                System.err.println("❌ Link nhạc trống!");
-                return;
+            if (currentPlayer != null) {
+                MediaPlayer.Status oldStatus = currentPlayer.getStatus();
+                if (oldStatus != MediaPlayer.Status.UNKNOWN && oldStatus != MediaPlayer.Status.HALTED) {
+                    try { currentPlayer.stop(); } catch (Exception ignored) {}
+                }
+                currentPlayer.dispose();
             }
 
-            Media hit = new Media(path);
+            String path = item.audioURL;
+            if (path == null || path.isEmpty()) return;
+            
+            String uriString = path.trim().replace(" ", "%20");
+            Media hit = new Media(uriString);
             currentPlayer = new MediaPlayer(hit);
-            currentPlayer.play();
-
+            
             if (mainController != null) {
                 mainController.showPlayerBar(item.title, item.artist, item.imageURL, currentPlayer);
             }
-            System.out.println("▶ Đang phát: " + item.title);
+            
+            currentPlayer.setOnReady(() -> currentPlayer.play());
         } catch (Exception ex) {
             System.err.println("❌ Lỗi MediaPlayer: " + ex.getMessage());
         }
     }
 
     // ==========================================
-    // LOGIC DỮ LIỆU & UI
+    // LOGIC DỮ LIỆU & UI (NÂNG CẤP ĐỢT 2)
     // ==========================================
-
     public void refreshData() {
+        // Không fetch lại nếu là màn hình Search
+        if (currentAlbumTitle != null && currentAlbumTitle.contains("Search Results")) return;
+
         new Thread(() -> {
             try {
-                List<Song> firebaseSongs = DatabaseManager.getInstance().getService().fetchSongs();
-                ObservableList<SongItem> convertedList = FXCollections.observableArrayList();
-                for (Song s : firebaseSongs) {
-                    // Filter handling if it's an album view
-                    if ("All Songs".equals(currentAlbumTitle) || currentAlbumTitle == null) {
-                        convertedList.add(new SongItem(s.getSongId(), s.getTitle(), s.getArtist(), 
-                            s.getGenre(), s.getDuration(), s.getReleaseYear(), s.getAudioURL(), s.getImageURL()));
-                    } else if (s.getArtist().equals(currentArtist)) {
+                List<SongItem> convertedList = new ArrayList<>();
+                boolean isLibraryView = (currentAlbumTitle != null && 
+                    (currentAlbumTitle.toLowerCase().contains("all") || currentAlbumTitle.toLowerCase().contains("library")));
+
+                if (isLibraryView) {
+                    // 1. Màn hình Library: Load tất cả bài hát
+                    List<Song> firebaseSongs = DatabaseManager.getInstance().getService().fetchSongs();
+                    for (Song s : firebaseSongs) {
                         convertedList.add(new SongItem(s.getSongId(), s.getTitle(), s.getArtist(), 
                             s.getGenre(), s.getDuration(), s.getReleaseYear(), s.getAudioURL(), s.getImageURL()));
                     }
+                } else if (currentAlbumId != null) {
+                    // 2. Màn hình Album/Playlist cụ thể
+                    // Nếu danh sách ID đang trống, đi fetch danh sách ID từ DB về trước
+                    if (currentSongIdList == null || currentSongIdList.isEmpty()) {
+                        System.out.println("[DEBUG] Đang lấy danh sách ID cho: " + currentAlbumId);
+                        
+                        // Kiểm tra xem là Playlist hay Album để tìm đúng chỗ
+                        if (currentAlbumId.startsWith("SYSTEM_") || currentAlbumId.startsWith("pl_")) {
+                            currentSongIdList = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(currentAlbumId);
+                        } else {
+                            currentSongIdList = DatabaseManager.getInstance().getService().fetchSongIdsFromAlbum(currentAlbumId);
+                        }
+                    }
+
+                    // Sau khi đã có danh sách ID (dù là truyền sang hay vừa fetch), kéo thông tin bài hát về
+                    if (currentSongIdList != null && !currentSongIdList.isEmpty()) {
+                        List<Song> songsFromDb = DatabaseManager.getInstance().getService().fetchSongsByIds(currentSongIdList);
+                        for (Song s : songsFromDb) {
+                            convertedList.add(new SongItem(s.getSongId(), s.getTitle(), s.getArtist(), 
+                                s.getGenre(), s.getDuration(), s.getReleaseYear(), s.getAudioURL(), s.getImageURL()));
+                        }
+                    }
                 }
+                
                 Platform.runLater(() -> songs.setAll(convertedList));
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) { 
+                System.err.println("[ERROR] Lỗi refreshData: " + e.getMessage());
+            }
         }).start();
     }
 
     private void setupRoleBasedUI() {
-        if (Main.isAdmin) {
-            playButton.setVisible(false); playButton.setManaged(false);
-            shuffleButton.setVisible(false); shuffleButton.setManaged(false);
-            addBtn.setVisible(true); addBtn.setManaged(true);
-            deleteBtn.setVisible(true); deleteBtn.setManaged(true);
-        } else {
-            addBtn.setVisible(false); addBtn.setManaged(false);
-            deleteBtn.setVisible(false); deleteBtn.setManaged(false);
-        }
+        try {
+            if (Main.isAdmin) {
+                if (playButton != null) { playButton.setVisible(false); playButton.setManaged(false); }
+                if (shuffleButton != null) { shuffleButton.setVisible(false); shuffleButton.setManaged(false); }
+            } else {
+                if (addBtn != null) { addBtn.setVisible(false); addBtn.setManaged(false); }
+                if (deleteBtn != null) { deleteBtn.setVisible(false); deleteBtn.setManaged(false); }
+            }
+        } catch (Exception e) {}
     }
 
     // ==========================================
     // ACTION HANDLERS
     // ==========================================
-
     @FXML 
     private void onAddSongClicked() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddSongModal.fxml"));
             Parent root = loader.load();
             
-            // LẤY CONTROLLER CỦA MODAL (HEAD logic)
             AddSongModalController modalCtrl = loader.getController();
             
-            // BƠM 4 DỮ LIỆU VÀO MODAL
-            if (!"All Songs".equals(currentAlbumTitle)) {
+            // Nối dây: Truyền ID Album sang để Modal biết đường mà lưu link
+            if (currentAlbumId != null) {
+                modalCtrl.setTargetAlbumId(currentAlbumId);
                 modalCtrl.setPredefinedData(currentArtist, currentGenre, currentYear, currentCover);
             }
             
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL); 
-            stage.setTitle("Admin - Add New Track to " + (currentAlbumTitle != null ? currentAlbumTitle : "Library"));
             stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            
-            // Tạm dừng thread UI ở đây cho đến khi cửa sổ AddSong đóng lại
             stage.showAndWait(); 
             
-            // Cửa sổ đã đóng -> Đợi 500ms cho Firebase đồng bộ rồi tải lại danh sách
-            new Thread(() -> {
-                try { Thread.sleep(500); } catch (InterruptedException ex) {}
-                Platform.runLater(this::refreshData);
-            }).start();
-            
+            Platform.runLater(this::refreshData);
         } catch (IOException e) { e.printStackTrace(); }
     }
 
-    // 🔴 HÀM XÓA ĐÃ ĐƯỢC FIX CHỐNG TREO APP
     @FXML 
     private void onDeleteToggleClicked() {
         isDeleteMode = !isDeleteMode;
         songListView.refresh();
-
         if (isDeleteMode) {
             deleteBtn.setText("CONFIRM");
             deleteBtn.setStyle("-fx-background-color: #CC3300; -fx-text-fill: white;");
         } else {
-            deleteBtn.setText("DELETING..."); 
-            deleteBtn.setDisable(true); 
-            
-            // Lọc ra các bài cần xóa
-            List<SongItem> itemsToRemove = songs.stream()
-                .filter(s -> s.isSelected)
-                .toList();
-                
-            // Nếu không có bài nào được chọn thì thoát luôn
+            List<SongItem> itemsToRemove = songs.stream().filter(s -> s.isSelected).toList();
             if (itemsToRemove.isEmpty()) {
-                deleteBtn.setText("DELETE");
-                deleteBtn.setStyle("-fx-background-color: #C0703A; -fx-text-fill: white;");
-                deleteBtn.setDisable(false);
+                resetDeleteBtn();
                 return;
             }
-
-            // Chạy ngầm để không làm đơ giao diện
             new Thread(() -> {
                 try {
                     for (SongItem item : itemsToRemove) {
                         DatabaseManager.getInstance().getService().deleteSong(item.songId);
                     }
-                    
-                    // Cập nhật lại giao diện sau khi Firebase báo thành công
                     Platform.runLater(() -> {
                         songs.removeAll(itemsToRemove);
-                        deleteBtn.setText("DELETE");
-                        deleteBtn.setStyle("-fx-background-color: #C0703A; -fx-text-fill: white;");
-                        deleteBtn.setDisable(false);
-                        System.out.println("[Success] Đã xóa nhạc khỏi Firebase an toàn!");
+                        resetDeleteBtn();
                     });
-                } catch (Exception e) {
-                    System.err.println("[Error] Lỗi khi xóa nhạc: " + e.getMessage());
-                    Platform.runLater(() -> {
-                        deleteBtn.setText("DELETE");
-                        deleteBtn.setStyle("-fx-background-color: #C0703A; -fx-text-fill: white;");
-                        deleteBtn.setDisable(false);
-                    });
-                }
+                } catch (Exception e) { Platform.runLater(this::resetDeleteBtn); }
             }).start();
         }
     }
+
+    private void resetDeleteBtn() {
+        deleteBtn.setText("DELETE");
+        deleteBtn.setStyle("-fx-background-color: #C0703A; -fx-text-fill: white;");
+        deleteBtn.setDisable(false);
+    }
     
-    public void setData(String title, String sub, String desc, String cover, int year, String genre, ObservableList<SongItem> data) {
+    // HÀM QUAN TRỌNG: Nơi nhận dữ liệu từ Album truyền sang
+    public void setData(String id, String title, String sub, String desc, String cover, int year, String genre, List<String> songIds) {
+        this.currentAlbumId = id;
         this.currentAlbumTitle = title;
         this.currentArtist = sub; 
         this.currentYear = year;     
         this.currentGenre = genre;   
         this.currentCover = cover;   
+        this.currentSongIdList = (songIds != null) ? songIds : new ArrayList<>();
 
-        titleLabel.setText(title);
-        subtitleLabel.setText(sub);
-        descriptionLabel.setText(desc);
+        if (titleLabel != null) titleLabel.setText(title);
+        if (subtitleLabel != null) subtitleLabel.setText(sub);
+        if (descriptionLabel != null) descriptionLabel.setText(desc);
         
-        // Nạp ảnh bìa
         if (coverImageView != null && cover != null && !cover.trim().isEmpty()) {
             try {
-                if (cover.startsWith("http")) {
-                    coverImageView.setImage(new Image(cover, true)); 
-                } else {
-                    URL imageURL = getClass().getResource(cover);
-                    if (imageURL != null) coverImageView.setImage(new Image(imageURL.toExternalForm()));
+                if (cover.startsWith("http")) coverImageView.setImage(new Image(cover, true)); 
+                else {
+                    URL url = getClass().getResource(cover);
+                    if (url != null) coverImageView.setImage(new Image(url.toExternalForm()));
                 }
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) {}
         }
 
-        if (data != null) {
-            songs.setAll(data);
-        }
+        refreshData(); 
 
-        // Hiện nút Add/Delete cho Admin
         if (Main.isAdmin) {
-            boolean canEdit = "All Songs".equals(title) || "Album detail view".equals(desc);
-            addBtn.setVisible(canEdit); addBtn.setManaged(canEdit);
-            deleteBtn.setVisible(canEdit); deleteBtn.setManaged(canEdit);
+            boolean canEdit = (title != null && title.toLowerCase().contains("all")) 
+                              || "Album detail view".equals(desc)
+                              || "System Playlist".equals(desc);
+            if (addBtn != null) { addBtn.setVisible(canEdit); addBtn.setManaged(canEdit); }
+            if (deleteBtn != null) { deleteBtn.setVisible(canEdit); deleteBtn.setManaged(canEdit); }
         }
     }
     
@@ -309,11 +311,8 @@ public class SongListController implements Initializable, MainViewController.Mai
         if (col3Header != null) col3Header.setText(c3);
     }
 
-    // ==========================================
-    // CUSTOM CELL (ĐÃ NUDGE - ÉP LÙI SANG TRÁI 20PX)
-    // ==========================================
     private class SongCell extends ListCell<SongItem> {
-        private final HBox root = new HBox(0); // Không khoảng cách tổng
+        private final HBox root = new HBox(0); 
         private final CheckBox checkBox = new CheckBox();
         private final Label indexLabel = new Label();
         private final ImageView thumb = new ImageView();
@@ -322,57 +321,48 @@ public class SongListController implements Initializable, MainViewController.Mai
         private final Label artistLabel = new Label();
         private final Label genreLabel = new Label();
         private final Region spacer = new Region();
-        private final Button addBtnRow = new Button("+");
         private final Label timeLabel = new Label();
 
         SongCell() {
-            // Ép JavaFX xoá bỏ lề ảo của ListCell
             this.setPadding(new Insets(0)); 
             
             root.setAlignment(Pos.CENTER_LEFT);
-            root.setPadding(new Insets(8, 40, 8, 40));
+            root.setPadding(new Insets(0, 40, 0, 40));
+            root.setMinHeight(62);
 
-            // 1. Cột # (Cho căn trái để thẳng hàng với dấu # ở trên)
+            checkBox.setMinWidth(35);
+            checkBox.setPrefWidth(35);
+
             indexLabel.setPrefWidth(40);
-            indexLabel.setAlignment(Pos.CENTER_LEFT); 
+            indexLabel.setMinWidth(40);
             
-            // 2. Cột SONG (Ép tổng chiều rộng từ 300px xuống 280px)
             thumb.setFitWidth(40); thumb.setFitHeight(40);
             
-            nameLabel.setPrefWidth(200); // Cắt 20px ở đây
+            nameLabel.setPrefWidth(190); 
             nameLabel.setStyle("-fx-font-weight: bold; -fx-padding: 0 0 0 10;"); 
             
             heartBtn.setPrefWidth(40);
-            heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0C0C0; -fx-cursor: hand; -fx-padding: 0;"); // Ép bỏ padding mặc định
+            heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0C0C0; -fx-cursor: hand; -fx-padding: 0;"); 
             
-            HBox songColumn = new HBox(0, thumb, nameLabel, heartBtn);
-            songColumn.setAlignment(Pos.CENTER_LEFT);
-            songColumn.setPrefWidth(280); // Cắt 20px ở đây để kéo Artist sang trái
-            songColumn.setMinWidth(280);
-            songColumn.setMaxWidth(280);
+            HBox songCol = new HBox(0, thumb, nameLabel, heartBtn);
+            songCol.setAlignment(Pos.CENTER_LEFT);
+            songCol.setPrefWidth(280); 
+            songCol.setMinWidth(280);
 
-            // 3. Cột ARTIST
-            artistLabel.setPrefWidth(200);
-            artistLabel.setMinWidth(200);
-            artistLabel.setMaxWidth(200);
+            artistLabel.setPrefWidth(180);
+            artistLabel.setMinWidth(180);
 
-            // 4. Cột GENRE
-            genreLabel.setPrefWidth(150);
-            genreLabel.setMinWidth(150);
-            genreLabel.setMaxWidth(150);
+            genreLabel.setPrefWidth(130);
+            genreLabel.setMinWidth(130);
 
-            // 5. Khoảng trắng đẩy Time sang phải
+            // TÁCH RIÊNG DÒNG NÀY: Nó trả về void nên phải đứng một mình
             HBox.setHgrow(spacer, Priority.ALWAYS);
             
-            // 6. Cột TIME
-            addBtnRow.setStyle("-fx-background-color: transparent; -fx-font-weight: bold; -fx-text-fill: #C0703A; -fx-font-size: 16px; -fx-cursor: hand;");
             timeLabel.setPrefWidth(40);
             timeLabel.setAlignment(Pos.CENTER_RIGHT);
             
-            HBox timeColumn = new HBox(5, addBtnRow, timeLabel);
-            timeColumn.setAlignment(Pos.CENTER_RIGHT);
-
-            root.getChildren().addAll(checkBox, indexLabel, songColumn, artistLabel, genreLabel, spacer, timeColumn);
+            // CHỈ TRUYỀN TÊN BIẾN VÀO ĐÂY:
+            root.getChildren().addAll(checkBox, indexLabel, songCol, artistLabel, genreLabel, spacer, timeLabel);
 
             root.setOnMouseClicked(e -> {
                 if (e.getClickCount() == 2 && getItem() != null) {
@@ -382,29 +372,34 @@ public class SongListController implements Initializable, MainViewController.Mai
             });
         }
 
+       
+
         @Override
         protected void updateItem(SongItem item, boolean empty) {
             super.updateItem(item, empty);
-            if (empty || item == null) {
-                setGraphic(null);
-            } else {
+            if (empty || item == null) setGraphic(null);
+            else {
                 checkBox.setVisible(isDeleteMode); checkBox.setManaged(isDeleteMode);
                 checkBox.setSelected(item.isSelected);
                 checkBox.setOnAction(e -> item.isSelected = checkBox.isSelected());
-
                 indexLabel.setText(String.valueOf(getIndex() + 1));
                 nameLabel.setText(item.title);
                 artistLabel.setText(item.artist);
                 genreLabel.setText(item.genre); 
                 timeLabel.setText(item.getDurationString());
-                
-                heartBtn.setVisible(!Main.isAdmin); 
-                
-                if(item.imageURL != null && !item.imageURL.isEmpty()){
-                    thumb.setImage(new Image(item.imageURL, true));
+                if (item.imageURL != null && !item.imageURL.isEmpty()) {
+                    try { thumb.setImage(new Image(item.imageURL, true)); } catch (Exception e) {}
                 }
                 setGraphic(root);
             }
+        }
+
+    }
+    
+ // Hàm bổ trợ để hiển thị dữ liệu Search hoặc dữ liệu ép từ bên ngoài vào
+    public void setSongsList(ObservableList<SongItem> manualData) {
+        if (manualData != null) {
+            this.songs.setAll(manualData);
         }
     }
 }

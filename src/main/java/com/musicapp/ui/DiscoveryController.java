@@ -1,6 +1,9 @@
 package com.musicapp.ui;
 
 import com.musicapp.Main;
+import com.musicapp.service.DatabaseManager;
+import com.musicapp.model.Song;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,6 +15,8 @@ import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -29,11 +34,8 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
 
     private MainViewController mainController;
 
-    // ==========================================
-    // DATA: Using the unified 8-attribute SongItem
-    // ==========================================
+    // Dữ liệu mẫu cho Trending
     private final ObservableList<SongListController.SongItem> TRENDING_SONGS = FXCollections.observableArrayList(
-        // Cấu trúc mới: id, title, artist, genre, duration(s), year, audioURL, imageURL
         new SongListController.SongItem("t1", "Going Bad (feat. Drake)", "Meek Mill", "Hip-hop", 181, 2026, "url", "/images/song1.png"),
         new SongListController.SongItem("t2", "HIGHEST IN THE ROOM", "Travis Scott", "Trap", 176, 2026, "url", "/images/song2.png")
     );
@@ -50,37 +52,33 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
     }
 
     private void populateSampleData() {
-        // Đổ dữ liệu 2026 vào UI
         if(trending1Title != null) trending1Title.setText(TRENDING_SONGS.get(0).title);
         if(trending1Artist != null) trending1Artist.setText(TRENDING_SONGS.get(0).artist);
         if(gotoTitle != null) gotoTitle.setText("It Will Be Okay (2026 Remix)");
     }
 
     private void setupClickHandlers() {
+        // Click vào Trending
         if (trendingCard1 != null) {
             trendingCard1.setOnMouseClicked(e -> openDetailedSongList("Trending Hits"));
         }
-        // The transition to hit songs when clicking today's hit banner
+        
+        // Click vào Today's Hits Banner
         if(todaysHitBanner != null) {
-        	todaysHitBanner.setOnMouseClicked(e -> {
-        		if(mainController != null) {
-        			mainController.openSongListView("Today's Hits", "Top tracks", "The biggest track on everyone's mind", null);
-        		}
-        	});
+            todaysHitBanner.setOnMouseClicked(e -> openDetailedSongList("Today's Hits"));
         }
-        // The play button to show ONLY the bottom bar
+        
+        // Nút Play nhanh ở Trending
         if(trending1PlayBtn != null) {
-        	trending1PlayBtn.setOnMouseClicked(e -> {
-        		e.consume();
-        		if(mainController != null) {
-        			// Get 1st song (demo)
-        			SongListController.SongItem song = TRENDING_SONGS.get(0);
-        			// Call the API to show play bar
-        			mainController.showPlayerBar(song.title, song.artist, song.imageURL);
-        		}
-        	});
+            trending1PlayBtn.setOnMouseClicked(e -> {
+                e.consume();
+                if(mainController != null) {
+                    SongListController.SongItem song = TRENDING_SONGS.get(0);
+                    mainController.showPlayerBar(song.title, song.artist, song.imageURL, null);
+                }
+            });
         }
-        // Admin click vào bài hát để quản lý, User click để nghe
+        
         if (latest1Title != null) {
             latest1Title.setOnMouseClicked(e -> openCompactList());
         }
@@ -90,16 +88,34 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
             Node view = loader.load();
-
             SongListController ctrl = loader.getController();
             
-            // 👉 BƯỚC QUAN TRỌNG: Bàn giao mainController cho thằng con mới
-            if (ctrl instanceof MainViewController.MainViewAware) {
-                ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
-                System.out.println("✅ Discovery đã truyền mainController sang SongList!");
-            }
+            // 1. Kết nối với MainViewController
+            ctrl.setMainController(this.mainController);
             
-            ctrl.setData(listTitle, "2026 Global Chart", "Top trending songs worldwide.", null, 0, null, TRENDING_SONGS);            updateMainContent(view);
+            // 2. XÁC ĐỊNH ID CHUẨN (Lấy đúng cái SYSTEM_TODAY'S_HITS)
+            // Logic này sẽ biến "Today's Hits" thành "SYSTEM_TODAY'S_HITS"
+            String finalId = "SYSTEM_" + listTitle.toUpperCase().replace(" ", "_");
+            
+            // 3. TRUYỀN DỮ LIỆU SANG SONG_LIST_CONTROLLER
+            // Truyền một list rỗng (new ArrayList<>()) vào tham số thứ 8.
+            // TẠI SAO? Để hàm refreshData() trong SongListController thấy list rỗng 
+            // và tự động lên Firebase kéo bài hát từ node finalId về.
+            ctrl.setData(
+                finalId, 
+                listTitle, 
+                "Curated for you", 
+                "System Playlist", 
+                "/images/playlist_cover.png", 
+                2026, 
+                "Various", 
+                new java.util.ArrayList<>() 
+            );
+
+            // 4. Đưa giao diện lên màn hình
+            if (mainController != null) {
+                mainController.getContentArea().getChildren().setAll(view);
+            }
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -111,29 +127,15 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CompactListView.fxml"));
             Node view = loader.load();
             
-            // 👉 CŨNG PHẢI NỐI DÂY Ở ĐÂY LUÔN
-            Object ctrl = loader.getController();
-            if (ctrl instanceof MainViewController.MainViewAware) {
-                ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
-                System.out.println("✅ Discovery đã truyền mainController sang CompactList!");
+            if (loader.getController() instanceof MainViewController.MainViewAware) {
+                ((MainViewController.MainViewAware) loader.getController()).setMainController(this.mainController);
             }
 
-            updateMainContent(view);
+            if (mainController != null) {
+                mainController.getContentArea().getChildren().setAll(view);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
-        }
-    }
-
-    /**
-     * Logic tráo đổi content mượt mà trong MainView
-     */
-    private void updateMainContent(Node newView) {
-        // Lấy contentArea thông qua trendingCard1 (Node thực tế) để tránh lỗi getScene()
-        if (trendingCard1 != null && trendingCard1.getScene() != null) {
-            StackPane contentArea = (StackPane) trendingCard1.getScene().lookup("#contentArea");
-            if (contentArea != null) {
-                contentArea.getChildren().setAll(newView);
-            }
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.musicapp.model;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Song implements Comparable<Song> {
 	private String songId;

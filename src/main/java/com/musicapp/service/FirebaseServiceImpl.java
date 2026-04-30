@@ -14,6 +14,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
+import com.google.firebase.database.DataSnapshot;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +23,11 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import java.util.concurrent.CompletableFuture;
 
 public class FirebaseServiceImpl implements FirebaseService {
 
@@ -111,6 +117,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         this.dbRef.child("songs").child(id).removeValueAsync();
     }
 
+    @Override
     public List<Album> fetchAlbums() {
         List<Album> albumList = new ArrayList<>();
         CountDownLatch latch = new CountDownLatch(1);
@@ -140,6 +147,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         return albumList;
     }
 
+    @Override
     public void saveAlbum(Album album) {
         if (album == null || album.getAlbumId() == null) return;
         
@@ -147,6 +155,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         System.out.println("Successfully saved album: " + album.getTitle());
     }
 
+    @Override
     public void saveUserPlaylist(String userId, Playlist playlist) {
         if (userId == null || playlist == null) return;
         
@@ -154,5 +163,165 @@ public class FirebaseServiceImpl implements FirebaseService {
         this.dbRef.child("users").child(userId).child("playlists")
                   .child(playlist.getPlaylistId()).setValueAsync(playlist);
         System.out.println("Saved playlist for user: " + userId);
+    }
+
+    // ==========================================
+    // 2 HÀM MỚI THÊM CHO TÍNH NĂNG TODAY'S HITS
+    // ==========================================
+
+    @Override
+    public Playlist fetchPlaylist(String playlistId) {
+        final Playlist[] result = new Playlist[1];
+        CountDownLatch latch = new CountDownLatch(1);
+
+        this.dbRef.child("playlists").child(playlistId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    result[0] = snapshot.getValue(Playlist.class);
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.err.println("Lỗi tải playlist: " + error.getMessage());
+                latch.countDown();
+            }
+        });
+
+        try { latch.await(); } catch (InterruptedException e) { e.printStackTrace(); }
+        return result[0];
+    }
+
+    @Override
+    public List<Song> fetchSongsByIds(List<String> songIds) {
+        List<Song> result = new ArrayList<>();
+        if (songIds == null || songIds.isEmpty()) return result;
+
+        // Tận dụng hàm fetchSongs() lấy toàn bộ nhạc, sau đó lọc tại Local
+        // Cách này đảm bảo đồng bộ với cấu trúc dữ liệu hiện tại của mày
+        List<Song> allSongs = fetchSongs();
+        for (Song s : allSongs) {
+            if (songIds.contains(s.getSongId())) {
+                result.add(s);
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public void deleteAlbum(String albumId) {
+        if (albumId == null || albumId.isEmpty()) return;
+        
+        this.dbRef.child("albums").child(albumId).removeValueAsync();
+        System.out.println("✅ Đã xóa Album khỏi Firebase: " + albumId);
+    }
+
+    @Override
+    public void deleteUserPlaylist(String userId, String playlistId) {
+        if (userId == null || playlistId == null) return;
+        
+        // Trỏ đúng đường dẫn: /users/{userId}/playlists/{playlistId}
+        this.dbRef.child("users").child(userId).child("playlists")
+                  .child(playlistId).removeValueAsync();
+        System.out.println("✅ Đã xóa Playlist: " + playlistId + " của user: " + userId);
+    }
+    
+    @Override
+    public void addSongToAlbum(String albumId, String songId) {
+        if (albumId == null || songId == null) return;
+        
+        // Đường dẫn: /albums/{albumId}/songIds/{songId} = true
+        this.dbRef.child("albums").child(albumId)
+                  .child("songIds").child(songId).setValueAsync(true);
+                  
+        System.out.println("✅ Firebase: Đã nối bài hát " + songId + " vào Album " + albumId);
+    }
+    
+ // Đảm bảo mày đã có @Override để Java biết đây là hàm triển khai từ Interface
+    @Override
+    public void addSongToPlaylist(String playlistId, String songId) {
+        if (playlistId == null || songId == null) return;
+        
+        // Lưu vào nhánh 'playlists' để không bị lẫn với 'albums'
+        this.dbRef.child("playlists")
+                  .child(playlistId)
+                  .child("songIds")
+                  .child(songId)
+                  .setValueAsync(true);
+                  
+        System.out.println("✅ [Firebase] Đã thêm bài hát " + songId + " vào playlist " + playlistId);
+    }
+    
+    @Override
+    public List<String> fetchSongIdsFromPlaylist(String playlistId) {
+        List<String> ids = new ArrayList<>();
+        // Tạo một "lời hứa" (Future) để đợi dữ liệu từ Firebase
+        CompletableFuture<DataSnapshot> future = new CompletableFuture<>();
+
+        // Dùng Listener để lấy dữ liệu một lần duy nhất
+        this.dbRef.child("playlists").child(playlistId).child("songIds")
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    // Khi có dữ liệu, hoàn thành "lời hứa"
+                    future.complete(snapshot);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    // Nếu lỗi, báo lỗi cho "lời hứa"
+                    future.completeExceptionally(error.toException());
+                }
+            });
+
+        try {
+            // Đợi tối đa 10 giây để lấy dữ liệu (tránh treo luồng vĩnh viễn nếu mạng lag)
+            DataSnapshot snapshot = future.get(10, java.util.concurrent.TimeUnit.SECONDS);
+            
+            if (snapshot != null && snapshot.exists()) {
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    ids.add(child.getKey()); // Lấy cái ID bài hát (ví dụ: 3333000)
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi fetch ID từ Firebase: " + e.getMessage());
+        }
+
+        return ids;
+    }
+    
+    @Override
+    public List<String> fetchSongIdsFromAlbum(String albumId) {
+        List<String> ids = new ArrayList<>();
+        CompletableFuture<DataSnapshot> future = new CompletableFuture<>();
+
+        // Soi đúng vào nhánh 'albums' -> {albumId} -> 'songIds'
+        this.dbRef.child("albums").child(albumId).child("songIds")
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    future.complete(snapshot);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    future.completeExceptionally(error.toException());
+                }
+            });
+
+        try {
+            // Đợi tối đa 10 giây cho dữ liệu load về
+            DataSnapshot snapshot = future.get(10, java.util.concurrent.TimeUnit.SECONDS);
+            if (snapshot != null && snapshot.exists()) {
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    ids.add(child.getKey()); // Lấy ID bài hát ra
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi lấy ID từ Album: " + e.getMessage());
+        }
+        return ids;
     }
 }
