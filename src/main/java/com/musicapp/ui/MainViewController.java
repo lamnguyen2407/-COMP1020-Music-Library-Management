@@ -265,9 +265,27 @@ public class MainViewController implements Initializable {
             contentArea.getChildren().setAll(view);
         } catch (IOException e) { e.printStackTrace(); }
     }
+    
+    public void openAllAlbumsView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/NewAlbumReleaseView.fxml"));
+            Node view = loader.load();
+            
+            Object childController = loader.getController();
+            if (childController instanceof MainViewAware) {
+                ((MainViewAware) childController).setMainController(this);
+            }
+            
+            contentArea.getChildren().setAll(view);
+        } catch (IOException e) {
+            System.err.println("❌ Could not load NewAlbumReleaseView.fxml");
+            e.printStackTrace();
+        }
+    }
+    
     public void loadSongDetail(String albumName, String artist, String genre, int year, String imageURL, List<Song> songs) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AlbumDetailView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AlbumView.fxml"));
             Parent view = loader.load();
             AlbumViewController controller = loader.getController();
             controller.setMainController(this);

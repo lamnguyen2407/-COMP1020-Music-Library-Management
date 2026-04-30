@@ -12,7 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
-
+import javafx.scene.layout.HBox;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,10 +28,12 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
     @FXML private StackPane trendingCard1, trendingCard2, trendingCard3, trendingCard4;
     @FXML private StackPane trending1PlayBtn;
     @FXML private StackPane todaysHitBanner;
+    @FXML private StackPane newAlbumCard1, newAlbumCard2, newAlbumCard3, newAlbumCard4;
+    @FXML private HBox newAlbumsHeader;
     @FXML private Label trending1Title, trending1Artist, trending2Title, trending2Artist;
     @FXML private Label gotoTitle, gotoArtist;
     @FXML private Label latest1Title, latest1Artist; 
-
+    @FXML private Label heartBtn1, heartBtn2, heartBtn3, heartBtn4, heartBtn5, heartBtn6, heartBtn7, heartBtn8, heartBtn9;
     private MainViewController mainController;
 
     // Dữ liệu mẫu cho Trending
@@ -68,13 +70,21 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
             todaysHitBanner.setOnMouseClicked(e -> openDetailedSongList("Today's Hits"));
         }
         
-        // Nút Play nhanh ở Trending
+        // Click vào New Album Header (NEW!)
+        if (newAlbumsHeader != null) {
+            newAlbumsHeader.setOnMouseClicked(e -> {
+                if (mainController != null) mainController.openAllAlbumsView();
+            });
+        }
+        
+        // Nút Play nhanh ở Trending (FIXED NULL CRASH)
         if(trending1PlayBtn != null) {
             trending1PlayBtn.setOnMouseClicked(e -> {
-                e.consume();
+                e.consume(); // Prevent the card behind it from being clicked
                 if(mainController != null) {
                     SongListController.SongItem song = TRENDING_SONGS.get(0);
-                    mainController.showPlayerBar(song.title, song.artist, song.imageURL, null);
+                    // FIXED: Use the 3-argument version so it doesn't crash trying to load a null audio file
+                    mainController.showPlayerBar(song.title, song.artist, song.imageURL);
                 }
             });
         }
@@ -82,6 +92,44 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
         if (latest1Title != null) {
             latest1Title.setOnMouseClicked(e -> openCompactList());
         }
+      
+     // Click New Album Cards to go to AlbumDetail
+        if (newAlbumCard1 != null) {
+            newAlbumCard1.setOnMouseClicked(e -> {
+                if (mainController != null) {
+                    List<Song> dummySongs = new ArrayList<>();
+                    dummySongs.add(new Song("1", "Shape of You", "Ed Sheeran", "Pop", 233, 2017, "", ""));
+                    dummySongs.add(new Song("2", "Castle on the Hill", "Ed Sheeran", "Pop", 261, 2017, "", ""));
+                    mainController.loadSongDetail("Divide", "Ed Sheeran", "Pop", 2017, "", dummySongs);
+                }
+            });
+        }
+        
+        if (newAlbumCard2 != null) {
+            newAlbumCard2.setOnMouseClicked(e -> {
+                if (mainController != null) {
+                    List<Song> dummySongs = new ArrayList<>();
+                    dummySongs.add(new Song("3", "Blinding Lights", "The Weeknd", "R&B", 200, 2020, "", ""));
+                    mainController.loadSongDetail("After Hours", "The Weeknd", "R&B", 2020, "", dummySongs);
+                }
+            });
+        }
+
+        // Connect the "New Album Release ›" header to view ALL albums
+        if (newAlbumsHeader != null) {
+            newAlbumsHeader.setOnMouseClicked(e -> {
+                if (mainController != null) mainController.openAllAlbumsView();
+            });
+        }
+        setupHeartToggle(heartBtn1);
+        setupHeartToggle(heartBtn2);
+        setupHeartToggle(heartBtn3);
+        setupHeartToggle(heartBtn4);
+        setupHeartToggle(heartBtn5);
+        setupHeartToggle(heartBtn6);
+        setupHeartToggle(heartBtn7);
+        setupHeartToggle(heartBtn8);
+        setupHeartToggle(heartBtn9);
     }
 
     private void openDetailedSongList(String listTitle) {
@@ -138,4 +186,22 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
             ex.printStackTrace();
         }
     }
+    private void setupHeartToggle(Label heartBtn) {
+        if (heartBtn == null) return;
+        
+        heartBtn.setOnMouseClicked(e -> {
+            e.consume(); // Prevent the click from triggering the song row click
+            
+            String currentFill = heartBtn.getStyle();
+            if (currentFill.contains("#D32F2F")) {
+                // It's currently red, switch it back to brown (un-like)
+                heartBtn.setStyle("-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;");
+            } else {
+                // It's currently brown, switch it to red (like)
+                heartBtn.setStyle("-fx-text-fill: #D32F2F; -fx-font-size: 16px; -fx-cursor: hand;");
+                System.out.println("Added song to favorites!"); 
+            }
+        });
+    }
 }
+
