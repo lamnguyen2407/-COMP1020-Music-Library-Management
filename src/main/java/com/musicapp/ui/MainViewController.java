@@ -97,16 +97,13 @@ public class MainViewController implements Initializable {
     
     @FXML 
     private void onNavSettings() { 
-        // Gộp logic: Nếu team mày muốn nút Settings mở ra WelcomeView (Đăng xuất)
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/WelcomeView.fxml"));
             Parent root = loader.load();
-            // Dùng btnHome để lấy window an toàn, phòng trường hợp btnSettings chưa được gán
             Stage stage = (Stage) btnHome.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (Exception e) {
-            // Nếu lỗi, fallback về loadView nội bộ như cũ
             loadView(FXML_SETTINGS);
         }
     }
@@ -131,31 +128,33 @@ public class MainViewController implements Initializable {
     @FXML 
     private void onPlayPause() { 
         if (mediaPlayer == null) return;
-        if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
-            mediaPlayer.pause();
-            isPlaying = false;
-            btnPlayPause.setText("▶");
-        } else {
-            mediaPlayer.play();
-            isPlaying = true;
-            btnPlayPause.setText("⏸");
+
+        MediaPlayer.Status status = mediaPlayer.getStatus();
+
+        // CÚ FIX: Ngăn chặn thao tác khi Media chưa tải xong lõi (jfxPlayer) hoặc bị lỗi link
+        if (status == MediaPlayer.Status.UNKNOWN || status == MediaPlayer.Status.HALTED) {
+            System.out.println("⏳ Nhạc đang tải hoặc link bị lỗi, chưa thể phát/dừng lúc này...");
+            return;
+        }
+
+        try {
+            if (status == MediaPlayer.Status.PLAYING) {
+                mediaPlayer.pause();
+                isPlaying = false;
+                btnPlayPause.setText("▶");
+            } else {
+                mediaPlayer.play();
+                isPlaying = true;
+                btnPlayPause.setText("⏸");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi từ nút Play/Pause: " + e.getMessage());
         }
     }
 
-    @FXML 
-    private void onNext() { 
-        if (SongListController.instance != null) SongListController.instance.playNext(); 
-    }
-
-    @FXML 
-    private void onPrev() { 
-        if (SongListController.instance != null) SongListController.instance.playPrevious(); 
-    }
-
-    @FXML 
-    private void onSeek() { 
-        if (mediaPlayer != null) mediaPlayer.seek(Duration.seconds(progressSlider.getValue()));
-    }
+    @FXML private void onNext() { if (SongListController.instance != null) SongListController.instance.playNext(); }
+    @FXML private void onPrev() { if (SongListController.instance != null) SongListController.instance.playPrevious(); }
+    @FXML private void onSeek() { if (mediaPlayer != null) mediaPlayer.seek(Duration.seconds(progressSlider.getValue())); }
 
     // ══════════════════════════════════════════
     // GẮN MEDIAPLAYER VÀ UPDATE SLIDER
@@ -164,27 +163,20 @@ public class MainViewController implements Initializable {
     public void setMediaPlayer(MediaPlayer player) {
         if (this.mediaPlayer != null) this.mediaPlayer.stop();
         this.mediaPlayer = player;
-
         if (volumeSlider != null) this.mediaPlayer.setVolume(volumeSlider.getValue() / 100);
-
         this.mediaPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) -> updateProgress(newTime));
         this.mediaPlayer.setOnEndOfMedia(this::onNext);
-
         isPlaying = true;
         btnPlayPause.setText("⏸");
     }
 
     private void updateProgress(Duration currentTime) {
         if (mediaPlayer == null) return;
-        
         double current = currentTime.toSeconds();
         double total = mediaPlayer.getTotalDuration().toSeconds();
-
         if (total > 0) {
             progressSlider.setMax(total);
-            // Chỉ update slider nếu user không đang cầm chuột kéo nó
             if (!progressSlider.isPressed()) progressSlider.setValue(current);
-            
             labelCurrentTime.setText(formatDuration((int)current));
             labelTotalTime.setText(formatDuration((int)total));
         }
@@ -198,38 +190,38 @@ public class MainViewController implements Initializable {
     // CÁC HÀM SHOW PLAYER BAR 
     // ══════════════════════════════════════════
 
-    // 1. Hàm cũ (Cập nhật UI chay)
     public void showPlayerBar(String songTitle, String artistName, String imagePath) {
         updatePlayerUI(songTitle, artistName, imagePath);
     }
 
-    // 2. Hàm gọi từ SongListController (Có gắn MediaPlayer)
     public void showPlayerBar(String songTitle, String artistName, String imagePath, MediaPlayer player) {
         setMediaPlayer(player);
         updatePlayerUI(songTitle, artistName, imagePath);
     }
 
-    // 3. Hàm gọi từ AlbumViewController
     public void showPlayerBar(Song currentSong, List<Song> queue, int index) {
         try {
             if (currentSong.getAudioURL() != null && !currentSong.getAudioURL().isEmpty()) {
-                Media hit = new Media(currentSong.getAudioURL());
+                // CÚ FIX: Xử lý khoảng trắng trong link nhạc y như SongListController
+                String uriString = currentSong.getAudioURL().trim().replace(" ", "%20");
+                Media hit = new Media(uriString);
+                
                 setMediaPlayer(new MediaPlayer(hit));
                 mediaPlayer.play();
             }
             updatePlayerUI(currentSong.getTitle(), currentSong.getArtist(), currentSong.getImageURL());
             labelTotalTime.setText(formatDuration(currentSong.getDuration()));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception e) { 
+            System.err.println("❌ LỖI KHỞI TẠO MEDIA TỪ QUEUE: " + e.getMessage());
+            e.printStackTrace(); 
         }
     }
 
-    // Hàm support ẩn/hiện UI Player Bar chung
     private void updatePlayerUI(String title, String artist, String img) {
-        if (playerSongTitle != null) playerSongTitle.setText(title);
-        if (playerArtistName != null) playerArtistName.setText(artist);
+        if (playerSongTitle != null) playerSongTitle.setText(title != null ? title : "Unknown");
+        if (playerArtistName != null) playerArtistName.setText(artist != null ? artist : "Unknown");
         
-        if (playerArtImage != null && img != null && !img.isEmpty()) {
+        if (playerArtImage != null && img != null && !img.trim().isEmpty()) {
             try { playerArtImage.setImage(new Image(img, true)); } 
             catch (Exception e) { System.err.println("Lỗi load ảnh"); }
         }
@@ -261,11 +253,18 @@ public class MainViewController implements Initializable {
             Node view = loader.load();
             SongListController ctrl = loader.getController();
             ctrl.setMainController(this); 
-            ctrl.setData(title, subtitle, desc, null, data);
+
+            // CÚ FIX: 
+            // 1. Thêm ID "SONG_LIST_VIEW" vào đầu cho đủ 8 tham số.
+            // 2. Tham số cuối truyền một ArrayList rỗng vì chúng ta đã có sẵn 'data' (SongItem) rồi.
+            ctrl.setData("SONG_LIST_VIEW", title, subtitle, desc, null, 0, "", new java.util.ArrayList<>());            
+            
+            // 3. Bơm trực tiếp danh sách SongItem vào giao diện
+            ctrl.setSongsList(data);
+
             contentArea.getChildren().setAll(view);
         } catch (IOException e) { e.printStackTrace(); }
     }
-
     public void loadSongDetail(String albumName, String artist, String genre, int year, String imageURL, List<Song> songs) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AlbumDetailView.fxml"));
@@ -278,7 +277,7 @@ public class MainViewController implements Initializable {
     }
 
     // ══════════════════════════════════════════
-    // SEARCH LOGIC (Chọc thẳng Firebase)
+    // SEARCH LOGIC (Chọc thẳng Firebase - ĐÃ FIX CHỐNG LỖI NULL)
     // ══════════════════════════════════════════
 
     private void handleSearchRequest() {
@@ -295,33 +294,23 @@ public class MainViewController implements Initializable {
             
             if (ctrl instanceof MainViewAware) ((MainViewAware) ctrl).setMainController(this);
             
-<<<<<<< HEAD
-            String lowerQuery = query.toLowerCase();
-            for (var song : allSongs) {
-                if (song.title.toLowerCase().contains(lowerQuery) || 
-                    song.artist.toLowerCase().contains(lowerQuery)) {
-                    results.add(song);
-                }
-            }
-
-            ctrl.setData("Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, 0, "", results);            ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE");
-
-=======
-            ctrl.setData("Search Results", "Results for: \"" + query + "\"", "Searching...", null, null);
+            // CÚ FIX 1: Truyền đủ 8 tham số (Thêm ID "SEARCH" vào đầu và null vào cuối)
+            ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", "Searching...", null, 0, "Various", new java.util.ArrayList<>());
             
             ctrl.setColumnHeaders("ARTIST", "GENRE", "TIME"); 
->>>>>>> f5e617433d1fdddb1cc42de8c9109a5561116b51
             contentArea.getChildren().setAll(view);
 
             new Thread(() -> {
                 try {
                     List<Song> allSongs = DatabaseManager.getInstance().getService().fetchSongs();
                     var results = javafx.collections.FXCollections.<SongListController.SongItem>observableArrayList();
-                    String lowerQuery = query.toLowerCase();
+                    String lowerQuery = query.toLowerCase(); 
                     
                     for (Song song : allSongs) {
-                        if (song.getTitle().toLowerCase().contains(lowerQuery) || 
-                            song.getArtist().toLowerCase().contains(lowerQuery)) {
+                        String title = song.getTitle() != null ? song.getTitle().toLowerCase() : "";
+                        String artist = song.getArtist() != null ? song.getArtist().toLowerCase() : "";
+                        
+                        if (title.contains(lowerQuery) || artist.contains(lowerQuery)) {
                             results.add(new SongListController.SongItem(
                                 song.getSongId(), song.getTitle(), song.getArtist(), 
                                 song.getGenre(), song.getDuration(), song.getReleaseYear(), 
@@ -330,8 +319,15 @@ public class MainViewController implements Initializable {
                         }
                     }
                     
-                    Platform.runLater(() -> ctrl.setData("Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, results));
-                } catch (Exception e) { e.printStackTrace(); }
+                    Platform.runLater(() -> {
+                        // CÚ FIX 2: Cập nhật lại kết quả tìm kiếm (Cũng phải đủ 8 tham số)
+                        ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, 0, "Various", new java.util.ArrayList<>());
+                        // Đẩy list kết quả tìm kiếm vào thẳng ListView
+                        ctrl.setSongsList(results); 
+                    });
+                } catch (Exception e) { 
+                    e.printStackTrace(); 
+                }
             }).start();
 
         } catch (IOException e) { e.printStackTrace(); }
@@ -361,13 +357,15 @@ public class MainViewController implements Initializable {
 
     public interface MainViewAware { void setMainController(MainViewController mainController); }
 
-    // ══════════════════════════════════════════
-    // Đã gói lại để sửa lỗi cú pháp tơ hơ ở cuối file
-    // ══════════════════════════════════════════
     private void testLoadAlbum() {
         List<Song> testSongs = new java.util.ArrayList<>();
         testSongs.add(new Song("1", "Going Bad", "Meek Mill", "Hip-Hop", 181, 2018, "", ""));
         testSongs.add(new Song("2", "Amen", "Meek Mill", "Hip-Hop", 196, 2018, "", ""));
         loadSongDetail("Championship", "Meek Mill", "Hip-Hop", 2018, "", testSongs);
+    }
+    
+ // Thêm hàm này để các Controller khác có thể lấy contentArea ra dùng
+    public javafx.scene.layout.StackPane getContentArea() {
+        return contentArea;
     }
 }

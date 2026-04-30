@@ -1,5 +1,8 @@
 package com.musicapp.ui;
 
+import com.musicapp.model.Playlist;
+import com.musicapp.service.DatabaseManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,7 +22,6 @@ import java.util.ResourceBundle;
 
 public class CreatePlaylistModalController implements Initializable {
 
-
     // ==========================================
     // FXML FIELDS
     // ==========================================
@@ -30,6 +32,9 @@ public class CreatePlaylistModalController implements Initializable {
 
     private ImageView uploadedImageView;
     private File selectedImageFile;
+
+    // Giả lập ID của User đang đăng nhập (Vì chưa có hệ thống Auth)
+    private final String CURRENT_USER_ID = "user_123";
 
     // Reference to Main content area for navigation
     private StackPane contentArea;
@@ -106,12 +111,36 @@ public class CreatePlaylistModalController implements Initializable {
             return;
         }
 
-        // --- BACKEND HANDSHAKE ---
-        // TODO: PlaylistService.getInstance().createPlaylist(name, description, selectedImageFile);
-        System.out.println("[CreatePlaylist] Success! Created: " + name);
+        System.out.println("[CreatePlaylist] Đang xử lý lưu lên Firebase...");
 
-        // Navigate back to overview to show the results
-        navigateToPlaylistOverview(name, selectedImageFile);
+        // Chạy luồng ngầm để không làm đơ giao diện khi upload ảnh
+        new Thread(() -> {
+            try {
+                // 1. Khởi tạo ảnh mặc định nếu User không chọn ảnh
+                String coverImageUrl = "/images/default_playlist.png";
+
+                // 2. Nếu User có chọn ảnh, đẩy ảnh lên Firebase Storage
+                if (selectedImageFile != null) {
+                    coverImageUrl = DatabaseManager.getInstance().getService()
+                            .uploadFileToStorage(selectedImageFile, "playlist_covers");
+                    System.out.println("[CreatePlaylist] Upload ảnh thành công: " + coverImageUrl);
+                }
+
+                // 3. Tạo đối tượng Playlist chuẩn theo Model đã viết
+                Playlist newPlaylist = new Playlist(name, CURRENT_USER_ID, "user", coverImageUrl);
+
+                // 4. Lưu Playlist lên Firebase Realtime Database
+                DatabaseManager.getInstance().getService().saveUserPlaylist(CURRENT_USER_ID, newPlaylist);
+                
+                System.out.println("[CreatePlaylist] Success! Created: " + name);
+
+                // 5. Cập nhật giao diện (Bắt buộc phải dùng Platform.runLater vì đang ở luồng ngầm)
+                Platform.runLater(() -> navigateToPlaylistOverview(name, selectedImageFile));
+
+            } catch (Exception e) {
+                System.err.println("[CreatePlaylist] Lỗi khi tạo Playlist: " + e.getMessage());
+            }
+        }).start();
     }
 
     @FXML
@@ -122,23 +151,18 @@ public class CreatePlaylistModalController implements Initializable {
 
     private void navigateToPlaylistOverview(String newName, File cover) {
         try {
-            // FIX: Ensure path matches your resources structure
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/PlaylistOverview.fxml"));
             Node view = loader.load();
 
-            // Link the new data to the overview controller
             PlaylistOverviewController ctrl = loader.getController();
             
-            // Only add if we actually created something
             if (newName != null) {
                 ctrl.addNewPlaylist(newName, cover);
             }
 
-            // Swap view in the main content area
             if (contentArea != null) {
                 contentArea.getChildren().setAll(view);
             } else {
-                // Fallback: If contentArea wasn't injected, try to find it from the scene
                 StackPane mainContent = (StackPane) playlistCoverBox.getScene().lookup("#contentArea");
                 if (mainContent != null) {
                     mainContent.getChildren().setAll(view);

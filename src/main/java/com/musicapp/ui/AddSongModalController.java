@@ -2,10 +2,8 @@ package com.musicapp.ui;
 
 import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
-import com.musicapp.service.FirebaseService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -17,11 +15,16 @@ public class AddSongModalController {
     @FXML private TextField genreField;
     @FXML private TextField yearField;
     @FXML private TextField durationField;
-    
     @FXML private TextField audioUrlField; 
     @FXML private TextField imageUrlField;
 
-    @FXML private Button saveBtn;
+    // BIẾN MỚI: Để giữ ID của album hiện tại
+    private String currentAlbumId;
+
+    // HÀM MỚI: Để SongListController truyền AlbumID sang
+    public void setTargetAlbumId(String albumId) {
+        this.currentAlbumId = albumId;
+    }
 
     @FXML
     private void onSave() {
@@ -31,7 +34,6 @@ public class AddSongModalController {
             String artist = artistField.getText().trim();
             String genre = genreField.getText().trim();
             
-            // Lấy code ép kiểu và xử lý link Drive của nhóm
             int year = Integer.parseInt(yearField.getText().trim());
             int duration = Integer.parseInt(durationField.getText().trim());
 
@@ -41,23 +43,26 @@ public class AddSongModalController {
             String directAudioUrl = convertToDirectLink(rawAudioUrl);
             String directImageUrl = convertToDirectLink(rawImageUrl);
 
-            // Lưu thẳng vào Database thật (thay cho dòng Mock của bạn)
+            // 1. Lưu bài hát vào kho /songs chung
             Song newSong = new Song(id, title, artist, genre, duration, year, directAudioUrl, directImageUrl);
             DatabaseManager.getInstance().getService().saveSong(newSong);
             
-            // Refresh lại danh sách hiển thị
-            if (SongListController.instance != null) {
-                SongListController.instance.refreshData();
+            // 2. NỐI DÂY: Nếu đang ở trong một Album cụ thể, lưu ID bài hát vào Album đó luôn
+            if (currentAlbumId != null && !currentAlbumId.isEmpty()) {
+                if (currentAlbumId.startsWith("pl_") || currentAlbumId.contains("SYSTEM")) {
+                    // Nếu là Playlist (Today's Hits hoặc Playlist tự tạo)
+                    DatabaseManager.getInstance().getService().addSongToPlaylist(currentAlbumId, id);
+                } else {
+                    // Nếu là Album thật sự
+                    DatabaseManager.getInstance().getService().addSongToAlbum(currentAlbumId, id);
+                }
             }
 
-            // Lấy code của bạn: Đóng popup sau khi lưu xong cho mượt UX
             closeModal();
-
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi định dạng", "Năm và thời lượng phải là số!");
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi", e.getMessage());
+            e.printStackTrace();
         }
+   
     }
 
     @FXML
@@ -70,23 +75,13 @@ public class AddSongModalController {
         stage.close();
     }
 
-    // ====================================================
-    // HÀM CỦA BẠN: TỰ ĐỘNG ĐIỀN DATA TỪ ALBUM TRUYỀN SANG
-    // ====================================================
     public void setPredefinedData(String artist, String genre, int year, String imageUrl) {
         if (artistField != null) artistField.setText(artist);
         if (genreField != null) genreField.setText(genre);
         if (yearField != null) yearField.setText(String.valueOf(year)); 
         if (imageUrlField != null) imageUrlField.setText(imageUrl);
-        
-        // (Tuỳ chọn) Khoá các ô này lại không cho Admin sửa
-        // artistField.setEditable(false);
-        // imageUrlField.setEditable(false);
     }
 
-    // ====================================================
-    // HÀM CỦA NHÓM: XỬ LÝ THÔNG BÁO VÀ CONVERT LINK DRIVE
-    // ====================================================
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -96,25 +91,13 @@ public class AddSongModalController {
     }
     
     private String convertToDirectLink(String driveUrl) {
-        if (driveUrl == null || !driveUrl.contains("drive.google.com")) {
-            return driveUrl; // Nếu không phải link Drive thì giữ nguyên
-        }
-        
+        if (driveUrl == null || !driveUrl.contains("drive.google.com")) return driveUrl;
         try {
             String fileId = "";
-            if (driveUrl.contains("/d/")) {
-                fileId = driveUrl.split("/d/")[1].split("/")[0];
-            } else if (driveUrl.contains("id=")) {
-                fileId = driveUrl.split("id=")[1].split("&")[0];
-            }
-            
-            if (!fileId.isEmpty()) {
-                return "https://drive.google.com/uc?export=download&id=" + fileId;
-            }
-        } catch (Exception e) {
-            System.err.println("Lỗi chuyển đổi link Drive: " + e.getMessage());
-        }
-        
+            if (driveUrl.contains("/d/")) fileId = driveUrl.split("/d/")[1].split("/")[0];
+            else if (driveUrl.contains("id=")) fileId = driveUrl.split("id=")[1].split("&")[0];
+            if (!fileId.isEmpty()) return "https://drive.google.com/uc?export=download&id=" + fileId;
+        } catch (Exception e) {}
         return driveUrl;
     }
 }
