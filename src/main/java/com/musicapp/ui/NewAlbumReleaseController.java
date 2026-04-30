@@ -1,6 +1,7 @@
 package com.musicapp.ui;
 
 import com.musicapp.Main; 
+
 import com.musicapp.model.Album;
 import com.musicapp.ui.SongListController.SongItem;
 import javafx.collections.FXCollections;
@@ -205,15 +206,15 @@ public class NewAlbumReleaseController implements Initializable {
         coverImage.setClip(clip);
 
         boolean hasImage = false;
-        if (album.imageURL() != null && !album.imageURL().trim().isEmpty()) {
+        if (album.getImageURL() != null && !album.getImageURL().trim().isEmpty()) {
             try {
-                URL imageURL = getClass().getResource(album.imageURL());
+                URL imageURL = getClass().getResource(album.getImageURL());
                 if (imageURL != null) {
                     coverImage.setImage(new Image(imageURL.toExternalForm()));
                     hasImage = true;
                 }
             } catch (Exception e) {
-                System.out.println("Lỗi load ảnh: " + album.imageURL());
+                System.out.println("Lỗi load ảnh: " + album.getImageURL());
             }
         }
         
@@ -229,7 +230,7 @@ public class NewAlbumReleaseController implements Initializable {
         titleLabel.setPrefWidth(140);
         titleLabel.setAlignment(Pos.CENTER);
 
-        Label artistLabel = new Label(album.getArtist() + " • " + album.releaseYear());
+        Label artistLabel = new Label(album.getArtist() + " • " + album.getReleaseYear());
         artistLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 12px;");
 
         textContainer.getChildren().addAll(titleLabel, artistLabel);
