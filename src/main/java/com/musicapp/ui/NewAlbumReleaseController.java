@@ -124,14 +124,40 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddAlbumModal.fxml"));
             Parent root = loader.load();
+            
+            // Lấy controller của modal để hứng dữ liệu
+            AddAlbumModalController modalController = loader.getController();
+
             Stage modalStage = new Stage();
             modalStage.setTitle("Add New Album");
             modalStage.setScene(new Scene(root));
             modalStage.initModality(Modality.APPLICATION_MODAL);
             if (addAlbumBtn.getScene() != null) modalStage.initOwner(addAlbumBtn.getScene().getWindow());
+            
+            // Mở bảng lên và code sẽ dừng ở đây chờ bạn bấm Save/Cancel
             modalStage.showAndWait();
-            refreshData();
-        } catch (IOException e) { e.printStackTrace(); }
+            
+            // ---- XỬ LÝ LÀM MỚI GIAO DIỆN NGAY LẬP TỨC ----
+            Album createdAlbum = modalController.getNewAlbum();
+            
+            if (createdAlbum != null) {
+                // Nếu có Album mới tạo -> Chèn thẳng vào giao diện mà không cần chờ mạng!
+                currentAlbums.add(createdAlbum);
+                
+                // Ép giao diện vẽ lại danh sách Album ngay lập tức
+                Platform.runLater(() -> {
+                    displayAlbums(currentAlbums);
+                });
+                
+                System.out.println("✅ Đã ép UI hiển thị ngay Album: " + createdAlbum.getTitle());
+            } else {
+                // Trường hợp người dùng bấm Cancel, không làm gì cả
+                System.out.println("Đã đóng bảng, không có Album nào được tạo.");
+            }
+            
+        } catch (IOException e) { 
+            e.printStackTrace(); 
+        }
     }
 
     public void displayAlbums(List<Album> albumsFromDatabase) {
@@ -162,8 +188,23 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
         coverImage.setClip(clip);
 
         if (album.getImageURL() != null && !album.getImageURL().isEmpty()) {
-            coverImage.setImage(new Image(album.getImageURL(), true));
-            imageContainer.getChildren().add(coverImage);
+            try {
+                String imgUrl = album.getImageURL().trim();
+                
+                // Kiểm tra xem là link local (trong máy) hay link web online
+                if (imgUrl.startsWith("/")) {
+                    // Đọc ảnh từ thư mục resources (ví dụ: /images/shapeofyou.jpg)
+                    coverImage.setImage(new Image(getClass().getResourceAsStream(imgUrl)));
+                } else {
+                    // Đọc ảnh từ web (http...)
+                    coverImage.setImage(new Image(imgUrl, true));
+                }
+                
+                imageContainer.getChildren().add(coverImage);
+            } catch (Exception e) {
+                // NẾU LỖI: Chỉ in ra console chứ không làm sập giao diện!
+                System.err.println("⚠️ Bỏ qua ảnh lỗi của Album '" + album.getTitle() + "': " + e.getMessage());
+            }
         }
 
         VBox textContainer = new VBox(3); textContainer.setAlignment(Pos.CENTER);
