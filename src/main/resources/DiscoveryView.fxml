@@ -83,11 +83,61 @@
         </VBox>
 
         <VBox spacing="14">
-            <Label text="New Album Release" style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold;"/>
-            <HBox spacing="14">
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14;"><VBox><ImageView fx:id="newAlbum1AlbumArt" fitWidth="175" fitHeight="165" /><Label fx:id="newAlbum1Title" text="Album 1"/><Label fx:id="newAlbum1Artist" text="Artist 1"/></VBox></StackPane>
-                <StackPane prefWidth="175" prefHeight="220" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14;"><VBox><ImageView fx:id="newAlbum2AlbumArt" fitWidth="175" fitHeight="165" /><Label fx:id="newAlbum2Title" text="Album 2"/><Label fx:id="newAlbum2Artist" text="Artist 2"/></VBox></StackPane>
-                </HBox>
+            <HBox fx:id="newAlbumsHeader" alignment="CENTER_LEFT" spacing="6" style="-fx-cursor: hand;">
+                <Label text="New Album Release" style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;"/>
+                <Label text="›" style="-fx-font-size: 18px; -fx-text-fill: #8B6F47;"/>
+            </HBox>
+
+            <HBox spacing="14" alignment="CENTER_LEFT">
+                <!-- Card 1 -->
+                <StackPane fx:id="newAlbumCard1" prefWidth="165" prefHeight="215" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
+                    <VBox alignment="BOTTOM_LEFT">
+                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #C9B49A;">
+                            <ImageView fx:id="newAlbum1Art" fitWidth="165" fitHeight="160" preserveRatio="false"/>
+                        </StackPane>
+                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
+                            <Label fx:id="newAlbum1Title" text="Divide" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                            <Label fx:id="newAlbum1Artist" text="Ed Sheeran" style="-fx-font-size: 11px;"/>
+                        </VBox>
+                    </VBox>
+                </StackPane>
+                <!-- Card 2 -->
+                <StackPane fx:id="newAlbumCard2" prefWidth="165" prefHeight="215" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
+                    <VBox alignment="BOTTOM_LEFT">
+                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #C9B49A;">
+                            <ImageView fx:id="newAlbum2Art" fitWidth="165" fitHeight="160" preserveRatio="false"/>
+                        </StackPane>
+                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
+                            <Label fx:id="newAlbum2Title" text="After Hours" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                            <Label fx:id="newAlbum2Artist" text="The Weeknd" style="-fx-font-size: 11px;"/>
+                        </VBox>
+                    </VBox>
+                </StackPane>
+                <!-- Card 3 -->
+                <StackPane fx:id="newAlbumCard3" prefWidth="165" prefHeight="215" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
+                    <VBox alignment="BOTTOM_LEFT">
+                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #C9B49A;">
+                            <ImageView fx:id="newAlbum3Art" fitWidth="165" fitHeight="160" preserveRatio="false"/>
+                        </StackPane>
+                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
+                            <Label fx:id="newAlbum3Title" text="1989" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                            <Label fx:id="newAlbum3Artist" text="Taylor Swift" style="-fx-font-size: 11px;"/>
+                        </VBox>
+                    </VBox>
+                </StackPane>
+                <!-- Card 4 -->
+                <StackPane fx:id="newAlbumCard4" prefWidth="165" prefHeight="215" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
+                    <VBox alignment="BOTTOM_LEFT">
+                        <StackPane prefWidth="165" prefHeight="160" style="-fx-background-radius: 14 14 0 0; -fx-background-color: #C9B49A;">
+                            <ImageView fx:id="newAlbum4Art" fitWidth="165" fitHeight="160" preserveRatio="false"/>
+                        </StackPane>
+                        <VBox style="-fx-padding: 8 10 10 10; -fx-background-color: #EDE4D9; -fx-background-radius: 0 0 14 14;" spacing="2">
+                            <Label fx:id="newAlbum4Title" text="Scorpion" style="-fx-font-family: 'Georgia'; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                            <Label fx:id="newAlbum4Artist" text="Drake" style="-fx-font-size: 11px;"/>
+                        </VBox>
+                    </VBox>
+                </StackPane>
+            </HBox>
         </VBox>
 
         <VBox spacing="10">
@@ -109,7 +159,7 @@
                         <Label fx:id="latest1Title" text="Song 1" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         <Label fx:id="latest1Artist" text="Artist 1" style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
                     </VBox>
-                    <Label text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
+                    <Label fx:id="heartBtn1" text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
                 </HBox>
                 
                 <HBox spacing="12" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-border-color: transparent transparent #E0D8D0 transparent; -fx-border-width: 0 0 1 0; -fx-padding: 12 10 12 0;">
@@ -118,7 +168,7 @@
                         <Label text="Song 2" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         <Label text="Artist 2" style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
                     </VBox>
-                    <Label text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
+                    <Label fx:id="heartBtn2" text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
                 </HBox>
                 
                 <HBox spacing="12" alignment="CENTER_LEFT" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-border-color: transparent transparent #E0D8D0 transparent; -fx-border-width: 0 0 1 0; -fx-padding: 12 10 12 0;">
@@ -127,7 +177,7 @@
                         <Label text="Song 3" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         <Label text="Artist 3" style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
                     </VBox>
-                    <Label text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
+                    <Label fx:id="heartBtn3" text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
                 </HBox>
 
                 <HBox spacing="12" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-border-color: transparent transparent #E0D8D0 transparent; -fx-border-width: 0 0 1 0; -fx-padding: 12 10 12 0;">
@@ -136,7 +186,7 @@
                         <Label text="Song 4" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         <Label text="Artist 4" style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
                     </VBox>
-                    <Label text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
+                    <Label fx:id="heartBtn4" text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
                 </HBox>
                 
                 <HBox spacing="12" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-border-color: transparent transparent #E0D8D0 transparent; -fx-border-width: 0 0 1 0; -fx-padding: 12 10 12 0;">
@@ -145,7 +195,7 @@
                         <Label text="Song 5" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         <Label text="Artist 5" style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
                     </VBox>
-                    <Label text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
+                    <Label fx:id="heartBtn5" text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
                 </HBox>
                 
                 <HBox spacing="12" alignment="CENTER_LEFT" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-border-color: transparent transparent #E0D8D0 transparent; -fx-border-width: 0 0 1 0; -fx-padding: 12 10 12 0;">
@@ -154,7 +204,7 @@
                         <Label text="Song 6" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         <Label text="Artist 6" style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
                     </VBox>
-                    <Label text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
+                    <Label fx:id="heartBtn6" text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
                 </HBox>
                 
                 <HBox spacing="12" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-border-color: transparent transparent #E0D8D0 transparent; -fx-border-width: 0 0 1 0; -fx-padding: 12 10 12 0;">
@@ -163,7 +213,7 @@
                         <Label text="Song 7" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         <Label text="Artist 7" style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
                     </VBox>
-                    <Label text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
+                    <Label fx:id="heartBtn7" text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
                 </HBox>
                 
                 <HBox spacing="12" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="2" style="-fx-border-color: transparent transparent #E0D8D0 transparent; -fx-border-width: 0 0 1 0; -fx-padding: 12 10 12 0;">
@@ -172,7 +222,7 @@
                         <Label text="Song 8" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         <Label text="Artist 8" style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
                     </VBox>
-                    <Label text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
+                    <Label fx:id="heartBtn8" text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
                 </HBox>
                 
                 <HBox spacing="12" alignment="CENTER_LEFT" GridPane.columnIndex="2" GridPane.rowIndex="2" style="-fx-border-color: transparent transparent #E0D8D0 transparent; -fx-border-width: 0 0 1 0; -fx-padding: 12 10 12 0;">
@@ -181,7 +231,7 @@
                         <Label text="Song 9" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         <Label text="Artist 9" style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
                     </VBox>
-                    <Label text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
+                    <Label fx:id="heartBtn9" text="♥" style="-fx-text-fill: #B08D6A; -fx-font-size: 16px; -fx-cursor: hand;"/>
                 </HBox>
             </GridPane>
         </VBox>
