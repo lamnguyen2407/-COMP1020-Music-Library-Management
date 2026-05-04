@@ -1,8 +1,14 @@
 package com.musicapp.ui;
 
-import com.musicapp.Main;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
+
+import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
-import com.musicapp.service.DatabaseManager; 
+import com.musicapp.service.DatabaseManager;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -23,11 +29,6 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
 
 public class MainViewController implements Initializable {
 
@@ -63,7 +64,7 @@ public class MainViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        userNameLabel.setText(Main.isAdmin ? "Admin View" : "User View");
+        userNameLabel.setText(SessionManager.isAdmin ? "Admin View" : "User View");
         loadView(FXML_DISCOVERY);
 
         if (searchField != null) {

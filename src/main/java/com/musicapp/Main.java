@@ -10,7 +10,7 @@ import java.net.URL;
 public class Main extends Application {
     
     // GLOBAL STATE FOR TESTING: 'true' = Admin, 'false' = User
-    public static boolean isAdmin = true; 
+    // public static boolean isAdmin = false; 
 
     @Override
     public void start(Stage primaryStage) throws Exception {

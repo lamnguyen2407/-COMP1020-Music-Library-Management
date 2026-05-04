@@ -1,6 +1,10 @@
 package com.musicapp.ui;
 
-import com.musicapp.Main;
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import com.musicapp.model.SessionManager;
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -8,9 +12,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class PlaybackViewController implements Initializable {
 
@@ -24,7 +25,7 @@ public class PlaybackViewController implements Initializable {
         // --- PHÂN QUYỀN ADMIN (Theo đúng định hướng Ảnh 3) ---
         // Nếu không phải Admin, ẩn nút chỉnh sửa thông tin bài hát
         if (editSongBtn != null) {
-            if (!Main.isAdmin) {
+            if (!SessionManager.isAdmin) {
                 editSongBtn.setVisible(false);
                 editSongBtn.setManaged(false);
             } else {

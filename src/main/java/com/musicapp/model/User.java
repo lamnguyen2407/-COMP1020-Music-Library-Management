@@ -5,6 +5,7 @@ public abstract class User {
 	private String email;
 	private String name;
 	private String password;
+	private String role;
 	
 	public User() {};
 
@@ -14,7 +15,9 @@ public abstract class User {
 		this.name = name;
 		this.password = password;
 	}
-
+	public String getRole() {
+		return this.role;
+	}
 	public String getUserId() {
 		return this.userId;
 	}
@@ -30,7 +33,9 @@ public abstract class User {
 	public String getPassword() {
 		return password;
 	}
-	
+	public void setRole(String role) {
+		this.role = role;
+	}
 	public void setUserId(String userId) { 
 		this.userId = userId; 
 	}

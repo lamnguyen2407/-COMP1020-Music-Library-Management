@@ -1,5 +1,5 @@
 package com.musicapp.ui;
-
+import java.util.UUID;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -7,7 +7,8 @@ import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import java.io.IOException;
-
+import com.musicapp.model.ListenerUser;
+import com.musicapp.service.DatabaseManager;
 public class SignUpController {
     @FXML private TextField emailField;
     @FXML private TextField usernameField;
@@ -25,9 +26,26 @@ public class SignUpController {
             System.out.println("Error: Please input again !");
             return;
         }
+        // 1. Create new unique id for listener
+        String newUserId = UUID.randomUUID().toString();
         
-        System.out.println("New User Registered");
-        System.out.println("Fullname: " + fullname + " | Email: " + email + " | Username: " + username);
+        // 2. Create new ListenerUser 
+        ListenerUser newUser = new ListenerUser(newUserId, fullname, email, username, password);
+        
+        try {
+        	DatabaseManager.getInstance().getService().saveUser(newUser);
+        	System.out.println("New user successfully saved to Firebase !");
+        }
+        catch (Exception e) {
+        	System.out.println("Error saving to Firebase!!! " + e.getMessage());
+        	e.printStackTrace();
+        	return;
+        }
+        System.out.println("Switch to main Dashboard...");
+        /* Test
+        //System.out.println("New User Registered");
+        //System.out.println("Fullname: " + fullname + " | Email: " + email + " | Username: " + username);
+        */
         goToMainView(event);
     }
     

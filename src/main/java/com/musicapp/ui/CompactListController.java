@@ -1,6 +1,6 @@
 package com.musicapp.ui;
 
-import com.musicapp.Main;
+import com.musicapp.model.SessionManager;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -104,7 +104,7 @@ public class CompactListController implements Initializable {
 
             root.getChildren().addAll(thumb, nameLabel, heartBtn, spacer, artistLabel, albumLabel, addBtn, timeLabel);
 
-            if (Main.isAdmin) {
+            if (SessionManager.isAdmin) {
                 heartBtn.setVisible(false);
                 heartBtn.setManaged(false);
             }
@@ -186,7 +186,7 @@ public class CompactListController implements Initializable {
             menu.setStyle("-fx-background-color: white; -fx-border-color: #E0D8D0;");
             String menuItemStyle = "-fx-font-size: 13px; -fx-text-fill: #2C1810;";
 
-            if (Main.isAdmin) {
+            if (SessionManager.isAdmin) {
                 MenuItem deleteFromLibrary = new MenuItem("Delete from System");
                 deleteFromLibrary.setStyle("-fx-text-fill: #CC3300; -fx-font-weight: bold;");
                 deleteFromLibrary.setOnAction(e -> {

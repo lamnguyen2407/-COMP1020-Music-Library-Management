@@ -1,8 +1,6 @@
 package com.musicapp.service;
 
-import com.musicapp.model.Song;
-import com.musicapp.model.Album;
-import com.musicapp.model.Playlist;
+import com.musicapp.model.*;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -323,5 +321,49 @@ public class FirebaseServiceImpl implements FirebaseService {
             System.err.println("❌ Lỗi lấy ID từ Album: " + e.getMessage());
         }
         return ids;
+    }
+    
+    // For dealing with users database
+    @Override 
+    public void saveUser(User user) {
+    	DatabaseReference usersRef = dbRef.child("users");
+    	usersRef.child(user.getUserId()).setValueAsync(user);
+    }
+    
+    @Override 
+    public void authenticateUser(String loginIdentifier, String password, LoginCallback callback) {
+    	DatabaseReference usersRef = dbRef.child("users");
+    	String identifer = loginIdentifier.contains("@") ? "email" : "name";
+    	usersRef.orderByChild(identifer).equalTo(loginIdentifier).addListenerForSingleValueEvent(new ValueEventListener() {
+    		@Override
+    		public void onDataChange(DataSnapshot snapshot) {
+    			if(snapshot.exists()) {
+    				for(DataSnapshot userSnap: snapshot.getChildren()) {
+    					String pw = userSnap.child("password").getValue(String.class);
+    					if(pw != null && pw.equals(password)) {
+    						String role = userSnap.child("role").getValue(String.class);
+    						User loginUser = null;
+    						if("admin".equals(role)) {
+    							loginUser = userSnap.getValue(Admin.class);
+    						}
+    						else {
+    							loginUser = userSnap.getValue(ListenerUser.class);
+    						}
+    						callback.onSuccess(loginUser, role);
+    						return;
+    					}
+    				}
+    				callback.onError("Incorrect Password!!!");
+    			}
+    			else {
+    				callback.onError("No account are found !!!");
+    			}
+    		}
+    		
+    		@Override
+    		public void onCancelled(DatabaseError error) {
+    			callback.onError("Database Error: " + error.getMessage());
+    		}
+    	});
     }
 }
