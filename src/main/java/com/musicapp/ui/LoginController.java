@@ -1,5 +1,7 @@
 package com.musicapp.ui;
-
+import com.musicapp.service.LoginCallback;
+import com.musicapp.model.*;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -8,27 +10,42 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import java.io.IOException;
 
+import com.musicapp.model.SessionManager;
+import com.musicapp.service.DatabaseManager;
+
 public class LoginController {
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
 
     @FXML
     public void handleLogin(ActionEvent event) {
-        String identifier = emailField.getText();
+        String identifier = emailField.getText().trim();
         String password = passwordField.getText();
         if(identifier.isEmpty() || password.isEmpty()) {
             System.out.println("Error: Please login again !");
             return;
         }
-        if(identifier.contains("@gmail")) {
-            System.out.println("Attempting to login using email " + identifier);
-        }
-        else {
-            System.out.println("Attempting to login using username " + identifier);
-        }
         
-        System.out.println("Dummy User Authorized successfully");
-        goToMainView(event);
+        System.out.println("Checking credentials on Firebase...");
+        
+        DatabaseManager.getInstance().getService().authenticateUser(identifier, password, new LoginCallback() {
+        	@Override 
+        	public void onSuccess(User user, String role) {
+        		SessionManager.currentUser = user;
+        		SessionManager.isAdmin = "admin".equals(role);
+        		Platform.runLater(() -> {
+        			System.out.println("Login successful! Welcome " + user.getName());
+        			goToMainView(event);
+        		});
+        	}
+        	
+        	@Override 
+        	public void onError(String errorMessage) {
+        		Platform.runLater(() -> {
+        			System.out.println("Login Failed " + errorMessage);
+        		});
+        	}
+        });
     }
     
     @FXML 

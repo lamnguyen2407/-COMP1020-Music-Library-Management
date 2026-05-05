@@ -1,8 +1,15 @@
 package com.musicapp.ui;
 
-import com.musicapp.Main;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
+import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,22 +20,20 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class SongListController implements Initializable, MainViewController.MainViewAware {
     
@@ -201,7 +206,7 @@ public class SongListController implements Initializable, MainViewController.Mai
 
     private void setupRoleBasedUI() {
         try {
-            if (Main.isAdmin) {
+            if (SessionManager.isAdmin) {
                 if (playButton != null) { playButton.setVisible(false); playButton.setManaged(false); }
                 if (shuffleButton != null) { shuffleButton.setVisible(false); shuffleButton.setManaged(false); }
             } else {
@@ -297,7 +302,7 @@ public class SongListController implements Initializable, MainViewController.Mai
 
         refreshData(); 
 
-        if (Main.isAdmin) {
+        if (SessionManager.isAdmin) {
             boolean canEdit = (title != null && title.toLowerCase().contains("all")) 
                               || "Album detail view".equals(desc)
                               || "System Playlist".equals(desc);

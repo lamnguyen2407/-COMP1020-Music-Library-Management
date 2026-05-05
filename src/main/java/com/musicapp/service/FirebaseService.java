@@ -1,9 +1,6 @@
 package com.musicapp.service;
 
-import com.musicapp.model.Album;
-import com.musicapp.model.Playlist;
-import com.musicapp.model.Song;
-
+import com.musicapp.model.*;
 import java.io.File;
 import java.util.List;
 
@@ -49,4 +46,8 @@ public interface FirebaseService {
     
     List<String> fetchSongIdsFromAlbum(String albumId);
     
+    // 4. USERS 
+    
+    void saveUser(User user);
+    void authenticateUser(String identifier, String password, LoginCallback callback);
 }

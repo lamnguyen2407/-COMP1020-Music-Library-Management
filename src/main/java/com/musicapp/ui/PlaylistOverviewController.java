@@ -1,10 +1,17 @@
 package com.musicapp.ui;
 
-import javafx.application.Platform;
-import com.musicapp.Main;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.musicapp.model.Playlist;
+import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
+
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -17,14 +24,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.*;
-import javafx.stage.Stage;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 public class PlaylistOverviewController implements Initializable, MainViewController.MainViewAware {
 
@@ -89,7 +93,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     private void setupRoleBasedView() {
         if (playlistListContainer == null) return;
         
-        if (Main.isAdmin) {
+        if (SessionManager.isAdmin) {
             Node tableNode = tableView;
             playlistListContainer.getChildren().clear(); 
             
