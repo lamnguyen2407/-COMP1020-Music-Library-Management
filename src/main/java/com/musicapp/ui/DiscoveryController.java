@@ -1,6 +1,7 @@
 package com.musicapp.ui;
 
 import com.musicapp.Main;
+import com.musicapp.model.SessionManager;
 import com.musicapp.service.DatabaseManager;
 import com.musicapp.model.Song;
 import javafx.application.Platform;
@@ -34,6 +35,7 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
     @FXML private Label gotoTitle, gotoArtist;
     @FXML private Label latest1Title, latest1Artist; 
     @FXML private Label heartBtn1, heartBtn2, heartBtn3, heartBtn4, heartBtn5, heartBtn6, heartBtn7, heartBtn8, heartBtn9;
+
     private MainViewController mainController;
 
     // Dữ liệu mẫu cho Trending
@@ -51,6 +53,17 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
     public void initialize(URL location, ResourceBundle resources) {
         populateSampleData();
         setupClickHandlers();
+
+        // Ẩn trái tim ở phần Latest Song nếu role là admin
+        if (SessionManager.isAdmin) {
+            Label[] hearts = {heartBtn1, heartBtn2, heartBtn3, heartBtn4, heartBtn5, heartBtn6, heartBtn7, heartBtn8, heartBtn9};
+            for (Label heart : hearts) {
+                if (heart != null) {
+                    heart.setVisible(false);
+                    heart.setManaged(false);
+                }
+            }
+        }
     }
 
     private void populateSampleData() {
@@ -92,8 +105,8 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
         if (latest1Title != null) {
             latest1Title.setOnMouseClicked(e -> openCompactList());
         }
-      
-     // Click New Album Cards to go to AlbumDetail
+
+        // Click New Album Cards to go to AlbumDetail
         if (newAlbumCard1 != null) {
             newAlbumCard1.setOnMouseClicked(e -> {
                 if (mainController != null) {
@@ -115,12 +128,13 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
             });
         }
 
-        // Connect the "New Album Release ›" header to view ALL albums
+        // Connect the "New Album Release >" header to view ALL albums
         if (newAlbumsHeader != null) {
             newAlbumsHeader.setOnMouseClicked(e -> {
                 if (mainController != null) mainController.openAllAlbumsView();
             });
         }
+
         setupHeartToggle(heartBtn1);
         setupHeartToggle(heartBtn2);
         setupHeartToggle(heartBtn3);
@@ -138,17 +152,17 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
             Node view = loader.load();
             SongListController ctrl = loader.getController();
             
-            // 1. Kết nối với MainViewController
+            // 1. Gắn MainViewController
             ctrl.setMainController(this.mainController);
             
-            // 2. XÁC ĐỊNH ID CHUẨN (Lấy đúng cái SYSTEM_TODAY'S_HITS)
-            // Logic này sẽ biến "Today's Hits" thành "SYSTEM_TODAY'S_HITS"
+            // 2. XÁC ĐỊNH ID CHUẨN (Lấy luôn cái SYSTEM_TODAY'S_HITS)
+            // Logic biến "Today's Hits" thành "SYSTEM_TODAY'S_HITS"
             String finalId = "SYSTEM_" + listTitle.toUpperCase().replace(" ", "_");
             
             // 3. TRUYỀN DỮ LIỆU SANG SONG_LIST_CONTROLLER
-            // Truyền một list rỗng (new ArrayList<>()) vào tham số thứ 8.
-            // TẠI SAO? Để hàm refreshData() trong SongListController thấy list rỗng 
-            // và tự động lên Firebase kéo bài hát từ node finalId về.
+            // Truyền 1 list rỗng (new ArrayList<>()) vào tham số ID
+            // TẠI SAO? Vì hàm refreshData() trong SongListController thấy list rỗng
+            // sẽ tự động lên Firebase kéo node finalId về!
             ctrl.setData(
                 finalId, 
                 listTitle, 
@@ -160,11 +174,10 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
                 new java.util.ArrayList<>() 
             );
 
-            // 4. Đưa giao diện lên màn hình
+            // 4. Đẩy giao diện lên
             if (mainController != null) {
                 mainController.getContentArea().getChildren().setAll(view);
             }
-
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -186,6 +199,7 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
             ex.printStackTrace();
         }
     }
+
     private void setupHeartToggle(Label heartBtn) {
         if (heartBtn == null) return;
         
@@ -204,4 +218,3 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
         });
     }
 }
-
