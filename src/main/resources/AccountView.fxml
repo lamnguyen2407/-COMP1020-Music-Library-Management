@@ -3,64 +3,105 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #f5f5f5;" 
-            xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.musicapp.ui.AccountController">
-    <padding>
-        <Insets bottom="24" left="24" right="24" top="24" />
-    </padding>
-    <content>
-        <VBox spacing="22.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 12, 0, 0, 2);">
-            <padding>
-                <Insets bottom="36" left="40" right="40" top="32" />
-            </padding>
+<VBox spacing="0" style="-fx-background-color: white;"
+      xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.musicapp.ui.AccountController">
+    <padding><Insets bottom="40" left="40" right="40" top="40" /></padding>
 
-            <VBox spacing="4.0">
-                <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #222222;" text="Account" />
-                <Label fx:id="roleLabel" style="-fx-font-size: 13px; -fx-text-fill: #C0703A; -fx-font-weight: bold;" text="Role: User" />
-            </VBox>
+    <!-- Title -->
+    <Label text="Account"
+           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" />
 
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
-                <Label prefWidth="130.0" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Username" />
-                <HBox alignment="CENTER_LEFT" style="-fx-background-color: #f8f8f8; -fx-border-color: #d5d5d5; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;">
-                    <TextField fx:id="usernameField" prefWidth="180.0" style="-fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 10 12 10 8; -fx-font-size: 13px;" text="ABC" />
-                </HBox>
-            </HBox>
+    <Region prefHeight="16" />
 
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
-                <Label prefWidth="130.0" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Phone Number" />
-                <HBox alignment="CENTER_LEFT" style="-fx-background-color: #f8f8f8; -fx-border-color: #d5d5d5; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;">
-                    <Label style="-fx-padding: 10 10 10 12; -fx-text-fill: #555555; -fx-font-size: 13px; -fx-border-color: #d5d5d5; -fx-border-width: 0 1 0 0;" text="🇬🇧 +44" />
-                    <TextField fx:id="phoneField" prefWidth="200.0" style="-fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 10 12 10 8; -fx-font-size: 13px;" text="(158) 008-9987" />
-                </HBox>
-            </HBox>
+    <!-- Card -->
+    <VBox style="-fx-border-color: #c8e0f7; -fx-border-width: 1.5; -fx-border-radius: 8; -fx-background-radius: 8;">
 
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
-                <Label prefWidth="130.0" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Profile Picture" />
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <Button onAction="#onEditProfilePic" style="-fx-background-color: #5a5a5a; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 8 18 8 18; -fx-background-radius: 20; -fx-cursor: hand;" text="Edit" />
-                    <Button onAction="#onDeleteProfilePic" style="-fx-background-color: #c0854a; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 8 18 8 18; -fx-background-radius: 20; -fx-cursor: hand;" text="Delete" />
-                </HBox>
-            </HBox>
+        <!-- Role row -->
+        <HBox alignment="CENTER_LEFT" style="-fx-padding: 14 20 14 20;">
+            <Label text="Role: " style="-fx-font-size: 13px; -fx-text-fill: #555555;" />
+            <Label fx:id="roleLabel" text="" style="-fx-font-size: 13px; -fx-text-fill: #555555;" />
+        </HBox>
+        <Separator />
 
-            <HBox alignment="TOP_LEFT" spacing="20.0">
-                <Label prefWidth="130.0" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #333333; -fx-padding: 8 0 0 0;" text="Biography" />
-                <VBox spacing="4.0">
-                    <TextArea fx:id="bioArea" prefHeight="100.0" prefWidth="360.0" promptText="Write a short description" style="-fx-background-color: #f8f8f8; -fx-border-color: #d5d5d5; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-size: 13px;" />
-                    <Label fx:id="charCountLabel" style="-fx-font-size: 11px; -fx-text-fill: #aaaaaa;" text="300 characters remaining" />
-                </VBox>
-            </HBox>
+        <!-- Username row -->
+        <HBox alignment="CENTER_LEFT" spacing="0" style="-fx-padding: 14 20 14 20;">
+            <Label text="Username" prefWidth="220"
+                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" />
+            <!-- View mode -->
+            <Label fx:id="usernameDisplay" text=""
+                   style="-fx-font-size: 13px; -fx-text-fill: #1a1a1a;" />
+            <!-- Edit mode -->
+            <TextField fx:id="usernameField" promptText="Your username here"
+                       managed="false" visible="false"
+                       prefWidth="380"
+                       style="-fx-background-radius: 20; -fx-border-radius: 20;
+                              -fx-border-color: #dddddd; -fx-border-width: 1;
+                              -fx-padding: 8 14 8 14; -fx-font-size: 13px;" />
+        </HBox>
+        <Separator />
 
-            <HBox alignment="CENTER_RIGHT" spacing="10.0">
-                <Button onAction="#onCancel" style="-fx-background-color: #f0f0f0; -fx-text-fill: #555555; -fx-font-size: 13px; -fx-padding: 9 22 9 22; -fx-background-radius: 20; -fx-cursor: hand;" text="✕  Cancel" />
-                <Button onAction="#onSave" style="-fx-background-color: #c0854a; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 9 22 9 22; -fx-background-radius: 20; -fx-cursor: hand;" text="✓  Save" />
-            </HBox>
-        </VBox>
-    </content>
-</ScrollPane>
+        <!-- Email row -->
+        <HBox alignment="CENTER_LEFT" spacing="0" style="-fx-padding: 14 20 14 20;">
+            <Label text="Email" prefWidth="220"
+                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" />
+            <Label fx:id="emailDisplay" text=""
+                   style="-fx-font-size: 13px; -fx-text-fill: #1a1a1a;" />
+            <TextField fx:id="emailField" promptText="Your email here"
+                       managed="false" visible="false"
+                       prefWidth="380"
+                       style="-fx-background-radius: 20; -fx-border-radius: 20;
+                              -fx-border-color: #dddddd; -fx-border-width: 1;
+                              -fx-padding: 8 14 8 14; -fx-font-size: 13px;" />
+        </HBox>
+        <Separator />
+
+        <!-- Name row -->
+        <HBox alignment="CENTER_LEFT" spacing="0" style="-fx-padding: 14 20 14 20;">
+            <Label text="Name" prefWidth="220"
+                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" />
+            <Label fx:id="nameDisplay" text=""
+                   style="-fx-font-size: 13px; -fx-text-fill: #1a1a1a;" />
+            <TextField fx:id="nameField" promptText="Your name here"
+                       managed="false" visible="false"
+                       prefWidth="380"
+                       style="-fx-background-radius: 20; -fx-border-radius: 20;
+                              -fx-border-color: #dddddd; -fx-border-width: 1;
+                              -fx-padding: 8 14 8 14; -fx-font-size: 13px;" />
+        </HBox>
+        <Separator />
+
+        <!-- Buttons row -->
+        <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 14 20 14 20;">
+
+            <!-- View mode: Edit button -->
+            <Button fx:id="editBtn" text="Edit" onAction="#handleEdit"
+                    style="-fx-background-color: #c07840; -fx-text-fill: white;
+                           -fx-font-size: 12px; -fx-font-weight: bold;
+                           -fx-background-radius: 20; -fx-border-width: 0;
+                           -fx-padding: 8 20 8 20; -fx-cursor: hand;" />
+
+            <!-- Edit mode: Cancel + Save -->
+            <Button fx:id="cancelBtn" text="✕  Cancel" onAction="#handleCancel"
+                    managed="false" visible="false"
+                    style="-fx-background-color: transparent; -fx-text-fill: #333333;
+                           -fx-font-size: 12px; -fx-font-weight: bold;
+                           -fx-background-radius: 20; -fx-border-radius: 20;
+                           -fx-border-color: #cccccc; -fx-border-width: 1;
+                           -fx-padding: 8 20 8 20; -fx-cursor: hand;" />
+            <Button fx:id="saveBtn" text="✓  Save" onAction="#handleSave"
+                    managed="false" visible="false"
+                    style="-fx-background-color: #c07840; -fx-text-fill: white;
+                           -fx-font-size: 12px; -fx-font-weight: bold;
+                           -fx-background-radius: 20; -fx-border-width: 0;
+                           -fx-padding: 8 20 8 20; -fx-cursor: hand;" />
+        </HBox>
+
+    </VBox>
+</VBox>
