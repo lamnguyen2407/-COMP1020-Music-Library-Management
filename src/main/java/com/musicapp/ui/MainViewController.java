@@ -67,7 +67,12 @@ public class MainViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         userNameLabel.setText(SessionManager.isAdmin ? "Admin View" : "User View");
         loadView(FXML_DISCOVERY);
-
+        if (SessionManager.isAdmin) {
+            if (btnLike != null) {
+                btnLike.setVisible(false);
+                btnLike.setManaged(false);
+            }
+        }
         if (searchField != null) {
             searchField.textProperty().addListener((obs, oldVal, newVal) -> {
                 if (!newVal.isBlank()) setActiveNav(btnSearch);
@@ -275,14 +280,10 @@ public class MainViewController implements Initializable {
             SongListController ctrl = loader.getController();
             ctrl.setMainController(this); 
 
-            // CÚ FIX: 
-            // 1. Thêm ID "SONG_LIST_VIEW" vào đầu cho đủ 8 tham số.
-            // 2. Tham số cuối truyền một ArrayList rỗng vì chúng ta đã có sẵn 'data' (SongItem) rồi.
-            ctrl.setData("SONG_LIST_VIEW", title, subtitle, desc, null, 0, "", new java.util.ArrayList<>());            
+            // Đảm bảo đường dẫn này là duy nhất cho "All Songs"
+            ctrl.setData("SONG_LIST_VIEW", title, subtitle, desc, "/images/allsong.jpg", 0, "", new java.util.ArrayList<>());            
             
-            // 3. Bơm trực tiếp danh sách SongItem vào giao diện
             ctrl.setSongsList(data);
-
             contentArea.getChildren().setAll(view);
         } catch (IOException e) { e.printStackTrace(); }
     }
@@ -380,9 +381,10 @@ public class MainViewController implements Initializable {
             if (ctrl instanceof MainViewAware) ((MainViewAware) ctrl).setMainController(this);
             
             // CÚ FIX 1: Truyền đủ 8 tham số (Thêm ID "SEARCH" vào đầu và null vào cuối)
+         // Trong hàm navigateToSearchResult(String query)
             ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", "Searching...", null, 0, "Various", new java.util.ArrayList<>());
-            
-            ctrl.setColumnHeaders("ARTIST", "GENRE", "TIME"); 
+
+            ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE"); // <- Sửa lại cho đúng thứ tựuserNameLabel.setText(SessionManager.isAdmin ? "Admin View" : "User View");
             contentArea.getChildren().setAll(view);
 
             new Thread(() -> {

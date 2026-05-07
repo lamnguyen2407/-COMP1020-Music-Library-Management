@@ -80,18 +80,23 @@ public class AddAlbumModalController {
         alert.showAndWait();
     }
 
-    // THÊM HÀM NÀY: Hàm thần thánh chuyển link Drive thành link ảnh trực tiếp
+ // THÊM HÀM NÀY: Hàm thần thánh chuyển link Drive thành link ảnh trực tiếp
     private String convertToDirectLink(String driveUrl) {
         if (driveUrl == null || !driveUrl.contains("drive.google.com")) return driveUrl;
         try {
             String fileId = "";
+            
+            // Cắt lấy ID của file từ các dạng link Drive khác nhau
             if (driveUrl.contains("/d/")) {
                 fileId = driveUrl.split("/d/")[1].split("/")[0];
             } else if (driveUrl.contains("id=")) {
                 fileId = driveUrl.split("id=")[1].split("&")[0];
             }
+            
             if (!fileId.isEmpty()) {
-                return "https://drive.google.com/uc?export=download&id=" + fileId;
+                // CÁCH SỬA: Đổi từ export=download sang server hiển thị ảnh trực tiếp của Google
+                // Điều này giúp JavaFX nhận diện đúng MIME type là image/png hoặc image/jpeg
+                return "https://drive.google.com/uc?export=view&id=" + fileId;
             }
         } catch (Exception e) {
             System.err.println("Lỗi convert link: " + e.getMessage());

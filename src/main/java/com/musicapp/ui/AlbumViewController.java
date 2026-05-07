@@ -85,6 +85,10 @@ public class AlbumViewController {
 
 		// ── Heart button ──
 		Button heartBtn = new Button("♡");
+		if (com.musicapp.model.SessionManager.isAdmin) {
+		    heartBtn.setVisible(false);
+		    heartBtn.setManaged(false);
+		}
 		heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #c07840; "
 				+ "-fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
 		heartBtn.setOnAction(e -> handleAddToFavorites(song));

@@ -71,7 +71,6 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         if (insertIndex == -1) insertIndex = playlistListContainer.getChildren().size();
 
         playlistListContainer.getChildren().add(insertIndex, newRow);
-        System.out.println("[Success] Đã thêm playlist mới vào UI: " + playlistName);
     }
 
     public void refreshData() {
@@ -81,7 +80,6 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                 Platform.runLater(() -> {
                     if (tableView != null) {
                         tableView.getItems().setAll(updatedSongs);
-                        System.out.println("[Success] Đã nạp " + updatedSongs.size() + " bài hát từ Firebase.");
                     }
                 });
             } catch (Exception e) {
@@ -99,7 +97,8 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
             
             if (tableNode != null) playlistListContainer.getChildren().add(tableNode);
 
-            addAdminSystemRow("Today's Hit", "♫");
+            // FIX: Thêm chữ 's' cho Today's Hits
+            addAdminSystemRow("Today's Hits", "♫");
             addSeparator();
             addAdminSystemRow("All Songs", "≡");
             addSeparator();
@@ -114,7 +113,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                 loadAdminManagementView();
             } else if (name.equals("All Albums")) { 
                 loadNewAlbumReleaseView();
-            } else if (name.equals("Today's Hit")) { // CÚ FIX ĐIỀU HƯỚNG TODAY'S HITS
+            } else if (name.equals("Today's Hits")) { // FIX: Phải khớp với tên bên trên
                 loadTodaysHitsView();
             } else {
                 loadCompactView(name);
@@ -138,7 +137,6 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
             Node view = loader.load();
             updateMainContent(view);
         } catch (IOException e) {
-            System.err.println("[Lỗi] Không load được CreatePlaylistModal.fxml");
             e.printStackTrace();
         }
     }
@@ -147,35 +145,26 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
             Node view = loader.load();
-
             SongListController ctrl = loader.getController();
             
-            // 1. Nối dây với sếp (MainViewController)
             if (ctrl instanceof MainViewController.MainViewAware) {
                 ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
             }
             
-            // 2. CÚ FIX: Truyền đủ 8 tham số cho hàm setData
-            // Tham số 1: ID định danh "ADMIN_ALL_SONGS"
-            // Tham số 8: Truyền list rỗng vì màn hình "All Songs" sẽ tự fetch toàn bộ trong refreshData()
             ctrl.setData(
                 "ADMIN_ALL_SONGS", 
                 "All Songs", 
                 "Library Management",
                 "Admin can add or remove songs from the global library here.",
-                null, 
+                "/images/allsong.jpg", // Đã sửa thành chữ thường khớp với file
                 0, 
                 "Various", 
                 new java.util.ArrayList<>()
             );
             
-            // 3. Dùng cách gọi chuẩn qua mainController thay cho updateMainContent cũ (nếu có thể)
             if (mainController != null) {
                 mainController.getContentArea().getChildren().setAll(view);
-            } else {
-                updateMainContent(view); // Giữ lại dự phòng nếu mày chưa sửa hết
             }
-            
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -185,90 +174,67 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/NewAlbumReleaseView.fxml"));
             Node view = loader.load();
-
             Object ctrl = loader.getController();
             if (ctrl instanceof MainViewController.MainViewAware) {
                 ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
             }
-
             updateMainContent(view);
         } catch (IOException e) {
-            System.err.println("[Lỗi] Không load được NewAlbumReleaseView.fxml");
             e.printStackTrace();
         }
     }
 
-    // ==========================================
-    // HÀM MỚI: XỬ LÝ RIÊNG CHO TODAY'S HITS
-    // ==========================================
     private void loadTodaysHitsView() {
         new Thread(() -> {
             try {
-                // 1. Kéo Playlist "Today's Hits" (ID: pl_system_todays_hits) từ Firebase
                 Playlist todaysHits = DatabaseManager.getInstance().getService().fetchPlaylist("pl_system_todays_hits");
                 
                 if (todaysHits != null) {
-                    // 2. Lấy danh sách ID bài hát và kéo List<Song> thật về
                     List<String> songIds = todaysHits.getSongIdList();
                     List<Song> dbSongs = DatabaseManager.getInstance().getService().fetchSongsByIds(songIds);
                     
-                    // 3. Ép kiểu từ Song sang SongItem để nhét vào UI
                     ObservableList<SongListController.SongItem> songItems = FXCollections.observableArrayList();
                     for (Song s : dbSongs) {
-                        // Đảm bảo class Song của mày có đủ các getter này (getDuration, getReleaseYear)
                         songItems.add(new SongListController.SongItem(
-                            s.getSongId(), 
-                            s.getTitle(), 
-                            s.getArtist(), 
+                            s.getSongId(), s.getTitle(), s.getArtist(), 
                             s.getGenre() != null ? s.getGenre() : "Pop", 
-                            s.getDuration(), 
-                            s.getReleaseYear(), 
-                            s.getAudioURL(), 
-                            s.getImageURL()
+                            s.getDuration(), s.getReleaseYear(), 
+                            s.getAudioURL(), s.getImageURL()
                         ));
                     }
                     
-                    // 4. Update UI trên luồng chính
-                 // 4. Update UI trên luồng chính
                     Platform.runLater(() -> {
                         try {
                             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
                             Node view = loader.load();
-                            
                             SongListController ctrl = loader.getController();
                             if (ctrl instanceof MainViewController.MainViewAware) {
                                 ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
                             }
                             
-                            // CÚ FIX: Truyền đủ 8 tham số cho hàm setData
                             ctrl.setData(
-                                todaysHits.getPlaylistId(), // 1. Thêm ID của Playlist vào đầu
-                                todaysHits.getName(),       // 2. Title
-                                "System Playlist",          // 3. Subtitle
-                                "The biggest tracks on everyone's mind right now.", // 4. Desc
-                                todaysHits.getCoverImage(),  // 5. Cover
-                                2026,                       // 6. Year
-                                "Various Artists",          // 7. Genre
-                                new java.util.ArrayList<>() // 8. Truyền list rỗng vì mình sẽ bơm data thủ công ở dưới
+                                todaysHits.getPlaylistId(),
+                                "Today's Hits", // Đảm bảo đồng nhất tên
+                                "System Playlist",
+                                "The biggest tracks on everyone's mind right now.",
+                                "/images/todayhit.jpg", // Ép dùng ảnh nội bộ
+                                2026,
+                                "Various Artists",
+                                new java.util.ArrayList<>()
                             );
                             
-                            // Bơm trực tiếp danh sách SongItem đã convert vào UI để không phải fetch lại
                             ctrl.setSongsList(songItems); 
                             
-                            // Dùng getter xịn từ MainViewController thay cho updateMainContent cũ
                             if (mainController != null) {
                                 mainController.getContentArea().getChildren().setAll(view);
                             }
-                            
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     });
-                } else {
-                    System.err.println("❌ Không tìm thấy Playlist 'pl_system_todays_hits' trên Firebase!");
                 }
             } catch (Exception e) {
-                System.err.println("❌ Lỗi khi tải Today's Hits: " + e.getMessage());
+                e.printStackTrace();
             }
         }).start();
     }
@@ -277,12 +243,10 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CompactListView.fxml"));
             Node view = loader.load();
-            
             Object ctrl = loader.getController();
             if (ctrl instanceof MainViewController.MainViewAware) {
                 ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
             }
-            
             updateMainContent(view); 
         } catch (IOException e) {
             e.printStackTrace();

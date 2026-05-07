@@ -1,6 +1,7 @@
 package com.musicapp.ui;
 
 import com.musicapp.Main;
+import com.musicapp.model.SessionManager;
 import com.musicapp.service.DatabaseManager;
 import com.musicapp.service.FirebaseServiceImpl;
 import com.musicapp.model.*;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Controller for DiscoveryView.fxml
  * Handles the home screen logic and role-based data display.
@@ -45,6 +47,7 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
     @FXML private Label latest7Title, latest7Artist, latest8Title, latest8Artist, latest9Title, latest9Artist;
     @FXML private ImageView latest1AlbumArt, latest2AlbumArt, latest3AlbumArt, latest4AlbumArt, latest5AlbumArt, latest6AlbumArt, latest7AlbumArt, latest8AlbumArt, latest9AlbumArt;
     @FXML private HBox latestCard1, latestCard2, latestCard3, latestCard4, latestCard5, latestCard6, latestCard7, latestCard8, latestCard9;
+
     private MainViewController mainController;
 
     @Override
@@ -62,38 +65,38 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
 
     // Dữ liệu cho Trending Songs
     private final ObservableList<SongListController.SongItem> TRENDING_SONGS = FXCollections.observableArrayList(
-	    // Song 1
-	    new SongListController.SongItem(
-	        "S1002", "Ex-Factor", "Lauryn Hill", "R&B", 327, 1998, 
-	        "https://drive.google.com/uc?export=download&id=1N7-tdKi3f31lNBqyToDHGl83pFFlkUlr", 
-	        "https://drive.google.com/uc?export=download&id=1LHb8cjGKcw64o2wfDiJqCuUZYIwtq3ts"
-	    ),
-	    // Song 2
-	    new SongListController.SongItem(
-	        "S1086", "Stay", "The Kid LAROI & Justin Bieber", "Pop", 143, 2024, 
-	        "https://drive.google.com/uc?export=download&id=1FwaBz_P2QnSGB9vjDdRLze3X7nLaVszU",
-	        "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/89/59/6a/89596ab9-fa3c-8d08-4d95-a6450fa2013c/886449400515.jpg/600x600bb.jpg"
-	    ),
-	    // Song 3 
-	    new SongListController.SongItem(
-	        "S1088", "That Girl", "Olly Murs", "Pop", 176, 2024, 
-	        "https://drive.google.com/uc?export=download&id=1ep119l9P4AFnfoCn9BghAsZVVokChIU6", 
-	        "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/29/94/b2/2994b2cd-5936-9081-4311-88dfc4d08e96/dj.sxjwuycl.jpg/600x600bb.jpg"
-	    ),
-	    // Song 4 
-	    new SongListController.SongItem(
-	        "S1046", "Be Great", "Jill Scott", "R&B", 193, 2026, 
-	        "https://drive.google.com/uc?export=download&id=1NqLTs89MHQRmgac7WFG18xpLiDwYGhS7", 
-	        "https://drive.google.com/uc?export=download&id=1cD4KxUpK4YZZ2vFRrnxUQQts_CfH1KiI"
-	    ),
-	    // Song 5 
-	    new SongListController.SongItem(
-	        "S1021", "Institutionalized", "Kendrick Lamar", "Rap", 272, 2015, 
-	        "https://drive.google.com/uc?export=download&id=1WKZR5KiO_zsCJYSuEYy-Ubh-51Lh-guZ", 
-	        "https://drive.google.com/uc?export=download&id=1KDyfIkWcBhy-PIgPtvQxm8Ja8JGlAhjS"
-	    )
-    	);
-       
+        // Song 1
+        new SongListController.SongItem(
+            "S1002", "Ex-Factor", "Lauryn Hill", "R&B", 327, 1998, 
+            "https://drive.google.com/uc?export=download&id=1N7-tdKi3f31lNBqyToDHGl83pFFlkUlr", 
+            "https://drive.google.com/uc?export=download&id=1LHb8cjGKcw64o2wfDiJqCuUZYIwtq3ts"
+        ),
+        // Song 2
+        new SongListController.SongItem(
+            "S1086", "Stay", "The Kid LAROI & Justin Bieber", "Pop", 143, 2024, 
+            "https://drive.google.com/uc?export=download&id=1FwaBz_P2QnSGB9vjDdRLze3X7nLaVszU",
+            "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/89/59/6a/89596ab9-fa3c-8d08-4d95-a6450fa2013c/886449400515.jpg/600x600bb.jpg"
+        ),
+        // Song 3 
+        new SongListController.SongItem(
+            "S1088", "That Girl", "Olly Murs", "Pop", 176, 2024, 
+            "https://drive.google.com/uc?export=download&id=1ep119l9P4AFnfoCn9BghAsZVVokChIU6", 
+            "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/29/94/b2/2994b2cd-5936-9081-4311-88dfc4d08e96/dj.sxjwuycl.jpg/600x600bb.jpg"
+        ),
+        // Song 4 
+        new SongListController.SongItem(
+            "S1046", "Be Great", "Jill Scott", "R&B", 193, 2026, 
+            "https://drive.google.com/uc?export=download&id=1NqLTs89MHQRmgac7WFG18xpLiDwYGhS7", 
+            "https://drive.google.com/uc?export=download&id=1cD4KxUpK4YZZ2vFRrnxUQQts_CfH1KiI"
+        ),
+        // Song 5 
+        new SongListController.SongItem(
+            "S1021", "Institutionalized", "Kendrick Lamar", "Rap", 272, 2015, 
+            "https://drive.google.com/uc?export=download&id=1WKZR5KiO_zsCJYSuEYy-Ubh-51Lh-guZ", 
+            "https://drive.google.com/uc?export=download&id=1KDyfIkWcBhy-PIgPtvQxm8Ja8JGlAhjS"
+        )
+        );
+        
     private void populateSampleData() {
         // Song 1
         SongListController.SongItem firstSong = TRENDING_SONGS.get(0);
@@ -141,14 +144,14 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
     // New album release list
     private final ObservableList<Album> NEW_ALBUMS = FXCollections.observableArrayList();   
     public void processNewestAlbums(List<Album> allAlbumFromDatabase) {
-    	System.out.println("Số lượng tải về từ Firebase: " + allAlbumFromDatabase.size());
-    	NEW_ALBUMS.clear();
-    	allAlbumFromDatabase.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
-    	int lim = Math.min(5, allAlbumFromDatabase.size());
-    	for(int i = 0; i < lim; ++i) {
-    		NEW_ALBUMS.add(allAlbumFromDatabase.get(i));
-    	}
-    	updateNewAlbumUI();
+        System.out.println("Số lượng tải về từ Firebase: " + allAlbumFromDatabase.size());
+        NEW_ALBUMS.clear();
+        allAlbumFromDatabase.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
+        int lim = Math.min(5, allAlbumFromDatabase.size());
+        for(int i = 0; i < lim; ++i) {
+            NEW_ALBUMS.add(allAlbumFromDatabase.get(i));
+        }
+        updateNewAlbumUI();
     }
     private void updateNewAlbumUI() {
         // Card 1
@@ -203,22 +206,22 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
     }
     private void setupClickHandlers() {
         // Click vào Trending
-    	// Card 1
+        // Card 1
         if (trendingCard1 != null) {
             trendingCard1.setOnMouseClicked(e -> {
-            	if(mainController != null && TRENDING_SONGS != null && TRENDING_SONGS.size() > 0) {
-            		SongListController.SongItem song = TRENDING_SONGS.get(0);
-            		mainController.showPlayerBar(song.title, song.artist, song.imageURL, song.audioURL);
-            	}
+                if(mainController != null && TRENDING_SONGS != null && TRENDING_SONGS.size() > 0) {
+                    SongListController.SongItem song = TRENDING_SONGS.get(0);
+                    mainController.showPlayerBar(song.title, song.artist, song.imageURL, song.audioURL);
+                }
             });
         }
         // Card 2
         if (trendingCard2 != null) {
             trendingCard2.setOnMouseClicked(e -> {
-            	if(mainController != null && TRENDING_SONGS != null && TRENDING_SONGS.size() > 1) {
-            		SongListController.SongItem song = TRENDING_SONGS.get(1);
-            		mainController.showPlayerBar(song.title, song.artist, song.imageURL, song.audioURL);
-            	}
+                if(mainController != null && TRENDING_SONGS != null && TRENDING_SONGS.size() > 1) {
+                    SongListController.SongItem song = TRENDING_SONGS.get(1);
+                    mainController.showPlayerBar(song.title, song.artist, song.imageURL, song.audioURL);
+                }
             });
         }
         // Card 3
@@ -273,7 +276,7 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
                 }
             });
         }
-
+        
         if (newAlbumCard3 != null) {
             newAlbumCard3.setOnMouseClicked(e -> {
                 if (NEW_ALBUMS != null && NEW_ALBUMS.size() > 2) {
@@ -302,90 +305,90 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
         // Latest song 1
         if (latestCard1 != null) {
             latestCard1.setOnMouseClicked(e -> {
-            	if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 0) {
-            		Song song = LATEST_SONGS.get(0);
-            		mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
-            	}
+                if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 0) {
+                    Song song = LATEST_SONGS.get(0);
+                    mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
+                }
             });
         }
 
         // Latest song 2
         if (latestCard2 != null) {
             latestCard2.setOnMouseClicked(e -> {
-            	if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 1) {
-            		Song song = LATEST_SONGS.get(1);
-            		mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
-            	}
+                if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 1) {
+                    Song song = LATEST_SONGS.get(1);
+                    mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
+                }
             });
         }
 
         // Latest song 3
         if (latestCard3 != null) {
             latestCard3.setOnMouseClicked(e -> {
-            	if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 2) {
-            		Song song = LATEST_SONGS.get(2);
-            		mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
-            	}
+                if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 2) {
+                    Song song = LATEST_SONGS.get(2);
+                    mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
+                }
             });
         }
 
         // Latest song 4
         if (latestCard4 != null) {
             latestCard4.setOnMouseClicked(e -> {
-            	if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 3) {
-            		Song song = LATEST_SONGS.get(3);
-            		mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
-            	}
+                if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 3) {
+                    Song song = LATEST_SONGS.get(3);
+                    mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
+                }
             });
         }
 
         // Latest song 5
         if (latestCard5 != null) {
             latestCard5.setOnMouseClicked(e -> {
-            	if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 4) {
-            		Song song = LATEST_SONGS.get(4);
-            		mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
-            	}
+                if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 4) {
+                    Song song = LATEST_SONGS.get(4);
+                    mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
+                }
             });
         }
 
         // Latest song 6
         if (latestCard6 != null) {
             latestCard6.setOnMouseClicked(e -> {
-            	if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 5) {
-            		Song song = LATEST_SONGS.get(5);
-            		mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
-            	}
+                if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 5) {
+                    Song song = LATEST_SONGS.get(5);
+                    mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
+                }
             });
         }
 
         // Latest song 7
         if (latestCard7 != null) {
             latestCard7.setOnMouseClicked(e -> {
-            	if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 6) {
-            		Song song = LATEST_SONGS.get(6);
-            		mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
-            	}
+                if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 6) {
+                    Song song = LATEST_SONGS.get(6);
+                    mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
+                }
             });
         }
 
         // Latest song 8
         if (latestCard8 != null) {
             latestCard8.setOnMouseClicked(e -> {
-            	if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 7) {
-            		Song song = LATEST_SONGS.get(7);
-            		mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
-            	}
+                if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 7) {
+                    Song song = LATEST_SONGS.get(7);
+                    mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
+                }
             });
         }
 
         // Latest song 9
         if (latestCard9 != null) {
             latestCard9.setOnMouseClicked(e -> {
-            	if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 8) {
-            		Song song = LATEST_SONGS.get(8);
-            		mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
-            	}
+                if(mainController != null && LATEST_SONGS != null && LATEST_SONGS.size() > 8) {
+                    Song song = LATEST_SONGS.get(8);
+                    mainController.showPlayerBar(song.getTitle(), song.getArtist(), song.getImageURL(), song.getAudioURL());
+                }
             });
         }   
     }
@@ -394,67 +397,67 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
         System.out.println(album.getSongIdList());
         // Run in background 
         new Thread(() -> {
-        	FirebaseServiceImpl firebaseService = new FirebaseServiceImpl();
-        	List<Song> realSongs = firebaseService.fetchAlbumSongsByIds(album.getSongIdList());
-        	System.out.println("Successfully download " + realSongs.size() + " songs.");
-        	Platform.runLater(() -> {
-        		if(mainController != null) {
-        			mainController.loadSongDetail(
-        				album.getTitle(),
-        				album.getArtist(),
-        				album.getGenre(),
-        				album.getReleaseYear(),
-        				album.getImageURL(),
-        				realSongs
-        			);
-        		}
-        	});
+            FirebaseServiceImpl firebaseService = new FirebaseServiceImpl();
+            List<Song> realSongs = firebaseService.fetchAlbumSongsByIds(album.getSongIdList());
+            System.out.println("Successfully download " + realSongs.size() + " songs.");
+            Platform.runLater(() -> {
+                if(mainController != null) {
+                    mainController.loadSongDetail(
+                        album.getTitle(),
+                        album.getArtist(),
+                        album.getGenre(),
+                        album.getReleaseYear(),
+                        album.getImageURL(),
+                        realSongs
+                    );
+                }
+            });
         }).start();
     }
     private void fetchAlbumsFromFirebase() {
-    	System.out.println("Loading albums list...");
-    	new Thread(()-> {
-    		FirebaseServiceImpl firebaseService = new FirebaseServiceImpl();
-    		List<Album> allAlbums = firebaseService.fetchAlbums();
-    		System.out.println("Download " + allAlbums.size() + " albums");
-    		Platform.runLater(() -> {
-    			processNewestAlbums(allAlbums);
-    		});
-    	}).start();
+        System.out.println("Loading albums list...");
+        new Thread(()-> {
+            FirebaseServiceImpl firebaseService = new FirebaseServiceImpl();
+            List<Album> allAlbums = firebaseService.fetchAlbums();
+            System.out.println("Download " + allAlbums.size() + " albums");
+            Platform.runLater(() -> {
+                processNewestAlbums(allAlbums);
+            });
+        }).start();
     }
     private void openDetailedSongList(String listTitle) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
             Node view = loader.load();
             SongListController ctrl = loader.getController();
-            
-            // 1. Kết nối với MainViewController
             ctrl.setMainController(this.mainController);
             
-            // 2. XÁC ĐỊNH ID CHUẨN (Lấy đúng cái SYSTEM_TODAY'S_HITS)
-            // Logic này sẽ biến "Today's Hits" thành "SYSTEM_TODAY'S_HITS"
             String finalId = "SYSTEM_" + listTitle.toUpperCase().replace(" ", "_");
             
-            // 3. TRUYỀN DỮ LIỆU SANG SONG_LIST_CONTROLLER
-            // Truyền một list rỗng (new ArrayList<>()) vào tham số thứ 8.
-            // TẠI SAO? Để hàm refreshData() trong SongListController thấy list rỗng 
-            // và tự động lên Firebase kéo bài hát từ node finalId về.
+         // --- LOGIC TÁCH ẢNH RIÊNG ---
+            String coverPath = "/images/playlist_cover.png"; // Ảnh mặc định
+            
+            // ĐÃ FIX: Thêm chữ 's' vào chữ Hits cho khớp với tên lúc truyền vào
+            if (listTitle.equals("Today's Hits")) { 
+                coverPath = "/images/todayhit.jpg"; 
+            } else if (listTitle.equals("All Songs")) {
+                coverPath = "/images/allsong.jpg"; 
+            }
+
             ctrl.setData(
                 finalId, 
                 listTitle, 
                 "Curated for you", 
                 "System Playlist", 
-                "/images/playlist_cover.png", 
+                coverPath, // Sử dụng biến coverPath vừa tách
                 2026, 
                 "Various", 
                 new java.util.ArrayList<>() 
             );
 
-            // 4. Đưa giao diện lên màn hình
             if (mainController != null) {
                 mainController.getContentArea().getChildren().setAll(view);
             }
-
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -480,14 +483,14 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
     // Latest songs list
     private final ObservableList<Song> LATEST_SONGS = FXCollections.observableArrayList();   
     public void processLatestSongs(List<Song> allSongsFromDatabase) {
-    	System.out.println("Số lượng tải về từ Firebase: " + allSongsFromDatabase.size());
-    	NEW_ALBUMS.clear();
-    	allSongsFromDatabase.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
-    	int lim = Math.min(9, allSongsFromDatabase.size());
-    	for(int i = 0; i < lim; ++i) {
-    		LATEST_SONGS.add(allSongsFromDatabase.get(i));
-    	}
-    	updateLatestSongsUI();
+        System.out.println("Số lượng tải về từ Firebase: " + allSongsFromDatabase.size());
+        LATEST_SONGS.clear();
+        allSongsFromDatabase.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
+        int lim = Math.min(9, allSongsFromDatabase.size());
+        for(int i = 0; i < lim; ++i) {
+            LATEST_SONGS.add(allSongsFromDatabase.get(i));
+        }
+        updateLatestSongsUI();
     }
     private void updateLatestSongsUI() {
         // Latest song 1
@@ -573,15 +576,14 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
         }   
     }
     private void fetchLatestSongsFromFirebase() {
-    	System.out.println("Loading songs list...");
-    	new Thread(()-> {
-    		FirebaseServiceImpl firebaseService = new FirebaseServiceImpl();
-    		List<Song> allSongs = firebaseService.fetchSongs();
-    		System.out.println("Download " + allSongs.size() + " Songs");
-    		Platform.runLater(() -> {
-    			processLatestSongs(allSongs);
-    		});
-    	}).start();
+        System.out.println("Loading songs list...");
+        new Thread(()-> {
+            FirebaseServiceImpl firebaseService = new FirebaseServiceImpl();
+            List<Song> allSongs = firebaseService.fetchSongs();
+            System.out.println("Download " + allSongs.size() + " Songs");
+            Platform.runLater(() -> {
+                processLatestSongs(allSongs);
+            });
+        }).start();
     }
 }
-
