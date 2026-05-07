@@ -260,14 +260,10 @@ public class MainViewController implements Initializable {
             SongListController ctrl = loader.getController();
             ctrl.setMainController(this); 
 
-            // CÚ FIX: 
-            // 1. Thêm ID "SONG_LIST_VIEW" vào đầu cho đủ 8 tham số.
-            // 2. Tham số cuối truyền một ArrayList rỗng vì chúng ta đã có sẵn 'data' (SongItem) rồi.
-            ctrl.setData("SONG_LIST_VIEW", title, subtitle, desc, null, 0, "", new java.util.ArrayList<>());            
+            // Đảm bảo đường dẫn này là duy nhất cho "All Songs"
+            ctrl.setData("SONG_LIST_VIEW", title, subtitle, desc, "/images/allsong.jpg", 0, "", new java.util.ArrayList<>());            
             
-            // 3. Bơm trực tiếp danh sách SongItem vào giao diện
             ctrl.setSongsList(data);
-
             contentArea.getChildren().setAll(view);
         } catch (IOException e) { e.printStackTrace(); }
     }

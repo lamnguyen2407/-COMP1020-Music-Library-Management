@@ -234,26 +234,39 @@ public class SongListController implements Initializable, MainViewController.Mai
             
             AddSongModalController modalCtrl = loader.getController();
             
-            // ĐOẠN NÀY LÀ CHÌA KHÓA:
             if (currentAlbumId != null) {
                 modalCtrl.setTargetAlbumId(currentAlbumId);
-                // currentCover chính là URL ảnh bìa của Album đang xem!
                 modalCtrl.setPredefinedData(currentArtist, currentGenre, currentYear, currentCover);
             }
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL); 
             stage.setScene(new Scene(root));
-            stage.showAndWait(); 
+            stage.showAndWait(); // Code sẽ tạm dừng ở đây cho đến khi bấm Save và đóng Modal
             
-            // Thêm độ trễ 300ms để Firebase kịp đồng bộ xong trước khi refresh UI
-            new Thread(() -> {
-                try { Thread.sleep(300); } catch (InterruptedException e) {}
-                Platform.runLater(this::refreshData);
-            }).start();
+            // --- ĐOẠN CODE FIX LỖI (Thay thế đoạn Thread.sleep 300ms cũ) ---
+            // Lấy ngay bài hát vừa được tạo thành công từ modal
+            Song addedSong = modalCtrl.getCreatedSong();
+            
+            if (addedSong != null) {
+                // Đóng gói thành SongItem
+                SongItem newItem = new SongItem(
+                    addedSong.getSongId(), addedSong.getTitle(), addedSong.getArtist(),
+                    addedSong.getGenre(), addedSong.getDuration(), addedSong.getReleaseYear(),
+                    addedSong.getAudioURL(), addedSong.getImageURL()
+                );
+                
+                // Add thẳng vào List hiển thị trên giao diện (UI sẽ tự động chèn thêm dòng nhạc này luôn)
+                songs.add(newItem);
+                
+                // Cập nhật danh sách ID nội bộ phòng trường hợp logic khác cần dùng
+                if (currentSongIdList != null) {
+                    currentSongIdList.add(addedSong.getSongId());
+                }
+            }
+            // ---------------------------------------------------------------
 
         } catch (IOException e) { e.printStackTrace(); }
     }
-
     @FXML 
     private void onDeleteToggleClicked() {
         isDeleteMode = !isDeleteMode;
@@ -303,12 +316,20 @@ public class SongListController implements Initializable, MainViewController.Mai
         
         if (coverImageView != null && cover != null && !cover.trim().isEmpty()) {
             try {
-                if (cover.startsWith("http")) coverImageView.setImage(new Image(cover, true)); 
-                else {
+                if (cover.startsWith("http")) {
+                    coverImageView.setImage(new Image(cover, true)); 
+                } else {
                     URL url = getClass().getResource(cover);
-                    if (url != null) coverImageView.setImage(new Image(url.toExternalForm()));
+                    if (url != null) {
+                        coverImageView.setImage(new Image(url.toExternalForm()));
+                    } else {
+                        // NẾU SAI ĐƯỜNG DẪN ẢNH HOẶC CHỮ HOA/THƯỜNG, NÓ SẼ BÁO LỖI RA CONSOLE NGAY!
+                        System.err.println("❌ BÁO ĐỘNG: KHÔNG TÌM THẤY ẢNH TẠI ĐƯỜNG DẪN -> " + cover);
+                    }
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                System.err.println("❌ LỖI LOAD ẢNH: " + e.getMessage());
+            }
         }
 
         refreshData(); 

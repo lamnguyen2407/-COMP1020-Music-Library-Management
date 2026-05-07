@@ -20,7 +20,13 @@ public class AddSongModalController {
 
     // BIẾN MỚI: Để giữ ID của album hiện tại
     private String currentAlbumId;
-
+    
+    private Song createdSong = null; 
+    
+    public Song getCreatedSong() { 
+        return createdSong; 
+    }
+    
     // HÀM MỚI: Để SongListController truyền AlbumID sang
     public void setTargetAlbumId(String albumId) {
         this.currentAlbumId = albumId;
@@ -57,12 +63,14 @@ public class AddSongModalController {
                     DatabaseManager.getInstance().getService().addSongToAlbum(currentAlbumId, id);
                 }
             }
-
+            
+            this.createdSong = newSong;
             closeModal();
+            
         } catch (Exception e) {
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Vui lòng kiểm tra lại dữ liệu nhập vào (Năm, Thời lượng phải là số).");
         }
-   
     }
 
     @FXML

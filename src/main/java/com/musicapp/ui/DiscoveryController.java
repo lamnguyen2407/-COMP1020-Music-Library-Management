@@ -151,30 +151,31 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
             Node view = loader.load();
             SongListController ctrl = loader.getController();
-            
-            // 1. Gắn MainViewController
             ctrl.setMainController(this.mainController);
             
-            // 2. XÁC ĐỊNH ID CHUẨN (Lấy luôn cái SYSTEM_TODAY'S_HITS)
-            // Logic biến "Today's Hits" thành "SYSTEM_TODAY'S_HITS"
             String finalId = "SYSTEM_" + listTitle.toUpperCase().replace(" ", "_");
             
-            // 3. TRUYỀN DỮ LIỆU SANG SONG_LIST_CONTROLLER
-            // Truyền 1 list rỗng (new ArrayList<>()) vào tham số ID
-            // TẠI SAO? Vì hàm refreshData() trong SongListController thấy list rỗng
-            // sẽ tự động lên Firebase kéo node finalId về!
+         // --- LOGIC TÁCH ẢNH RIÊNG ---
+            String coverPath = "/images/playlist_cover.png"; // Ảnh mặc định
+            
+            // ĐÃ FIX: Thêm chữ 's' vào chữ Hits cho khớp với tên lúc truyền vào
+            if (listTitle.equals("Today's Hits")) { 
+                coverPath = "/images/todayhit.jpg"; 
+            } else if (listTitle.equals("All Songs")) {
+                coverPath = "/images/allsong.jpg"; 
+            }
+
             ctrl.setData(
                 finalId, 
                 listTitle, 
                 "Curated for you", 
                 "System Playlist", 
-                "/images/playlist_cover.png", 
+                coverPath, // Sử dụng biến coverPath vừa tách
                 2026, 
                 "Various", 
                 new java.util.ArrayList<>() 
             );
 
-            // 4. Đẩy giao diện lên
             if (mainController != null) {
                 mainController.getContentArea().getChildren().setAll(view);
             }
