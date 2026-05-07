@@ -114,7 +114,42 @@ public class FirebaseServiceImpl implements FirebaseService {
     public void deleteSong(String id) {
         this.dbRef.child("songs").child(id).removeValueAsync();
     }
+    @Override 
+    public List<Song> fetchAlbumSongsByIds(List<String> songIds) {
+    	List<Song> songList = new ArrayList<>();
+    	if(songIds == null || songIds.isEmpty()) return songList;
+    	CountDownLatch latch = new CountDownLatch(songIds.size());
+    	for (String id : songIds) {
+            this.dbRef.child("songs").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        Song song = snapshot.getValue(Song.class);
+                        if (song != null) {
+                            // Dùng synchronized để đảm bảo an toàn khi add từ nhiều luồng Firebase
+                            synchronized (songList) {
+                                songList.add(song);
+                            }
+                        }
+                    }
+                    latch.countDown(); // Tải xong 1 bài, đếm ngược Latch
+                }
 
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    latch.countDown(); // Lỗi cũng đếm ngược để không bị treo
+                }
+            });
+        }
+
+        try {
+            latch.await(); // Đóng băng luồng hiện tại cho đến khi tải đủ số bài hát
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return songList;
+    }
     @Override
     public List<Album> fetchAlbums() {
         List<Album> albumList = new ArrayList<>();

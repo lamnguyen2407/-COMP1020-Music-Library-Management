@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
-
+import com.google.firebase.database.*;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -199,7 +200,26 @@ public class MainViewController implements Initializable {
         setMediaPlayer(player);
         updatePlayerUI(songTitle, artistName, imagePath);
     }
-
+    public void showPlayerBar(String songTitle, String artistName, String imagePath, String audioUrl) {
+        try {
+            // 1. Create the audio player if the URL exists
+            if (audioUrl != null && !audioUrl.isEmpty()) {
+                // Fix spaces in the URL just like your other method does
+                String uriString = audioUrl.trim().replace(" ", "%20");
+                Media hit = new Media(uriString);
+                
+                setMediaPlayer(new MediaPlayer(hit));
+                mediaPlayer.play();
+            }
+            
+            // 2. Update the UI text and image
+            updatePlayerUI(songTitle, artistName, imagePath);
+            
+        } catch (Exception e) {
+            System.err.println("❌ LỖI KHỞI TẠO MEDIA TỪ DISCOVERY: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     public void showPlayerBar(Song currentSong, List<Song> queue, int index) {
         try {
             if (currentSong.getAudioURL() != null && !currentSong.getAudioURL().isEmpty()) {
@@ -283,7 +303,53 @@ public class MainViewController implements Initializable {
             e.printStackTrace();
         }
     }
-    
+    public void fetchAndLoadAlbum(String albumName, String artist, String genre, int year, String imageURL, List<String> songIds) {
+        
+        List<Song> realSongs = new ArrayList<>();
+
+        // 1. Nếu album chưa có bài hát nào, gọi ngay hàm cũ của bạn để mở màn hình
+        if (songIds == null || songIds.isEmpty()) {
+            loadSongDetail(albumName, artist, genre, year, imageURL, realSongs);
+            return;
+        }
+
+        // 2. Kết nối tới node chứa toàn bộ bài hát
+        DatabaseReference songsRef = FirebaseDatabase.getInstance().getReference("ADMIN_ALL_SONGS");
+
+        // Biến đếm an toàn
+        AtomicInteger loadedCount = new AtomicInteger(0);
+
+        // 3. Vòng lặp tải từng bài hát
+        for (String id : songIds) {
+            songsRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        Song song = snapshot.getValue(Song.class);
+                        if (song != null) {
+                            realSongs.add(song);
+                        }
+                    }
+                    checkIfFinished();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    System.err.println("❌ Lỗi tải bài hát: " + error.getMessage());
+                    checkIfFinished(); 
+                }
+
+                private void checkIfFinished() {
+                    if (loadedCount.incrementAndGet() == songIds.size()) {
+                        // Tải xong hết! Gọi hàm loadSongDetail CŨ CỦA BẠN để chuyển màn hình
+                        Platform.runLater(() -> {
+                            loadSongDetail(albumName, artist, genre, year, imageURL, realSongs);
+                        });
+                    }
+                }
+            });
+        }
+    }
     public void loadSongDetail(String albumName, String artist, String genre, int year, String imageURL, List<Song> songs) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AlbumView.fxml"));
