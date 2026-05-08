@@ -185,58 +185,33 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     }
 
     private void loadTodaysHitsView() {
-        new Thread(() -> {
-            try {
-                Playlist todaysHits = DatabaseManager.getInstance().getService().fetchPlaylist("pl_system_todays_hits");
-                
-                if (todaysHits != null) {
-                    List<String> songIds = todaysHits.getSongIdList();
-                    List<Song> dbSongs = DatabaseManager.getInstance().getService().fetchSongsByIds(songIds);
-                    
-                    ObservableList<SongListController.SongItem> songItems = FXCollections.observableArrayList();
-                    for (Song s : dbSongs) {
-                        songItems.add(new SongListController.SongItem(
-                            s.getSongId(), s.getTitle(), s.getArtist(), 
-                            s.getGenre() != null ? s.getGenre() : "Pop", 
-                            s.getDuration(), s.getReleaseYear(), 
-                            s.getAudioURL(), s.getImageURL()
-                        ));
-                    }
-                    
-                    Platform.runLater(() -> {
-                        try {
-                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
-                            Node view = loader.load();
-                            SongListController ctrl = loader.getController();
-                            if (ctrl instanceof MainViewController.MainViewAware) {
-                                ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
-                            }
-                            
-                            ctrl.setData(
-                                todaysHits.getPlaylistId(),
-                                "Today's Hits", // Đảm bảo đồng nhất tên
-                                "System Playlist",
-                                "The biggest tracks on everyone's mind right now.",
-                                "/images/todayhit.jpg", // Ép dùng ảnh nội bộ
-                                2026,
-                                "Various Artists",
-                                new java.util.ArrayList<>()
-                            );
-                            
-                            ctrl.setSongsList(songItems); 
-                            
-                            if (mainController != null) {
-                                mainController.getContentArea().getChildren().setAll(view);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
+            Node view = loader.load();
+            SongListController ctrl = loader.getController();
+            
+            if (ctrl instanceof MainViewController.MainViewAware) {
+                ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
             }
-        }).start();
+            
+            // TRUYỀN ĐÚNG ID MÀ MAIN VIEW ĐANG DÙNG
+            ctrl.setData(
+                "SYSTEM_TODAY'S_HITS",  // <--- ĐỔI DÒNG NÀY LÀ XONG (thay vì "pl_system_todays_hits")
+                "Today's Hits", 
+                "System Playlist",
+                "The biggest tracks on everyone's mind right now.",
+                "/images/todayhit.jpg", 
+                2026,
+                "Various Artists",
+                new java.util.ArrayList<>()
+            );
+            
+            if (mainController != null) {
+                mainController.getContentArea().getChildren().setAll(view);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadCompactView(String title) {

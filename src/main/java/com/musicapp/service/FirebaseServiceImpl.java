@@ -255,38 +255,39 @@ public class FirebaseServiceImpl implements FirebaseService {
     @Override
     public List<String> fetchSongIdsFromPlaylist(String playlistId) {
         List<String> ids = new ArrayList<>();
-        // Tạo một "lời hứa" (Future) để đợi dữ liệu từ Firebase
         CompletableFuture<DataSnapshot> future = new CompletableFuture<>();
 
-        // Dùng Listener để lấy dữ liệu một lần duy nhất
         this.dbRef.child("playlists").child(playlistId).child("songIds")
             .addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
-                    // Khi có dữ liệu, hoàn thành "lời hứa"
                     future.complete(snapshot);
                 }
-
                 @Override
                 public void onCancelled(DatabaseError error) {
-                    // Nếu lỗi, báo lỗi cho "lời hứa"
                     future.completeExceptionally(error.toException());
                 }
             });
 
         try {
-            // Đợi tối đa 10 giây để lấy dữ liệu (tránh treo luồng vĩnh viễn nếu mạng lag)
             DataSnapshot snapshot = future.get(10, java.util.concurrent.TimeUnit.SECONDS);
-            
             if (snapshot != null && snapshot.exists()) {
                 for (DataSnapshot child : snapshot.getChildren()) {
-                    ids.add(child.getKey()); // Lấy cái ID bài hát (ví dụ: 3333000)
+                    Object value = child.getValue();
+                    
+                    // NẾU LÀ BOOLEAN: Dành cho nhạc được add bằng app ("ID": true)
+                    if (value instanceof Boolean) {
+                        ids.add(child.getKey());
+                    } 
+                    // NẾU LÀ SỐ HOẶC CHUỖI: Dành cho list nhập tay trên Firebase (0: 3333001)
+                    else {
+                        ids.add(String.valueOf(value)); 
+                    }
                 }
             }
         } catch (Exception e) {
             System.err.println("❌ Lỗi fetch ID từ Firebase: " + e.getMessage());
         }
-
         return ids;
     }
     

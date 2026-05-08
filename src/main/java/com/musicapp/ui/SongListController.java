@@ -442,10 +442,12 @@ public class SongListController implements Initializable, MainViewController.Mai
         }
     }
     
-    // Hàm bổ trợ để hiển thị dữ liệu Search hoặc dữ liệu ép từ bên ngoài vào
+ // Hàm bổ trợ để hiển thị dữ liệu Search hoặc dữ liệu ép từ bên ngoài vào
     public void setSongsList(ObservableList<SongItem> manualData) {
         if (manualData != null) {
+            // Ngăn thằng refreshData() tự động fetch và ghi đè
+            this.currentAlbumId = null; 
             this.songs.setAll(manualData);
         }
     }
-}
+    }
