@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox fx:id="playerBar" alignment="CENTER" managed="false" prefHeight="100.0" spacing="0" styleClass="player-bar" visible="false" 
+      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.musicapp.ui.PlaybackViewController">
+    
+    <padding><Insets bottom="12" left="24" right="24" top="12" /></padding>
+            
+    <HBox alignment="CENTER_LEFT" prefWidth="300" spacing="14">
+        <StackPane styleClass="player-art-box">
+            <ImageView fx:id="playerArtImage" fitHeight="55" fitWidth="55" preserveRatio="true" />
+        </StackPane>
+        <VBox alignment="CENTER_LEFT" spacing="2">
+            <Label fx:id="playerSongTitle" styleClass="player-song-title" text="Not Playing" />
+            <Label fx:id="playerArtistName" styleClass="player-artist-name" text="Unknown Artist" />
+        </VBox>
+        <Button fx:id="btnLike" onAction="#onToggleLike" styleClass="player-icon-btn" text="♡" />
+    </HBox>
+
+    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS">
+        <HBox alignment="CENTER" spacing="25">
+            <Button fx:id="btnShuffle" onAction="#onShuffle" styleClass="player-icon-btn" text="⇌" />
+            <Button fx:id="btnPrev" onAction="#onPrev" styleClass="player-icon-btn" text="⏮" />
+            <Button fx:id="btnPlayPause" onAction="#onPlayPause" prefHeight="45" prefWidth="45" styleClass="player-play-btn" text="▶" />
+            <Button fx:id="btnNext" onAction="#onNext" styleClass="player-icon-btn" text="⏭" />
+            <Button fx:id="btnRepeat" onAction="#onRepeat" styleClass="player-icon-btn" text="↻" />
+        </HBox>
+        <HBox alignment="CENTER" spacing="12">
+            <Label fx:id="labelCurrentTime" styleClass="player-time" text="0:00" />
+            <Slider fx:id="progressSlider" max="100" min="0" onMouseReleased="#onSeek" prefWidth="450" styleClass="player-progress" HBox.hgrow="ALWAYS" />
+            <Label fx:id="labelTotalTime" styleClass="player-time" text="0:00" />
+        </HBox>
+    </VBox>
+
+    <HBox alignment="CENTER_RIGHT" prefWidth="250" spacing="10">
+        <Label styleClass="volume-icon" text="🔊" />
+        <Slider fx:id="volumeSlider" max="100" min="0" prefWidth="120" styleClass="player-volume" value="70" />
+    </HBox>
+</HBox>

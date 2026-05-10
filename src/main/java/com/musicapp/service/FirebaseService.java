@@ -45,9 +45,14 @@ public interface FirebaseService {
     public List<String> fetchSongIdsFromPlaylist(String playlistId);
     
     List<String> fetchSongIdsFromAlbum(String albumId);
-    
+    List<Song> fetchAlbumSongsByIds(List<String> songIds);
     // 4. USERS 
     
     void saveUser(User user);
     void authenticateUser(String identifier, String password, LoginCallback callback);
+    List<Playlist> fetchUserPlaylists(String userId);
+    
+    void saveNewUserPlaylist(String uid, String name);
+    
+    public void toggleFavoriteSong(String userId, Song song);
 }

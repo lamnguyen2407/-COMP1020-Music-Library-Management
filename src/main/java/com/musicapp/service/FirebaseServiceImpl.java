@@ -81,7 +81,11 @@ public class FirebaseServiceImpl implements FirebaseService {
             public void onDataChange(DataSnapshot snapshot) {
                 for (DataSnapshot c : snapshot.getChildren()) {
                     Song s = c.getValue(Song.class);
-                    if (s != null) songList.add(s);
+                    if (s != null) {
+                        // QUAN TRỌNG: Phải lấy cái Key gán vào ID thì app mới biết nó là ai!
+                        s.setSongId(c.getKey()); 
+                        songList.add(s);
+                    }
                 }
                 latch.countDown();
             }
@@ -114,7 +118,42 @@ public class FirebaseServiceImpl implements FirebaseService {
     public void deleteSong(String id) {
         this.dbRef.child("songs").child(id).removeValueAsync();
     }
+    @Override 
+    public List<Song> fetchAlbumSongsByIds(List<String> songIds) {
+    	List<Song> songList = new ArrayList<>();
+    	if(songIds == null || songIds.isEmpty()) return songList;
+    	CountDownLatch latch = new CountDownLatch(songIds.size());
+    	for (String id : songIds) {
+            this.dbRef.child("songs").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        Song song = snapshot.getValue(Song.class);
+                        if (song != null) {
+                            // Dùng synchronized để đảm bảo an toàn khi add từ nhiều luồng Firebase
+                            synchronized (songList) {
+                                songList.add(song);
+                            }
+                        }
+                    }
+                    latch.countDown(); // Tải xong 1 bài, đếm ngược Latch
+                }
 
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    latch.countDown(); // Lỗi cũng đếm ngược để không bị treo
+                }
+            });
+        }
+
+        try {
+            latch.await(); // Đóng băng luồng hiện tại cho đến khi tải đủ số bài hát
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return songList;
+    }
     @Override
     public List<Album> fetchAlbums() {
         List<Album> albumList = new ArrayList<>();
@@ -155,12 +194,15 @@ public class FirebaseServiceImpl implements FirebaseService {
 
     @Override
     public void saveUserPlaylist(String userId, Playlist playlist) {
-        if (userId == null || playlist == null) return;
+        // 1. Lưu thông tin chi tiết playlist vào nhánh chung
+        this.dbRef.child("playlists").child(playlist.getPlaylistId()).setValueAsync(playlist);
         
-        // Save to path: /users/{userId}/playlists/{playlistId}
-        this.dbRef.child("users").child(userId).child("playlists")
-                  .child(playlist.getPlaylistId()).setValueAsync(playlist);
-        System.out.println("Saved playlist for user: " + userId);
+        // 2. Lưu ID này vào danh sách playlist của User đó
+        this.dbRef.child("users")
+                  .child(userId)
+                  .child("playlistIds")
+                  .child(playlist.getPlaylistId())
+                  .setValueAsync(true); // Chỉ cần lưu ID là key, value là true cho nhẹ
     }
 
     // ==========================================
@@ -255,38 +297,39 @@ public class FirebaseServiceImpl implements FirebaseService {
     @Override
     public List<String> fetchSongIdsFromPlaylist(String playlistId) {
         List<String> ids = new ArrayList<>();
-        // Tạo một "lời hứa" (Future) để đợi dữ liệu từ Firebase
         CompletableFuture<DataSnapshot> future = new CompletableFuture<>();
 
-        // Dùng Listener để lấy dữ liệu một lần duy nhất
         this.dbRef.child("playlists").child(playlistId).child("songIds")
             .addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
-                    // Khi có dữ liệu, hoàn thành "lời hứa"
                     future.complete(snapshot);
                 }
-
                 @Override
                 public void onCancelled(DatabaseError error) {
-                    // Nếu lỗi, báo lỗi cho "lời hứa"
                     future.completeExceptionally(error.toException());
                 }
             });
 
         try {
-            // Đợi tối đa 10 giây để lấy dữ liệu (tránh treo luồng vĩnh viễn nếu mạng lag)
             DataSnapshot snapshot = future.get(10, java.util.concurrent.TimeUnit.SECONDS);
-            
             if (snapshot != null && snapshot.exists()) {
                 for (DataSnapshot child : snapshot.getChildren()) {
-                    ids.add(child.getKey()); // Lấy cái ID bài hát (ví dụ: 3333000)
+                    Object value = child.getValue();
+                    
+                    // NẾU LÀ BOOLEAN: Dành cho nhạc được add bằng app ("ID": true)
+                    if (value instanceof Boolean) {
+                        ids.add(child.getKey());
+                    } 
+                    // NẾU LÀ SỐ HOẶC CHUỖI: Dành cho list nhập tay trên Firebase (0: 3333001)
+                    else {
+                        ids.add(String.valueOf(value)); 
+                    }
                 }
             }
         } catch (Exception e) {
             System.err.println("❌ Lỗi fetch ID từ Firebase: " + e.getMessage());
         }
-
         return ids;
     }
     
@@ -365,5 +408,120 @@ public class FirebaseServiceImpl implements FirebaseService {
     			callback.onError("Database Error: " + error.getMessage());
     		}
     	});
+    }
+    
+    @Override
+    public List<Playlist> fetchUserPlaylists(String userId) {
+        List<Playlist> playlists = new ArrayList<>();
+        CompletableFuture<DataSnapshot> userFuture = new CompletableFuture<>();
+
+        // 1. Tìm xem User này có danh sách ID playlist nào không
+        this.dbRef.child("users").child(userId).child("playlistIds")
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    userFuture.complete(snapshot);
+                }
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    userFuture.completeExceptionally(error.toException());
+                }
+            });
+
+        try {
+            DataSnapshot playlistIdsSnapshot = userFuture.get(5, java.util.concurrent.TimeUnit.SECONDS);
+            
+            if (playlistIdsSnapshot.exists()) {
+                // 2. Nếu có ID, duyệt qua từng ID để lấy Object Playlist thật sự
+                for (DataSnapshot idSnapshot : playlistIdsSnapshot.getChildren()) {
+                    String pId = idSnapshot.getKey(); 
+                    
+                    // Chỗ này mình fetch nốt thông tin Playlist từ nhánh /playlists
+                    Playlist p = fetchPlaylistById(pId); // Mày nên có hàm phụ này
+                    if (p != null) {
+                        playlists.add(p);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("ℹ️ User chưa có playlist hoặc lỗi kết nối: " + e.getMessage());
+        }
+
+        return playlists; // Trả về list (có thể rỗng nhưng không được null)
+    }
+
+    // Hàm hỗ trợ lấy 1 playlist theo ID
+    private Playlist fetchPlaylistById(String playlistId) throws Exception {
+        CompletableFuture<DataSnapshot> pFuture = new CompletableFuture<>();
+        this.dbRef.child("playlists").child(playlistId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) { pFuture.complete(snapshot); }
+            @Override
+            public void onCancelled(DatabaseError error) { pFuture.completeExceptionally(error.toException()); }
+        });
+        
+        DataSnapshot ds = pFuture.get(5, java.util.concurrent.TimeUnit.SECONDS);
+        if (ds.exists()) {
+            return ds.getValue(Playlist.class);
+        }
+        return null;
+    }
+    
+    @Override
+    public void saveNewUserPlaylist(String uid, String name) {
+        // 1. Tạo một ID ngẫu nhiên cho Playlist mới trên Firebase
+        String playlistId = dbRef.child("playlists").push().getKey();
+        
+        if (playlistId == null) return;
+
+        // 2. Tạo Object Playlist (Đảm bảo Class Playlist của mày có các setter này)
+        Playlist newPlaylist = new Playlist();
+        newPlaylist.setPlaylistId(playlistId);
+        newPlaylist.setName(name);
+        newPlaylist.setOwnerId(uid);
+        // Khởi tạo một Map rỗng để tránh lỗi Null sau này khi add bài hát
+        newPlaylist.setSongIds(new java.util.HashMap<>()); 
+
+        // 3. Thực hiện lưu đồng thời vào 2 nhánh (Atomic Update)
+        // Lưu thông tin chi tiết của Playlist
+        dbRef.child("playlists").child(playlistId).setValueAsync(newPlaylist);
+        
+        // Lưu ID của Playlist này vào danh sách quản lý của User
+        dbRef.child("users").child(uid).child("playlistIds").child(playlistId).setValueAsync(true);
+        
+        System.out.println("✅ Firebase: Đã tạo playlist " + name + " thành công!");
+    }
+    
+    @Override
+    public void toggleFavoriteSong(String userId, Song song) {
+        String favPlaylistId = "fav_" + userId;
+        DatabaseReference favRef = dbRef.child("playlists").child(favPlaylistId);
+
+        favRef.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(com.google.firebase.database.DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    // Tạo mới nếu chưa từng thả tim bài nào
+                    Playlist favPlaylist = new Playlist();
+                    favPlaylist.setPlaylistId(favPlaylistId);
+                    favPlaylist.setName("Your favorite songs");
+                    favPlaylist.setOwnerId(userId);
+                    // Lưu một cái cờ (flag) để sau này code UI biết đường mà vẽ trái tim
+                    favPlaylist.setType("SYSTEM_FAVORITE"); 
+                    favPlaylist.getSongIds().put(song.getSongId(), true);
+
+                    dbRef.child("playlists").child(favPlaylistId).setValueAsync(favPlaylist);
+                    dbRef.child("users").child(userId).child("playlistIds").child(favPlaylistId).setValueAsync(true);
+                } else {
+                    // Nếu có rồi thì đảo trạng thái (Like <-> Unlike)
+                    if (snapshot.child("songIds").hasChild(song.getSongId())) {
+                        favRef.child("songIds").child(song.getSongId()).removeValueAsync();
+                    } else {
+                        favRef.child("songIds").child(song.getSongId()).setValueAsync(true);
+                    }
+                }
+            }
+            @Override public void onCancelled(DatabaseError error) {}
+        });
     }
 }

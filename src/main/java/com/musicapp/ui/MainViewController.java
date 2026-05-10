@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
+import com.google.firebase.database.*;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -31,16 +34,14 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class MainViewController implements Initializable {
-
+    
     // ══════════════════════════════════════════
-    // FXML — TopBar & PlayerBar
+    // FXML — TopBar
     // ══════════════════════════════════════════
-    @FXML private HBox topBar, playerBar;
+    @FXML private HBox topBar;
     @FXML private TextField searchField;
-    @FXML private Label userNameLabel, playerSongTitle, playerArtistName, labelCurrentTime, labelTotalTime;
-    @FXML private ImageView userImageView, playerArtImage;
-    @FXML private Button btnLike, btnShuffle, btnPrev, btnPlayPause, btnNext, btnRepeat;
-    @FXML private Slider progressSlider, volumeSlider;
+    @FXML private Label userNameLabel;
+    @FXML private ImageView userImageView;
 
     // ══════════════════════════════════════════
     // FXML — Sidebar & Content
@@ -49,13 +50,14 @@ public class MainViewController implements Initializable {
     @FXML private StackPane contentArea;
 
     // ══════════════════════════════════════════
+    // FXML — Nhúng PlaybackView (fx:id="playback")
+    // ══════════════════════════════════════════
+    @FXML private PlaybackViewController playbackController;
+
+    // ══════════════════════════════════════════
     // State
     // ══════════════════════════════════════════
-    private boolean isPlaying = false;
-    private boolean isLiked = false;
-    private boolean isShuffled = false;
-    private boolean isRepeating = false;
-    private MediaPlayer mediaPlayer;
+    private MediaPlayer mediaPlayer; 
 
     private static final String FXML_DISCOVERY = "/DiscoveryView.fxml";
     private static final String FXML_ACCOUNT = "/AccountView.fxml";
@@ -67,19 +69,19 @@ public class MainViewController implements Initializable {
         userNameLabel.setText(SessionManager.isAdmin ? "Admin View" : "User View");
         loadView(FXML_DISCOVERY);
 
+        // Khởi tạo tham chiếu cho Controller con
+        if (playbackController != null) {
+            playbackController.setMainController(this);
+        } else {
+            System.err.println("⚠️ CẢNH BÁO: Không tìm thấy playbackController!");
+        }
+
         if (searchField != null) {
             searchField.textProperty().addListener((obs, oldVal, newVal) -> {
                 if (!newVal.isBlank()) setActiveNav(btnSearch);
             });
             searchField.setOnMouseClicked(e -> setActiveNav(btnSearch));
             searchField.setOnAction(e -> handleSearchRequest());
-        }
-
-        if (volumeSlider != null) {
-            volumeSlider.setValue(70);
-            volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-                if (mediaPlayer != null) mediaPlayer.setVolume(newVal.doubleValue() / 100);
-            });
         }
     }
 
@@ -119,129 +121,96 @@ public class MainViewController implements Initializable {
     }
 
     // ══════════════════════════════════════════
-    // PLAYER BAR HANDLERS 
-    // ══════════════════════════════════════════
-
-    @FXML private void onShuffle() { isShuffled = !isShuffled; }
-    @FXML private void onRepeat() { isRepeating = !isRepeating; }
-    @FXML private void onToggleLike() { isLiked = !isLiked; btnLike.setText(isLiked ? "❤️" : "♡"); }
-
-    @FXML 
-    private void onPlayPause() { 
-        if (mediaPlayer == null) return;
-
-        MediaPlayer.Status status = mediaPlayer.getStatus();
-
-        // CÚ FIX: Ngăn chặn thao tác khi Media chưa tải xong lõi (jfxPlayer) hoặc bị lỗi link
-        if (status == MediaPlayer.Status.UNKNOWN || status == MediaPlayer.Status.HALTED) {
-            System.out.println("⏳ Nhạc đang tải hoặc link bị lỗi, chưa thể phát/dừng lúc này...");
-            return;
-        }
-
-        try {
-            if (status == MediaPlayer.Status.PLAYING) {
-                mediaPlayer.pause();
-                isPlaying = false;
-                btnPlayPause.setText("▶");
-            } else {
-                mediaPlayer.play();
-                isPlaying = true;
-                btnPlayPause.setText("⏸");
-            }
-        } catch (Exception e) {
-            System.err.println("❌ Lỗi từ nút Play/Pause: " + e.getMessage());
-        }
-    }
-
-    @FXML private void onNext() { if (SongListController.instance != null) SongListController.instance.playNext(); }
-    @FXML private void onPrev() { if (SongListController.instance != null) SongListController.instance.playPrevious(); }
-    @FXML private void onSeek() { if (mediaPlayer != null) mediaPlayer.seek(Duration.seconds(progressSlider.getValue())); }
-
-    // ══════════════════════════════════════════
-    // GẮN MEDIAPLAYER VÀ UPDATE SLIDER
+    // AUDIO ENGINE (ĐIỀU KHIỂN NHẠC)
     // ══════════════════════════════════════════
 
     public void setMediaPlayer(MediaPlayer player) {
         if (this.mediaPlayer != null) this.mediaPlayer.stop();
         this.mediaPlayer = player;
-        if (volumeSlider != null) this.mediaPlayer.setVolume(volumeSlider.getValue() / 100);
-        this.mediaPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) -> updateProgress(newTime));
-        this.mediaPlayer.setOnEndOfMedia(this::onNext);
-        isPlaying = true;
-        btnPlayPause.setText("⏸");
+        
+        // Tự động chuyển bài khi hát xong
+        this.mediaPlayer.setOnEndOfMedia(() -> {
+            if (playbackController != null) playbackController.onNext();
+        });
     }
 
-    private void updateProgress(Duration currentTime) {
-        if (mediaPlayer == null) return;
-        double current = currentTime.toSeconds();
-        double total = mediaPlayer.getTotalDuration().toSeconds();
-        if (total > 0) {
-            progressSlider.setMax(total);
-            if (!progressSlider.isPressed()) progressSlider.setValue(current);
-            labelCurrentTime.setText(formatDuration((int)current));
-            labelTotalTime.setText(formatDuration((int)total));
+    public void pauseAudio() {
+        if (this.mediaPlayer != null) {
+            this.mediaPlayer.pause();
         }
     }
 
-    private String formatDuration(int seconds) {
-        return String.format("%d:%02d", seconds / 60, seconds % 60);
+    public void resumeAudio() {
+        if (this.mediaPlayer != null) {
+            this.mediaPlayer.play();
+        }
     }
 
     // ══════════════════════════════════════════
-    // CÁC HÀM SHOW PLAYER BAR 
+    // HIỂN THỊ THANH NHẠC
+    // ══════════════════════════════════════════
+
+    public void showPlayerBar(Song currentSong, List<Song> queue, int index) {
+        try {
+            // 1. Mồi Playlist cho Backend
+            if (queue != null && !queue.isEmpty()) {
+                com.musicapp.service.PlaybackService.getInstance().setPlaylist(queue, index);
+            }
+            com.musicapp.service.PlaybackService.getInstance().play(currentSong);
+
+            // 2. Chơi nhạc thật
+            if (currentSong.getAudioURL() != null && !currentSong.getAudioURL().isEmpty()) {
+                String uriString = currentSong.getAudioURL().trim().replace(" ", "%20");
+                Media hit = new Media(uriString);
+                setMediaPlayer(new MediaPlayer(hit));
+                mediaPlayer.play();
+            }
+
+            // 3. Đá UI sang cho PlaybackViewController
+            if (playbackController != null) {
+                playbackController.showBar();
+                playbackController.setSongData(currentSong);
+            }
+
+        } catch (Exception e) { 
+            System.err.println("❌ LỖI KHỞI TẠO MEDIA: " + e.getMessage());
+        }
+    }
+
+    // ══════════════════════════════════════════
+    // CÁC HÀM TƯƠNG THÍCH NGƯỢC
     // ══════════════════════════════════════════
 
     public void showPlayerBar(String songTitle, String artistName, String imagePath) {
-        updatePlayerUI(songTitle, artistName, imagePath);
+        if (playbackController != null) {
+            Song tempSong = new Song("temp_id", songTitle, artistName, "", 0, 2026, "", imagePath);
+            playbackController.showBar();
+            playbackController.setSongData(tempSong);
+        }
     }
 
     public void showPlayerBar(String songTitle, String artistName, String imagePath, MediaPlayer player) {
         setMediaPlayer(player);
-        updatePlayerUI(songTitle, artistName, imagePath);
+        showPlayerBar(songTitle, artistName, imagePath);
     }
 
-    public void showPlayerBar(Song currentSong, List<Song> queue, int index) {
+    public void showPlayerBar(String songTitle, String artistName, String imagePath, String audioUrl) {
         try {
-            if (currentSong.getAudioURL() != null && !currentSong.getAudioURL().isEmpty()) {
-                // CÚ FIX: Xử lý khoảng trắng trong link nhạc y như SongListController
-                String uriString = currentSong.getAudioURL().trim().replace(" ", "%20");
+            if (audioUrl != null && !audioUrl.isEmpty()) {
+                String uriString = audioUrl.trim().replace(" ", "%20");
                 Media hit = new Media(uriString);
-                
                 setMediaPlayer(new MediaPlayer(hit));
                 mediaPlayer.play();
             }
-            updatePlayerUI(currentSong.getTitle(), currentSong.getArtist(), currentSong.getImageURL());
-            labelTotalTime.setText(formatDuration(currentSong.getDuration()));
-        } catch (Exception e) { 
-            System.err.println("❌ LỖI KHỞI TẠO MEDIA TỪ QUEUE: " + e.getMessage());
-            e.printStackTrace(); 
+            
+            if (playbackController != null) {
+                Song tempSong = new Song("temp_id", songTitle, artistName, "", 0, 2026, audioUrl, imagePath);
+                playbackController.showBar();
+                playbackController.setSongData(tempSong);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    }
-
-    private void updatePlayerUI(String title, String artist, String img) {
-        if (playerSongTitle != null) playerSongTitle.setText(title != null ? title : "Unknown");
-        if (playerArtistName != null) playerArtistName.setText(artist != null ? artist : "Unknown");
-        
-        if (playerArtImage != null && img != null && !img.trim().isEmpty()) {
-            try { playerArtImage.setImage(new Image(img, true)); } 
-            catch (Exception e) { System.err.println("Lỗi load ảnh"); }
-        }
-
-        if (playerBar != null && !playerBar.isVisible()) {
-            playerBar.setVisible(true);
-            playerBar.setManaged(true);
-            FadeTransition ft = new FadeTransition(Duration.millis(300), playerBar);
-            ft.setFromValue(0); ft.setToValue(1); ft.play();
-        }
-    }
-
-    public void hidePlayerBar() {
-        if (playerBar != null) {
-            playerBar.setVisible(false);
-            playerBar.setManaged(false);
-        }
-        isPlaying = false;
-        if (btnPlayPause != null) btnPlayPause.setText("▶");
     }
 
     // ══════════════════════════════════════════
@@ -254,15 +223,8 @@ public class MainViewController implements Initializable {
             Node view = loader.load();
             SongListController ctrl = loader.getController();
             ctrl.setMainController(this); 
-
-            // CÚ FIX: 
-            // 1. Thêm ID "SONG_LIST_VIEW" vào đầu cho đủ 8 tham số.
-            // 2. Tham số cuối truyền một ArrayList rỗng vì chúng ta đã có sẵn 'data' (SongItem) rồi.
-            ctrl.setData("SONG_LIST_VIEW", title, subtitle, desc, null, 0, "", new java.util.ArrayList<>());            
-            
-            // 3. Bơm trực tiếp danh sách SongItem vào giao diện
+            ctrl.setData("SONG_LIST_VIEW", title, subtitle, desc, "/images/allsong.jpg", 0, "", new java.util.ArrayList<>());            
             ctrl.setSongsList(data);
-
             contentArea.getChildren().setAll(view);
         } catch (IOException e) { e.printStackTrace(); }
     }
@@ -271,19 +233,43 @@ public class MainViewController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/NewAlbumReleaseView.fxml"));
             Node view = loader.load();
-            
             Object childController = loader.getController();
-            if (childController instanceof MainViewAware) {
-                ((MainViewAware) childController).setMainController(this);
-            }
-            
+            if (childController instanceof MainViewAware) ((MainViewAware) childController).setMainController(this);
             contentArea.getChildren().setAll(view);
-        } catch (IOException e) {
-            System.err.println("❌ Could not load NewAlbumReleaseView.fxml");
-            e.printStackTrace();
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    public void fetchAndLoadAlbum(String albumName, String artist, String genre, int year, String imageURL, List<String> songIds) {
+        List<Song> realSongs = new ArrayList<>();
+        if (songIds == null || songIds.isEmpty()) {
+            loadSongDetail(albumName, artist, genre, year, imageURL, realSongs);
+            return;
+        }
+
+        DatabaseReference songsRef = FirebaseDatabase.getInstance().getReference("ADMIN_ALL_SONGS");
+        AtomicInteger loadedCount = new AtomicInteger(0);
+
+        for (String id : songIds) {
+            songsRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        Song song = snapshot.getValue(Song.class);
+                        if (song != null) realSongs.add(song);
+                    }
+                    checkIfFinished();
+                }
+                @Override public void onCancelled(DatabaseError error) { checkIfFinished(); }
+
+                private void checkIfFinished() {
+                    if (loadedCount.incrementAndGet() == songIds.size()) {
+                        Platform.runLater(() -> loadSongDetail(albumName, artist, genre, year, imageURL, realSongs));
+                    }
+                }
+            });
         }
     }
-    
+
     public void loadSongDetail(String albumName, String artist, String genre, int year, String imageURL, List<Song> songs) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AlbumView.fxml"));
@@ -296,7 +282,7 @@ public class MainViewController implements Initializable {
     }
 
     // ══════════════════════════════════════════
-    // SEARCH LOGIC (Chọc thẳng Firebase - ĐÃ FIX CHỐNG LỖI NULL)
+    // SEARCH LOGIC
     // ══════════════════════════════════════════
 
     private void handleSearchRequest() {
@@ -310,13 +296,10 @@ public class MainViewController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
             Node view = loader.load();
             SongListController ctrl = loader.getController();
-            
             if (ctrl instanceof MainViewAware) ((MainViewAware) ctrl).setMainController(this);
             
-            // CÚ FIX 1: Truyền đủ 8 tham số (Thêm ID "SEARCH" vào đầu và null vào cuối)
             ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", "Searching...", null, 0, "Various", new java.util.ArrayList<>());
-            
-            ctrl.setColumnHeaders("ARTIST", "GENRE", "TIME"); 
+            ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE"); 
             contentArea.getChildren().setAll(view);
 
             new Thread(() -> {
@@ -328,7 +311,6 @@ public class MainViewController implements Initializable {
                     for (Song song : allSongs) {
                         String title = song.getTitle() != null ? song.getTitle().toLowerCase() : "";
                         String artist = song.getArtist() != null ? song.getArtist().toLowerCase() : "";
-                        
                         if (title.contains(lowerQuery) || artist.contains(lowerQuery)) {
                             results.add(new SongListController.SongItem(
                                 song.getSongId(), song.getTitle(), song.getArtist(), 
@@ -337,18 +319,12 @@ public class MainViewController implements Initializable {
                             ));
                         }
                     }
-                    
                     Platform.runLater(() -> {
-                        // CÚ FIX 2: Cập nhật lại kết quả tìm kiếm (Cũng phải đủ 8 tham số)
                         ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, 0, "Various", new java.util.ArrayList<>());
-                        // Đẩy list kết quả tìm kiếm vào thẳng ListView
                         ctrl.setSongsList(results); 
                     });
-                } catch (Exception e) { 
-                    e.printStackTrace(); 
-                }
+                } catch (Exception e) { e.printStackTrace(); }
             }).start();
-
         } catch (IOException e) { e.printStackTrace(); }
     }
 
@@ -375,16 +351,5 @@ public class MainViewController implements Initializable {
     }
 
     public interface MainViewAware { void setMainController(MainViewController mainController); }
-
-    private void testLoadAlbum() {
-        List<Song> testSongs = new java.util.ArrayList<>();
-        testSongs.add(new Song("1", "Going Bad", "Meek Mill", "Hip-Hop", 181, 2018, "", ""));
-        testSongs.add(new Song("2", "Amen", "Meek Mill", "Hip-Hop", 196, 2018, "", ""));
-        loadSongDetail("Championship", "Meek Mill", "Hip-Hop", 2018, "", testSongs);
-    }
-    
- // Thêm hàm này để các Controller khác có thể lấy contentArea ra dùng
-    public javafx.scene.layout.StackPane getContentArea() {
-        return contentArea;
-    }
+    public javafx.scene.layout.StackPane getContentArea() { return contentArea; }
 }
