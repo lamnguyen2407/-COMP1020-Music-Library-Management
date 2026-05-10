@@ -61,6 +61,14 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         if (audioColumn != null) audioColumn.setCellValueFactory(new PropertyValueFactory<>("audioURL"));
 
         setupRoleBasedView();
+        
+     // Chỉ hiển thị với Listener, ẩn với Admin
+        if (SessionManager.isAdmin) {
+            favoriteRow.setVisible(false);
+            favoriteRow.setManaged(false);
+        } else {
+            favoriteRow.setOnMouseClicked(e -> loadFavoriteSongView());
+        }
         refreshData();
     }
 
@@ -279,5 +287,20 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         row.setOnMouseExited(ev -> row.setStyle("-fx-background-color: transparent;"));
 
         return row;
+    }
+    private void loadFavoriteSongView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FavoriteSongView.fxml"));
+            Node view = loader.load();
+
+            FavoriteSongViewController ctrl = loader.getController();
+            ctrl.setMainController(this.mainController);
+
+            if (mainController != null) {
+                mainController.getContentArea().getChildren().setAll(view);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
