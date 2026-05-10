@@ -41,6 +41,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     @FXML private TableColumn<Song, String> titleColumn;
     @FXML private TableColumn<Song, String> artistColumn;
     @FXML private TableColumn<Song, String> audioColumn;
+    @FXML private HBox favoriteRow;
 
     private MainViewController mainController;
 
@@ -62,6 +63,14 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
         refreshData();
         setupRoleBasedView();
+        
+     // Chỉ hiển thị với Listener, ẩn với Admin
+        if (SessionManager.isAdmin) {
+            favoriteRow.setVisible(false);
+            favoriteRow.setManaged(false);
+        } else {
+            favoriteRow.setOnMouseClicked(e -> loadFavoriteSongView());
+        }
     }
 
     public void addNewPlaylist(String playlistName, File coverImageFile) {
@@ -324,5 +333,20 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         row.setOnMouseExited(ev -> row.setStyle("-fx-background-color: transparent;"));
 
         return row;
+    }
+    private void loadFavoriteSongView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FavoriteSongView.fxml"));
+            Node view = loader.load();
+
+            FavoriteSongViewController ctrl = loader.getController();
+            ctrl.setMainController(this.mainController);
+
+            if (mainController != null) {
+                mainController.getContentArea().getChildren().setAll(view);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
