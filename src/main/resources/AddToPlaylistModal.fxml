@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="15" prefWidth="450" prefHeight="500" 
+      style="-fx-background-color: #fdfbf7; -fx-background-radius: 15; -fx-border-radius: 15; -fx-border-color: #d1d1d1; -fx-border-width: 1;" 
+      xmlns:fx="http://javafx.com/fxml" 
+      fx:controller="com.musicapp.ui.AddToPlaylistController">
+    
+    <padding>
+        <Insets top="30" right="35" bottom="30" left="35"/>
+    </padding>
+
+    <!-- Header Section (Giống hệt ảnh mày gửi) -->
+    <VBox spacing="5">
+        <Label text="ADD TO PLAYLIST" 
+               style="-fx-text-fill: #4a3116; -fx-font-weight: bold; -fx-font-size: 26px; -fx-font-family: 'Segoe UI', Arial;"/>
+        <Label text="Select a playlist to update your library" 
+               style="-fx-text-fill: #8e8e8e; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', Arial;"/>
+        <Separator prefWidth="200" style="-fx-padding: 10 0 10 0;"/>
+    </VBox>
+
+    <!-- Body Section (ListView được style lại theo tone sáng) -->
+    <VBox spacing="10" VBox.vgrow="ALWAYS">
+        <Label text="Your Playlists:" 
+               style="-fx-text-fill: #4a3116; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+        
+        <ListView fx:id="playlistListView" VBox.vgrow="ALWAYS" 
+                  style="-fx-background-color: white; 
+                         -fx-background-radius: 5; 
+                         -fx-border-color: #cccccc; 
+                         -fx-border-radius: 5; 
+                         -fx-control-inner-background: white;"/>
+    </VBox>
+
+    <!-- Footer Buttons (Nút cam đất bo tròn giống ảnh) -->
+    <HBox spacing="20" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+        <Button text="CANCEL" onAction="#handleCancel" 
+                style="-fx-background-color: transparent; 
+                       -fx-text-fill: #4a3116; 
+                       -fx-font-weight: bold; 
+                       -fx-font-size: 14px; 
+                       -fx-cursor: hand;"/>
+                       
+        <Button fx:id="addBtn" text="ADD TO PLAYLIST" onAction="#handleAdd" 
+                style="-fx-background-color: #b86d3b; 
+                       -fx-text-fill: white; 
+                       -fx-font-weight: bold; 
+                       -fx-font-size: 14px; 
+                       -fx-cursor: hand; 
+                       -fx-background-radius: 30; 
+                       -fx-padding: 12 30; 
+                       -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);"/>
+    </HBox>
+</VBox>

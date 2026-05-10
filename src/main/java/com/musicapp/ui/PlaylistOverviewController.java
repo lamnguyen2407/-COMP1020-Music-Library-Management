@@ -12,8 +12,6 @@ import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
 
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -35,8 +33,10 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     public static PlaylistOverviewController instance;
 
     @FXML private VBox playlistListContainer;
+    @FXML private HBox favoriteRow; 
     @FXML private HBox newPlaylistRow; 
     @FXML private StackPane contentArea;
+    
     @FXML private TableView<Song> tableView;
     @FXML private TableColumn<Song, String> titleColumn;
     @FXML private TableColumn<Song, String> artistColumn;
@@ -60,8 +60,8 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         if (artistColumn != null) artistColumn.setCellValueFactory(new PropertyValueFactory<>("artist"));
         if (audioColumn != null) audioColumn.setCellValueFactory(new PropertyValueFactory<>("audioURL"));
 
-        refreshData();
         setupRoleBasedView();
+        refreshData();
     }
 
     public void addNewPlaylist(String playlistName, File coverImageFile) {
@@ -74,18 +74,45 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     }
 
     public void refreshData() {
+        if (SessionManager.currentUser == null) return;
+
         new Thread(() -> {
             try {
-                List<Song> updatedSongs = DatabaseManager.getInstance().getService().fetchSongs();
-                Platform.runLater(() -> {
-                    if (tableView != null) {
-                        tableView.getItems().setAll(updatedSongs);
-                    }
-                });
+                if (SessionManager.isAdmin) {
+                    List<Song> updatedSongs = DatabaseManager.getInstance().getService().fetchSongs();
+                    Platform.runLater(() -> {
+                        if (tableView != null) {
+                            tableView.getItems().setAll(updatedSongs);
+                        }
+                    });
+                } else {
+                    String uid = SessionManager.currentUser.getUserId();
+                    List<Playlist> userPlaylists = DatabaseManager.getInstance().getService().fetchUserPlaylists(uid);
+
+                    Platform.runLater(() -> {
+                        if (playlistListContainer.getChildren().size() > 3) {
+                            playlistListContainer.getChildren().remove(3, playlistListContainer.getChildren().size());
+                        }
+
+                        for (Playlist p : userPlaylists) {
+                            if (p.getPlaylistId().startsWith("fav_")) continue;
+                            
+                            addCustomPlaylistRow(p);
+                        }
+                    });
+                }
             } catch (Exception e) {
-                System.err.println("[Error] Lỗi khi load nhạc: " + e.getMessage());
+                System.err.println("[Error] Lỗi khi load dữ liệu: " + e.getMessage());
             }
         }).start();
+    }
+
+    private void addCustomPlaylistRow(Playlist p) {
+        HBox row = buildPlaylistRow(p.getName(), "♫");
+        row.setOnMouseClicked(e -> {
+            loadSongListView(p.getPlaylistId(), p.getName(), "User Playlist", "A playlist created by you.", "/images/playlist_default.jpg");
+        });
+        playlistListContainer.getChildren().add(row);
     }
 
     private void setupRoleBasedView() {
@@ -97,12 +124,22 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
             
             if (tableNode != null) playlistListContainer.getChildren().add(tableNode);
 
-            // FIX: Thêm chữ 's' cho Today's Hits
             addAdminSystemRow("Today's Hits", "♫");
             addSeparator();
             addAdminSystemRow("All Songs", "≡");
             addSeparator();
             addAdminSystemRow("All Albums", "◎");
+        } else {
+            setupUserView();
+        }
+    }
+
+    private void setupUserView() {
+        if (favoriteRow != null) {
+            favoriteRow.setOnMouseClicked(e -> {
+                String favId = "fav_" + SessionManager.currentUser.getUserId();
+                loadSongListView(favId, "Your favorite songs", "Collection", "All the songs you've loved", "/images/heart_fav_icon.png");
+            });
         }
     }
 
@@ -113,7 +150,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                 loadAdminManagementView();
             } else if (name.equals("All Albums")) { 
                 loadNewAlbumReleaseView();
-            } else if (name.equals("Today's Hits")) { // FIX: Phải khớp với tên bên trên
+            } else if (name.equals("Today's Hits")) { 
                 loadTodaysHitsView();
             } else {
                 loadCompactView(name);
@@ -142,32 +179,13 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     }
 
     private void loadAdminManagementView() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
-            Node view = loader.load();
-            SongListController ctrl = loader.getController();
-            
-            if (ctrl instanceof MainViewController.MainViewAware) {
-                ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
-            }
-            
-            ctrl.setData(
-                "ADMIN_ALL_SONGS", 
-                "All Songs", 
-                "Library Management",
-                "Admin can add or remove songs from the global library here.",
-                "/images/allsong.jpg", // Đã sửa thành chữ thường khớp với file
-                0, 
-                "Various", 
-                new java.util.ArrayList<>()
-            );
-            
-            if (mainController != null) {
-                mainController.getContentArea().getChildren().setAll(view);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        loadSongListView(
+            "ADMIN_ALL_SONGS", 
+            "All Songs", 
+            "Library Management",
+            "Admin can add or remove songs from the global library here.",
+            "/images/allsong.jpg"
+        );
     }
 
     private void loadNewAlbumReleaseView() {
@@ -185,6 +203,16 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     }
 
     private void loadTodaysHitsView() {
+        loadSongListView(
+            "SYSTEM_TODAY'S_HITS",  
+            "Today's Hits", 
+            "System Playlist",
+            "The biggest tracks on everyone's mind right now.",
+            "/images/todayhit.jpg"
+        );
+    }
+
+    private void loadSongListView(String id, String title, String sub, String desc, String cover) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
             Node view = loader.load();
@@ -194,21 +222,9 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                 ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
             }
             
-            // TRUYỀN ĐÚNG ID MÀ MAIN VIEW ĐANG DÙNG
-            ctrl.setData(
-                "SYSTEM_TODAY'S_HITS",  // <--- ĐỔI DÒNG NÀY LÀ XONG (thay vì "pl_system_todays_hits")
-                "Today's Hits", 
-                "System Playlist",
-                "The biggest tracks on everyone's mind right now.",
-                "/images/todayhit.jpg", 
-                2026,
-                "Various Artists",
-                new java.util.ArrayList<>()
-            );
+            ctrl.setData(id, title, sub, desc, cover, 2026, "Various", new java.util.ArrayList<>());
             
-            if (mainController != null) {
-                mainController.getContentArea().getChildren().setAll(view);
-            }
+            updateMainContent(view);
         } catch (IOException e) {
             e.printStackTrace();
         }
