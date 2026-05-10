@@ -28,7 +28,7 @@
         <Label text="New Playlist" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C1810;" />
         <Region HBox.hgrow="ALWAYS" />
 
-        <Button onAction="#onDoneClicked" text="Done" 
+        <Button onAction="#handleSavePlaylist" text="Done" 
                 style="-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14px;"/>
     </HBox>
 
@@ -54,12 +54,9 @@
         <TextField fx:id="playlistNameField" maxWidth="380" promptText="Give your playlist a name"
                    style="-fx-background-color: transparent; -fx-border-color: #E0D8D0; -fx-border-width: 0 0 1 0; -fx-padding: 5 0 5 0; -fx-font-size: 16px;"/>
 
-        <Region minHeight="24" />
-        <Label text="Description" style="-fx-text-fill: #9E8E84; -fx-font-size: 12px;" />
-        <Region minHeight="6" />
+     
 
-        <TextField fx:id="descriptionField" maxWidth="380" promptText="Add an optional description"
-                   style="-fx-background-color: transparent; -fx-border-color: #E0D8D0; -fx-border-width: 0 0 1 0; -fx-padding: 5 0 5 0; -fx-font-size: 14px;"/>
+     
 
         <Region minHeight="32" />
 

@@ -86,4 +86,17 @@ public class PlaylistManager {
     public Playlist getCurrentPlaylist() {
         return this.currentPlaylist;
     }
+    
+    public void addSongToSpecificPlaylist(String playlistId, Song song) {
+        Playlist target = playlistMap.get(playlistId);
+        if (target == null) {
+            System.err.println("Cannot find playlist ID " + playlistId);
+            return;
+        }
+
+        target.addSongToPlaylist(song.getSongId());
+        
+        DatabaseManager.getInstance().getService().saveUserPlaylist(currentUserId, target);
+        System.out.println("Added " + song.getTitle() + " to playlist " + target.getName());
+    }
 }

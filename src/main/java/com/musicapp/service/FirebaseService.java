@@ -50,4 +50,9 @@ public interface FirebaseService {
     
     void saveUser(User user);
     void authenticateUser(String identifier, String password, LoginCallback callback);
+    List<Playlist> fetchUserPlaylists(String userId);
+    
+    void saveNewUserPlaylist(String uid, String name);
+    
+    public void toggleFavoriteSong(String userId, Song song);
 }

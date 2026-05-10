@@ -2,6 +2,8 @@ package com.musicapp.model;
 
 import java.util.*;
 
+import com.google.firebase.database.Exclude;
+
 public class Playlist {
     private String playlistId;
     private String ownerId;
@@ -47,14 +49,17 @@ public class Playlist {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public Map<String, Boolean> getSongIds() { return songIds; }
+    public Map<String, Boolean> getSongIds() { 
+    	if (this.songIds == null) {
+            this.songIds = new HashMap<>();
+        }
+        return this.songIds;
+    }
+    
     public void setSongIds(Map<String, Boolean> songIds) { this.songIds = songIds; }
 
    
-    public List<String> getSongIdList() {
-        if (this.songIds == null) return new ArrayList<>();
-        return new ArrayList<>(this.songIds.keySet());
-    }
+
 
     public void addSongToPlaylist(String songId) {
         if (this.songIds == null) this.songIds = new HashMap<>();
@@ -65,5 +70,11 @@ public class Playlist {
         if (this.songIds != null) {
             this.songIds.remove(songId);
         }
+    }
+    
+    @Exclude
+    public List<String> getSongIdList() {
+        if (this.songIds == null) return new ArrayList<>();
+        return new ArrayList<>(this.songIds.keySet());
     }
 }
