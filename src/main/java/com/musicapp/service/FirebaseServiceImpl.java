@@ -105,13 +105,17 @@ public class FirebaseServiceImpl implements FirebaseService {
         
         return songList;
     }
-
+    
+    @Override
+    public DatabaseReference getDbRef() {
+        return this.dbRef;
+    }
+    
     @Override
     public void saveSong(Song song) {
         if (song == null || song.getSongId() == null) return;
-        
+        // Lưu vào nhánh songs
         this.dbRef.child("songs").child(song.getSongId()).setValueAsync(song);
-        System.out.println("Successfully saved song: " + song.getTitle());
     }
 
     @Override
@@ -494,34 +498,31 @@ public class FirebaseServiceImpl implements FirebaseService {
     
     @Override
     public void toggleFavoriteSong(String userId, Song song) {
-        String favPlaylistId = "fav_" + userId;
-        DatabaseReference favRef = dbRef.child("playlists").child(favPlaylistId);
+        // Trỏ thẳng vào nhánh của bài hát cụ thể, KHÔNG trỏ vào node cha
+        com.google.firebase.database.DatabaseReference ref = com.google.firebase.database.FirebaseDatabase.getInstance()
+            .getReference("playlists")
+            .child("fav_" + userId)
+            .child("songIds")
+            .child(song.getSongId()); 
 
-        favRef.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+        ref.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
             @Override
             public void onDataChange(com.google.firebase.database.DataSnapshot snapshot) {
-                if (!snapshot.exists()) {
-                    // Tạo mới nếu chưa từng thả tim bài nào
-                    Playlist favPlaylist = new Playlist();
-                    favPlaylist.setPlaylistId(favPlaylistId);
-                    favPlaylist.setName("Your favorite songs");
-                    favPlaylist.setOwnerId(userId);
-                    // Lưu một cái cờ (flag) để sau này code UI biết đường mà vẽ trái tim
-                    favPlaylist.setType("SYSTEM_FAVORITE"); 
-                    favPlaylist.getSongIds().put(song.getSongId(), true);
-
-                    dbRef.child("playlists").child(favPlaylistId).setValueAsync(favPlaylist);
-                    dbRef.child("users").child(userId).child("playlistIds").child(favPlaylistId).setValueAsync(true);
+                if (snapshot.exists()) {
+                    // Nếu đã có tim -> Xóa bài này (Bỏ tim)
+                    ref.removeValueAsync();
+                    System.out.println("Đã xóa khỏi Favorite: " + song.getTitle());
                 } else {
-                    // Nếu có rồi thì đảo trạng thái (Like <-> Unlike)
-                    if (snapshot.child("songIds").hasChild(song.getSongId())) {
-                        favRef.child("songIds").child(song.getSongId()).removeValueAsync();
-                    } else {
-                        favRef.child("songIds").child(song.getSongId()).setValueAsync(true);
-                    }
+                    // Nếu chưa có tim -> Thêm bài này (Thả tim) bằng setValue(true)
+                    ref.setValueAsync(true); 
+                    System.out.println("Đã thêm vào Favorite: " + song.getTitle());
                 }
             }
-            @Override public void onCancelled(DatabaseError error) {}
+            @Override
+            public void onCancelled(com.google.firebase.database.DatabaseError error) {
+                System.err.println("Lỗi thả tim: " + error.getMessage());
+            }
         });
     }
+    
 }

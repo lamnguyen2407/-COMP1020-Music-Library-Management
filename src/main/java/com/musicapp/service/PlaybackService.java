@@ -23,16 +23,20 @@ public class PlaybackService {
     }
     
     public void setPlaylist(List<Song> allSongs, int startIndex) {
-        nextqueue.clear();
-        history.clear();
+        nextqueue.clear(); 
         
-        for (int i = startIndex + 1; i <allSongs.size(); i++) {
-            nextqueue.addLast(allSongs.get(i));
+        if (allSongs != null && !allSongs.isEmpty() && startIndex >= 0 && startIndex < allSongs.size()) {
+            for (int i = startIndex + 1; i < allSongs.size(); i++) {
+                nextqueue.addLast(allSongs.get(i));
+            }
         }
     }
     
     public void play(Song song) {
-        if (this.currentSong != null) {
+        if (song == null) return;
+        
+     
+        if (this.currentSong != null && !this.currentSong.getSongId().equals(song.getSongId())) {
             history.push(this.currentSong);
         }
         this.currentSong = song;
@@ -42,11 +46,14 @@ public class PlaybackService {
     public Song next() {
         if (nextqueue.isEmpty()) {
             System.out.println("Off the waiting list");
-            return currentSong; 
+            return null; 
         }
         
-        if (currentSong != null) history.push(currentSong);
-        currentSong = nextqueue.poll();
+        if (currentSong != null) {
+            history.push(currentSong); 
+        }
+        
+        currentSong = nextqueue.poll(); 
         System.out.println("Move to the next song: " + currentSong.getTitle());
         return currentSong;
     }
@@ -54,14 +61,14 @@ public class PlaybackService {
     public Song previous() {
         if (history.isEmpty()) {
             System.out.println("No previous song played");
-            return currentSong;
+            return null; 
         }
         
         if (currentSong != null) {
-            nextqueue.addFirst(currentSong);
+            nextqueue.addFirst(currentSong); 
         }
         
-        currentSong = history.pop();
+        currentSong = history.pop(); 
         System.out.println("Move to the previous song: " + currentSong.getTitle());
         return currentSong;
     }
@@ -72,5 +79,10 @@ public class PlaybackService {
     
     public Song getCurrentSong() {
         return currentSong;
+    }
+    
+    public void clearQueue() {
+        this.nextqueue.clear();
+        System.out.println("Clear next queue");
     }
 }

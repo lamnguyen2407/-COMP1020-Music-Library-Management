@@ -92,15 +92,24 @@ public class AlbumViewController {
     private HBox buildRow(Song song, int index) {
         HBox row = new HBox(12);
         row.setAlignment(Pos.CENTER_LEFT);
+        // Giữ style cũ của mày
         row.setStyle("-fx-padding: 10 40 10 40; -fx-border-color: #f0ebe5; -fx-border-width: 0 0 1 0; -fx-cursor: hand;");
 
-        // ── Title (clickable) ──
+        // ✅ CẢI TIẾN: Gán sự kiện Click cho toàn bộ ROW thay vì chỉ Title
+        row.setOnMouseClicked(e -> {
+            // Kiểm tra nếu người dùng click vào vùng trống hoặc Title thì mới phát nhạc
+            // Nếu click trúng mấy cái Button (Tim, Plus) thì để Button tự xử lý, không phát nhạc.
+            if (!(e.getTarget() instanceof Button)) {
+                handleSongClick(song, index);
+            }
+        });
+
+        // ── Title ──
         Label titleLabel = new Label(song.getTitle());
         titleLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #1a1a1a;");
-        titleLabel.setOnMouseClicked(e -> handleSongClick(song, index));
+        // (Bỏ dòng setOnMouseClicked cũ ở đây đi)
 
         // ── Heart button ──
-        // ✅ KIỂM TRA TRẠNG THÁI TIM NGAY TỪ ĐẦU
         boolean isFav = favSongIds.contains(song.getSongId());
         Button heartBtn = new Button(isFav ? "♥" : "♡");
         
@@ -109,23 +118,26 @@ public class AlbumViewController {
             heartBtn.setManaged(false);
         }
         
-        // Setup màu chuẩn như bên SongListController
         String heartColor = isFav ? "#C0703A" : "#C0C0C0";
         heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: " + heartColor + "; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
         
-        // Truyền cả nút bấm vào hàm để đổi màu ngay lập tức
+        // Ngăn sự kiện click lan ra ngoài Row khi bấm nút Tim
+        heartBtn.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> e.consume());
         heartBtn.setOnAction(e -> handleAddToFavorites(song, heartBtn));
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // ── Plus button with dropdown ──
+        // ── Plus button ──
         Button plusBtn = new Button("+");
         if (SessionManager.isAdmin) {
             plusBtn.setVisible(false);
             plusBtn.setManaged(false);
         }
         plusBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0C0C0; -fx-font-size: 16px; -fx-cursor: hand; -fx-border-width: 0;");
+
+        // Ngăn sự kiện click lan ra ngoài Row khi bấm nút Plus
+        plusBtn.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> e.consume());
 
         ContextMenu dropdown = new ContextMenu();
         MenuItem addToPlaylist = new MenuItem("Add to playlist");
@@ -140,7 +152,7 @@ public class AlbumViewController {
 
         row.getChildren().addAll(titleLabel, heartBtn, spacer, plusBtn, durationLabel);
 
-        // Hover effect
+        // Hover effect (giữ nguyên logic của mày)
         row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 10 40 10 40; -fx-border-color: #f0ebe5; -fx-border-width: 0 0 1 0; -fx-background-color: #f5efe9; -fx-cursor: hand;"));
         row.setOnMouseExited(e -> row.setStyle("-fx-padding: 10 40 10 40; -fx-border-color: #f0ebe5; -fx-border-width: 0 0 1 0; -fx-cursor: hand;"));
 
