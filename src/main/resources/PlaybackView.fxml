@@ -28,11 +28,9 @@
 
     <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS">
         <HBox alignment="CENTER" spacing="25">
-            <Button fx:id="btnShuffle" onAction="#onShuffle" styleClass="player-icon-btn" text="⇌" />
             <Button fx:id="btnPrev" onAction="#onPrev" styleClass="player-icon-btn" text="⏮" />
             <Button fx:id="btnPlayPause" onAction="#onPlayPause" prefHeight="45" prefWidth="45" styleClass="player-play-btn" text="▶" />
             <Button fx:id="btnNext" onAction="#onNext" styleClass="player-icon-btn" text="⏭" />
-            <Button fx:id="btnRepeat" onAction="#onRepeat" styleClass="player-icon-btn" text="↻" />
         </HBox>
         <HBox alignment="CENTER" spacing="12">
             <Label fx:id="labelCurrentTime" styleClass="player-time" text="0:00" />
