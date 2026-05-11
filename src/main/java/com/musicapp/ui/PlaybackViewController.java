@@ -190,6 +190,5 @@ public class PlaybackViewController {
         }
     }
 
-    @FXML public void onShuffle() { System.out.println("🔀 Shuffle mode"); }
-    @FXML public void onRepeat() { System.out.println("↻ Repeat mode"); }
+
 }
