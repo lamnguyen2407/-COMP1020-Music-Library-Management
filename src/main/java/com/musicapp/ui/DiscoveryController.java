@@ -190,9 +190,21 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
 		System.out.println("Số lượng tải về từ Firebase: " + allAlbumFromDatabase.size());
 		NEW_ALBUMS.clear();
 		allAlbumFromDatabase.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
-		int lim = Math.min(5, allAlbumFromDatabase.size());
-		for (int i = 0; i < lim; ++i) {
-			NEW_ALBUMS.add(allAlbumFromDatabase.get(i));
+		
+		// Dùng Set để theo dõi ca sĩ nào đã có album trên UI rồi
+		java.util.Set<String> seenArtists = new java.util.HashSet<>();
+		
+		for (Album a : allAlbumFromDatabase) {
+		    String artist = a.getArtist();
+		    
+		    // Nếu ca sĩ này chưa có album nào trong list 5 cái
+		    if (!seenArtists.contains(artist)) { 
+		        NEW_ALBUMS.add(a);
+		        seenArtists.add(artist);
+		    }
+		    
+		    // Đủ 5 ô UI thì dừng
+		    if (NEW_ALBUMS.size() == 5) break; 
 		}
 		updateNewAlbumUI();
 	}
@@ -597,14 +609,22 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
 	public void processLatestSongs(List<Song> allSongsFromDatabase) {
 	    if (allSongsFromDatabase == null || allSongsFromDatabase.isEmpty()) return;
 
-	    // ✅ CHỈ LÀM NHIỆM VỤ LẤY 9 BÀI MỚI NHẤT
 	    LATEST_SONGS.clear();
-	    List<Song> sortedList = new ArrayList<>(allSongsFromDatabase);
+	    List<Song> sortedList = new java.util.ArrayList<>(allSongsFromDatabase);
 	    sortedList.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
 	    
-	    int latestLim = Math.min(9, sortedList.size());
-	    for(int i = 0; i < latestLim; i++) {
-	        LATEST_SONGS.add(sortedList.get(i));
+	    java.util.Map<String, Integer> artistCount = new java.util.HashMap<>();
+	    
+	    for (Song s : sortedList) {
+	        String artist = s.getArtist();
+	        int count = artistCount.getOrDefault(artist, 0);
+	        
+	        if (count < 1) { 
+	            LATEST_SONGS.add(s);
+	            artistCount.put(artist, count + 1);
+	        }
+	        
+	        if (LATEST_SONGS.size() == 9) break; 
 	    }
 	    updateLatestSongsUI();
 	}

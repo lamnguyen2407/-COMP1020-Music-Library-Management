@@ -30,7 +30,17 @@ import java.util.concurrent.CompletableFuture;
 public class FirebaseServiceImpl implements FirebaseService {
 
     private DatabaseReference dbRef;
+    
+    private String currentUserId;
+    private String currentUserRole;
+    
     private final String BUCKET_NAME = "music-library-management-59ce4.appspot.com";
+    
+    @Override
+    public String getCurrentUserId() { return currentUserId; }
+    
+    @Override
+    public String getCurrentUserRole() { return currentUserRole; }
 
     public FirebaseServiceImpl() {
         try {
@@ -396,6 +406,11 @@ public class FirebaseServiceImpl implements FirebaseService {
     						else {
     							loginUser = userSnap.getValue(ListenerUser.class);
     						}
+    						
+    						FirebaseServiceImpl.this.currentUserId = loginUser.getUserId();
+    						FirebaseServiceImpl.this.currentUserRole = role;
+
+    				
     						callback.onSuccess(loginUser, role);
     						return;
     					}
