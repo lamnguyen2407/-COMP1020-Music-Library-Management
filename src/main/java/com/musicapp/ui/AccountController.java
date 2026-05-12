@@ -1,117 +1,149 @@
 package com.musicapp.ui;
 
+import com.musicapp.service.DatabaseManager;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class AccountController implements Initializable {
 
-    // ── FXML bindings ──────────────────────────────────────────────────────────
-    @FXML private Label     roleLabel;
-
-    @FXML private Label     usernameDisplay;
+    @FXML private Label roleLabel;
+    @FXML private Label usernameDisplay;
     @FXML private TextField usernameField;
-
-    @FXML private Label     emailDisplay;
+    @FXML private Label emailDisplay;
     @FXML private TextField emailField;
-
-    @FXML private Label     nameDisplay;
+    @FXML private Label nameDisplay;
     @FXML private TextField nameField;
 
-    @FXML private Button    editBtn;
-    @FXML private Button    cancelBtn;
-    @FXML private Button    saveBtn;
+    @FXML private Button editBtn, cancelBtn, saveBtn;
 
-    // ── Snapshot for cancel ────────────────────────────────────────────────────
-    private String savedUsername;
-    private String savedEmail;
-    private String savedName;
+    private String savedUsername, savedEmail, savedName;
+    private String currentUserId;
+    private String currentUserRole;
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // Initialize
-    // ══════════════════════════════════════════════════════════════════════════
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        loadUserData();
+        this.currentUserId = DatabaseManager.getInstance().getService().getCurrentUserId();
+        this.currentUserRole = DatabaseManager.getInstance().getService().getCurrentUserRole();
+
+        if (currentUserId != null) {
+            loadUserData();
+        } else {
+            System.err.println("Session not found");
+        }
     }
 
-    // ── Load user data ─────────────────────────────────────────────────────────
     private void loadUserData() {
-        // TODO: Replace with real Firebase fetch
-        // Example:
-        //   User user = FirebaseService.getCurrentUser();
-        //   setUserData(user.getUserId(), user.getEmail(), user.getName(), "Listener");
+        String path = "users/" + currentUserId;
 
-        // Placeholder data
-        setUserData("Username", "abc@gmail.com", "Rachelly Proovra", "Listener");
-    }
+        DatabaseManager.getInstance().getService().getDbRef()
+                .child(path)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String username = snapshot.child("name").getValue(String.class);
+                    String email = snapshot.child("email").getValue(String.class);
+                    String role = snapshot.child("role").getValue(String.class);
+                    
+                    String fullName = snapshot.hasChild("fullname") 
+                                      ? snapshot.child("fullname").getValue(String.class) 
+                                      : snapshot.child("name").getValue(String.class);
 
-    public void setUserData(String username, String email, String name, String role) {
-        savedUsername = username;
-        savedEmail    = email;
-        savedName     = name;
+                    Platform.runLater(() -> {
+                        savedUsername = username;
+                        savedEmail = email;
+                        savedName = fullName;
 
-        roleLabel.setText(role);
-        usernameDisplay.setText(username);
-        emailDisplay.setText(email);
-        nameDisplay.setText(name);
-    }
+                        if (role != null && !role.isEmpty()) {
+                            roleLabel.setText(role.substring(0, 1).toUpperCase() + role.substring(1));
+                        }
+                        
+                        usernameDisplay.setText(savedUsername);
+                        emailDisplay.setText(savedEmail);
+                        nameDisplay.setText(savedName);
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // Handlers
-    // ══════════════════════════════════════════════════════════════════════════
+                        usernameField.setText(savedUsername);
+                        emailField.setText(savedEmail);
+                        nameField.setText(savedName);
+                    });
+                }
+            }
 
-    @FXML
-    private void handleEdit() {
-        // Populate fields with current values
-        usernameField.setText(savedUsername);
-        emailField.setText(savedEmail);
-        nameField.setText(savedName);
-
-        setEditMode(true);
-    }
-
-    @FXML
-    private void handleCancel() {
-        // Discard changes — restore display labels from snapshot
-        usernameDisplay.setText(savedUsername);
-        emailDisplay.setText(savedEmail);
-        nameDisplay.setText(savedName);
-
-        setEditMode(false);
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.err.println("Data load failed: " + error.getMessage());
+            }
+        });
     }
 
     @FXML
     private void handleSave() {
         String newUsername = usernameField.getText().trim();
-        String newEmail    = emailField.getText().trim();
-        String newName     = nameField.getText().trim();
+        String newEmail = emailField.getText().trim();
+        String newName = nameField.getText().trim();
 
-        // Keep old value if field left empty
-        if (!newUsername.isEmpty()) savedUsername = newUsername;
-        if (!newEmail.isEmpty())    savedEmail    = newEmail;
-        if (!newName.isEmpty())     savedName     = newName;
+        if (newUsername.isEmpty() || newEmail.isEmpty() || newName.isEmpty()) {
+            showAlert("Input Required", "All fields must be filled.");
+            return;
+        }
 
-        // Update display labels
+        String path = "users/" + currentUserId;
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", newUsername);
+        updates.put("email", newEmail);
+        updates.put("fullname", newName);
+
+        DatabaseManager.getInstance().getService().getDbRef()
+                .child(path)
+                .updateChildren(updates, (error, ref) -> {
+                    if (error == null) {
+                        Platform.runLater(() -> {
+                            savedUsername = newUsername;
+                            savedEmail = newEmail;
+                            savedName = newName;
+                            updateLabels();
+                            setEditMode(false);
+                        });
+                    } else {
+                        Platform.runLater(() -> showAlert("Error", "Update failed: " + error.getMessage()));
+                    }
+                });
+    }
+
+    private void updateLabels() {
         usernameDisplay.setText(savedUsername);
         emailDisplay.setText(savedEmail);
         nameDisplay.setText(savedName);
-
-        // TODO: Push updated data to Firebase
-        // Example:
-        //   FirebaseService.updateUser(savedUsername, savedEmail, savedName);
-
-        setEditMode(false);
     }
 
-    // ── Toggle between view / edit mode ───────────────────────────────────────
+    @FXML 
+    private void handleEdit() { 
+        setEditMode(true); 
+    }
+    
+    @FXML 
+    private void handleCancel() { 
+        usernameField.setText(savedUsername);
+        emailField.setText(savedEmail);
+        nameField.setText(savedName);
+        setEditMode(false); 
+    }
+
     private void setEditMode(boolean editing) {
-        // Display labels
         usernameDisplay.setVisible(!editing);
         usernameDisplay.setManaged(!editing);
         emailDisplay.setVisible(!editing);
@@ -119,7 +151,6 @@ public class AccountController implements Initializable {
         nameDisplay.setVisible(!editing);
         nameDisplay.setManaged(!editing);
 
-        // Edit fields
         usernameField.setVisible(editing);
         usernameField.setManaged(editing);
         emailField.setVisible(editing);
@@ -127,12 +158,19 @@ public class AccountController implements Initializable {
         nameField.setVisible(editing);
         nameField.setManaged(editing);
 
-        // Buttons
         editBtn.setVisible(!editing);
         editBtn.setManaged(!editing);
         cancelBtn.setVisible(editing);
         cancelBtn.setManaged(editing);
         saveBtn.setVisible(editing);
         saveBtn.setManaged(editing);
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

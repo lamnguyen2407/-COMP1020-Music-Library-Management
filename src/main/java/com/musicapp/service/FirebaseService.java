@@ -59,4 +59,7 @@ public interface FirebaseService {
     DatabaseReference getDbRef();
     public void toggleFavoriteSong(String userId, Song song);
     
+    public String getCurrentUserId();
+    public String getCurrentUserRole();
+    
 }
