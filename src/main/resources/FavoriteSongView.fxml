@@ -22,11 +22,16 @@
                    style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 18, 0, 0, 6);" />
 
         <!-- Info -->
-        <VBox alignment="CENTER_LEFT" spacing="8">
+        <VBox alignment="CENTER_LEFT" spacing="12">
             <Label text="Your Favorite Songs"
                    style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" />
             <Label fx:id="songCountLabel" text="0 songs"
                    style="-fx-font-size: 13px; -fx-text-fill: #888888;" />
+            <Button fx:id="playAllBtn" text="PLAY"
+            style="-fx-background-color: #c07840; -fx-text-fill: white;
+                   -fx-font-size: 13px; -fx-font-weight: bold;
+                   -fx-padding: 10 32 10 32; -fx-cursor: hand;
+                   -fx-background-radius: 4;" />
         </VBox>
     </HBox>
 
@@ -36,8 +41,9 @@
                style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
         <Label text="SONG" prefWidth="300"
                style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
-        <Label text="GENRE" prefWidth="160"
+        <Label text="ARTIST" prefWidth="180"
                style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
+        <Label text="GENRE" prefWidth="160" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
         <Region HBox.hgrow="ALWAYS" />
         <Label text="TIME"
                style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />

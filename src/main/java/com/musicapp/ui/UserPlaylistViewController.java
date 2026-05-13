@@ -149,8 +149,8 @@ public class UserPlaylistViewController implements Initializable, MainViewContro
         if (!deleteMode) HBox.setMargin(numberLabel, new javafx.geometry.Insets(0, 0, 0, 40));
 
         ImageView thumb = new ImageView();
-        thumb.setFitWidth(40);
-        thumb.setFitHeight(40);
+        thumb.setFitWidth(44);
+        thumb.setFitHeight(44);
         thumb.setPreserveRatio(true);
         if (song.getImageURL() != null && !song.getImageURL().isEmpty()) {
             try { thumb.setImage(new Image(song.getImageURL(), true)); }
