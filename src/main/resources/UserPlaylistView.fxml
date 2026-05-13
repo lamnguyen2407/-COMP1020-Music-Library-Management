@@ -50,11 +50,11 @@
                managed="false" visible="false" />
         <Label text="#" prefWidth="40"
                style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
-        <Label text="SONG" prefWidth="220"
+        <Label text="SONG" prefWidth="260"
                style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
-        <Label text="ARTIST" prefWidth="160"
+        <Label text="ARTIST" prefWidth="200"
                style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
-        <Label text="GENRE" prefWidth="120"
+        <Label text="GENRE" prefWidth="140"
                style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
         <Region HBox.hgrow="ALWAYS" />
         <Label text="TIME"

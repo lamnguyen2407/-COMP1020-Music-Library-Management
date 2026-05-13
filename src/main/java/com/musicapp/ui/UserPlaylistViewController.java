@@ -134,8 +134,8 @@ public class UserPlaylistViewController implements Initializable,
 
         // ── Thumbnail ──
         ImageView thumb = new ImageView();
-        thumb.setFitWidth(40);
-        thumb.setFitHeight(40);
+        thumb.setFitWidth(44);
+        thumb.setFitHeight(44);
         thumb.setPreserveRatio(true);
         if (song.getImageURL() != null && !song.getImageURL().isEmpty()) {
             try { thumb.setImage(new Image(song.getImageURL(), true)); }
