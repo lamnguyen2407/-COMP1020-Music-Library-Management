@@ -9,51 +9,36 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="0" style="-fx-background-color: #fdfaf7;"
-      xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.musicapp.ui.FavoriteSongViewController">
+<VBox spacing="0" style="-fx-background-color: #fdfaf7;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.musicapp.ui.FavoriteSongViewController">
 
     <!-- ── HEADER ── -->
     <HBox spacing="32" style="-fx-background-color: #fdfaf7;">
         <padding><Insets bottom="32" left="40" right="40" top="32" /></padding>
 
         <!-- Cover art -->
-        <ImageView fx:id="coverArtView" fitHeight="180.0" fitWidth="180.0" preserveRatio="true"
-                   style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 18, 0, 0, 6);" />
+        <ImageView fx:id="coverArtView" fitHeight="180.0" fitWidth="180.0" preserveRatio="true" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 18, 0, 0, 6);" />
 
         <!-- Info -->
         <VBox alignment="CENTER_LEFT" spacing="12">
-            <Label text="Your Favorite Songs"
-                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" />
-            <Label fx:id="songCountLabel" text="0 songs"
-                   style="-fx-font-size: 13px; -fx-text-fill: #888888;" />
-            <Button fx:id="playAllBtn" text="PLAY"
-            style="-fx-background-color: #c07840; -fx-text-fill: white;
-                   -fx-font-size: 13px; -fx-font-weight: bold;
-                   -fx-padding: 10 32 10 32; -fx-cursor: hand;
-                   -fx-background-radius: 4;" />
+            <Label style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" text="Your Favorite Songs" />
+            <Label fx:id="songCountLabel" style="-fx-font-size: 13px; -fx-text-fill: #888888;" text="0 songs" />
+            <Button fx:id="playAllBtn" style="-fx-background-color: #c07840; -fx-text-fill: white;                    -fx-font-size: 13px; -fx-font-weight: bold;                    -fx-padding: 10 32 10 32; -fx-cursor: hand;                    -fx-background-radius: 4;" text="PLAY" />
         </VBox>
     </HBox>
 
     <!-- ── COLUMN HEADERS ── -->
     <HBox style="-fx-border-color: #e8e0d8; -fx-border-width: 1 0 1 0; -fx-padding: 8 40 8 40;">
-        <Label text="#" prefWidth="40"
-               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
-        <Label text="SONG" prefWidth="300"
-               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
-        <Label text="ARTIST" prefWidth="180"
-               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
-        <Label text="GENRE" prefWidth="160" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
+        <Label prefWidth="40" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" text="#" />
+        <Label prefWidth="300" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" text="SONG" />
+        <Label prefHeight="16.0" prefWidth="167.0" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" text="ARTIST" />
+        <Label prefHeight="16.0" prefWidth="115.0" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" text="GENRE" />
         <Region HBox.hgrow="ALWAYS" />
-        <Label text="TIME"
-               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" />
+        <Label prefHeight="16.0" prefWidth="54.0" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #999999;" text="TIME" />
     </HBox>
 
     <!-- ── SONG LIST ── -->
-    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
-                style="-fx-background-color: transparent; -fx-background: transparent;">
-        <VBox fx:id="songListContainer" spacing="0"
-              style="-fx-background-color: #fdfaf7;" />
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
+        <VBox fx:id="songListContainer" spacing="0" style="-fx-background-color: #fdfaf7;" />
     </ScrollPane>
 
 </VBox>
