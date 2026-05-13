@@ -62,7 +62,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
         setupRoleBasedView();
         
-     // Chỉ hiển thị với Listener, ẩn với Admin
+        // Chỉ hiển thị với Listener, ẩn với Admin
         if (SessionManager.isAdmin) {
             favoriteRow.setVisible(false);
             favoriteRow.setManaged(false);
@@ -115,12 +115,49 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         }).start();
     }
 
+    // ✅ ĐÃ FIX: Chuyển hướng sang giao diện Playlist xịn của User
     private void addCustomPlaylistRow(Playlist p) {
         HBox row = buildPlaylistRow(p.getName(), "♫");
         row.setOnMouseClicked(e -> {
-            loadSongListView(p.getPlaylistId(), p.getName(), "User Playlist", "A playlist created by you.", "/images/playlist_default.jpg");
+            loadUserPlaylistView(p.getPlaylistId(), p.getName(), "/images/playlist_default.jpg");
         });
         playlistListContainer.getChildren().add(row);
+    }
+
+    // ✅ THÊM HÀM MỚI: Load dữ liệu và mở UserPlaylistViewController
+    private void loadUserPlaylistView(String playlistId, String name, String coverUrl) {
+        new Thread(() -> {
+            try {
+                // Tải danh sách bài hát thật từ Firebase
+                List<String> songIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(playlistId);
+                List<Song> songs = new java.util.ArrayList<>();
+                if (songIds != null && !songIds.isEmpty()) {
+                    songs = DatabaseManager.getInstance().getService().fetchSongsByIds(songIds);
+                }
+
+                List<Song> finalSongs = songs;
+                Platform.runLater(() -> {
+                    try {
+                        // Sửa tên file FXML cho đúng chữ thường nếu bạn mày lưu chữ thường
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/userplaylistview.fxml"));
+                        Node view = loader.load();
+                        UserPlaylistViewController ctrl = loader.getController();
+                        
+                        ctrl.setMainController(this.mainController);
+                        // Truyền dữ liệu xịn vào Controller mới
+                        ctrl.setPlaylistData(playlistId, name, coverUrl, finalSongs);
+                        
+                        if (mainController != null) {
+                            mainController.getContentArea().getChildren().setAll(view);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (Exception e) {
+                System.err.println("Lỗi load User Playlist: " + e.getMessage());
+            }
+        }).start();
     }
 
     private void setupRoleBasedView() {
@@ -144,10 +181,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
     private void setupUserView() {
         if (favoriteRow != null) {
-            favoriteRow.setOnMouseClicked(e -> {
-                String favId = "fav_" + SessionManager.currentUser.getUserId();
-                loadSongListView(favId, "Your favorite songs", "Collection", "All the songs you've loved", "/images/heart_fav_icon.png");
-            });
+            favoriteRow.setOnMouseClicked(e -> loadFavoriteSongView()); // Đã gọn gàng!
         }
     }
 
@@ -288,9 +322,12 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
         return row;
     }
+    
+    // ✅ HÀM MỞ GIAO DIỆN FAVORITE CỦA MÀY (Đã chuẩn hóa tên file fxml)
     private void loadFavoriteSongView() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FavoriteSongView.fxml"));
+            // Sửa tên file FXML cho đúng chữ thường nếu bạn mày lưu chữ thường
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/favoritesongview.fxml"));
             Node view = loader.load();
 
             FavoriteSongViewController ctrl = loader.getController();

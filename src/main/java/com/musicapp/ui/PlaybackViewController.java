@@ -13,6 +13,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.Node;
 
 import java.util.List;
 
@@ -28,32 +29,97 @@ public class PlaybackViewController {
     private Song currentSongModel;
     private boolean isFavorite = false;
 
-    // 1. Nhận tham chiếu từ MainView
+    // ✅ THÊM 3 BIẾN NÀY ĐỂ CHỐNG LỖI "BÓNG MA" (RÒ RỈ BỘ NHỚ)
+    private javafx.scene.media.MediaPlayer currentPlayer;
+    private javafx.beans.value.ChangeListener<Number> volumeListener;
+    private javafx.beans.value.ChangeListener<javafx.util.Duration> timeListener;
+
     public void setMainController(MainViewController mainController) {
         this.mainController = mainController;
     }
 
-    // 2. Hàm hiển thị thanh nhạc (Hàm mày đang báo lỗi thiếu đây)
     public void showBar() {
         if (playerBar != null) {
             playerBar.setVisible(true);
             playerBar.setManaged(true);
-        } else {
-            System.err.println("⚠️ Chưa tìm thấy playerBar trong FXML!");
         }
     }
 
-    // 3. Hàm mồi dữ liệu và check tim
+    // ✅ HÀM CẮM DÂY ĐÃ ĐƯỢC CHỐNG ĐẠN 100%
+    public void bindMediaPlayer(javafx.scene.media.MediaPlayer player) {
+        // 1. NGẮT DÂY ĐIỆN VỚI CÁI LOA CŨ (RẤT QUAN TRỌNG)
+        if (this.currentPlayer != null) {
+            if (volumeListener != null && volumeSlider != null) {
+                volumeSlider.valueProperty().removeListener(volumeListener);
+            }
+            if (timeListener != null) {
+                this.currentPlayer.currentTimeProperty().removeListener(timeListener);
+            }
+        }
+
+        this.currentPlayer = player;
+        if (player == null) return;
+
+        // 2. CẮM DÂY CHO LOA MỚI VÀ GẮN ÁO GIÁP BẢO VỆ
+        if (volumeSlider != null) {
+            volumeListener = (obs, oldVal, newVal) -> {
+                try {
+                    // Chỉ chỉnh âm lượng khi loa đang hoạt động, không chạm vào loa đã bị Hủy (DISPOSED)
+                    if (this.currentPlayer.getStatus() != javafx.scene.media.MediaPlayer.Status.DISPOSED 
+                        && this.currentPlayer.getStatus() != javafx.scene.media.MediaPlayer.Status.UNKNOWN) {
+                        this.currentPlayer.setVolume(newVal.doubleValue() / 100.0);
+                    }
+                } catch (Exception e) { /* Bỏ qua lỗi vặt nếu loa đang giật lag */ }
+            };
+            volumeSlider.valueProperty().addListener(volumeListener);
+        }
+
+        // Cắm dây thanh chạy tiến độ nhạc
+        timeListener = (obs, oldTime, newTime) -> {
+            if (progressSlider != null && !progressSlider.isPressed()) {
+                progressSlider.setValue(newTime.toSeconds());
+            }
+            if (labelCurrentTime != null) {
+                labelCurrentTime.setText(formatDuration((int) newTime.toSeconds()));
+            }
+        };
+        player.currentTimeProperty().addListener(timeListener);
+
+        // 3. KHI LOA ĐÃ NẠP XONG NHẠC THÌ MỚI LẤY THÔNG SỐ
+        player.setOnReady(() -> {
+            try {
+                if (volumeSlider != null) {
+                    player.setVolume(volumeSlider.getValue() / 100.0);
+                }
+                double totalSecs = player.getTotalDuration().toSeconds();
+                if (progressSlider != null) progressSlider.setMax(totalSecs);
+                if (labelTotalTime != null) labelTotalTime.setText(formatDuration((int) totalSecs));
+            } catch (Exception e) {}
+        });
+    }
+
+    @FXML 
+    public void onSeek() { 
+        if (mainController != null && progressSlider != null) {
+            mainController.seekAudio(progressSlider.getValue());
+        }
+    }
+
+    private String formatDuration(int seconds) {
+        return String.format("%d:%02d", seconds / 60, seconds % 60);
+    }
+
     public void setSongData(Song song) {
         if (song == null) return;
+        
+        this.isFavorite = false; 
         this.currentSongModel = song;
+        updateHeartUI(); 
 
-        // Cập nhật text
         if (playerSongTitle != null) playerSongTitle.setText(song.getTitle());
         if (playerArtistName != null) playerArtistName.setText(song.getArtist());
         if (btnPlayPause != null) btnPlayPause.setText("⏸"); 
 
-        // Cập nhật ảnh
         if (song.getImageURL() != null && !song.getImageURL().isEmpty() && playerArtImage != null) {
             try {
                 if (song.getImageURL().startsWith("/")) {
@@ -64,25 +130,29 @@ public class PlaybackViewController {
             } catch (Exception e) {}
         }
 
-        // Check tim ngầm từ Firebase
-        if (SessionManager.currentUser != null && btnLike != null) {
-            new Thread(() -> {
-                try {
-                    String favId = "fav_" + SessionManager.currentUser.getUserId();
-                    List<String> favIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(favId);
-                    isFavorite = favIds.contains(song.getSongId());
-                    Platform.runLater(this::updateHeartUI);
-                } catch (Exception e) {}
-            }).start();
+        if (SessionManager.currentUser != null && btnLike != null && song.getSongId() != null) {
+            com.google.firebase.database.FirebaseDatabase.getInstance().getReference("playlists")
+                .child("fav_" + SessionManager.currentUser.getUserId())
+                .child("songIds")
+                .child(song.getSongId())
+                .addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+                    @Override
+                    public void onDataChange(com.google.firebase.database.DataSnapshot snapshot) {
+                        isFavorite = snapshot.exists();
+                        Platform.runLater(() -> updateHeartUI());
+                    }
+                    @Override
+                    public void onCancelled(com.google.firebase.database.DatabaseError error) {}
+                });
         }
     }
 
-    // 4. Logic thả tim
     @FXML 
     public void onToggleLike() {
         if (currentSongModel == null || SessionManager.currentUser == null) return;
         isFavorite = !isFavorite;
         updateHeartUI();
+        
         DatabaseManager.getInstance().getService().toggleFavoriteSong(SessionManager.currentUser.getUserId(), currentSongModel);
     }
 
@@ -92,11 +162,9 @@ public class PlaybackViewController {
         btnLike.setStyle(isFavorite ? "-fx-text-fill: #C0703A; -fx-background-color: transparent;" : "-fx-text-fill: #C0C0C0; -fx-background-color: transparent;");
     }
 
-    // 5. Nút Play/Pause (Đã sửa thành public)
     @FXML 
     public void onPlayPause() { 
         if (mainController == null || btnPlayPause == null) return;
-        
         if (btnPlayPause.getText().equals("▶")) {
             btnPlayPause.setText("⏸");
             mainController.resumeAudio(); 
@@ -106,26 +174,21 @@ public class PlaybackViewController {
         }
     }
 
-    // 6. Nút Next (Đã sửa thành public để MainView gọi khi hết bài)
     @FXML 
     public void onNext() { 
         Song nextSong = PlaybackService.getInstance().next();
-        if (nextSong != null && !nextSong.equals(currentSongModel) && mainController != null) {
-            mainController.showPlayerBar(nextSong, null, 0); 
+        if (nextSong != null && mainController != null) {
+            mainController.playSongFromService(nextSong); 
         }
     }
 
-    // 7. Nút Prev (Đã sửa thành public)
     @FXML 
     public void onPrev() { 
         Song prevSong = PlaybackService.getInstance().previous();
-        if (prevSong != null && !prevSong.equals(currentSongModel) && mainController != null) {
-            mainController.showPlayerBar(prevSong, null, 0);
+        if (prevSong != null && mainController != null) {
+            mainController.playSongFromService(prevSong);
         }
     }
 
-    // Các hàm phụ (cũng public cho an toàn)
-    @FXML public void onShuffle() { System.out.println("🔀 Shuffle mode"); }
-    @FXML public void onRepeat() { System.out.println("↻ Repeat mode"); }
-    @FXML public void onSeek() { /* Chỗ này sau sẽ nhét logic tua nhạc */ }
+
 }

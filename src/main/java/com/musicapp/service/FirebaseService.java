@@ -1,5 +1,6 @@
 package com.musicapp.service;
 
+import com.google.firebase.database.DatabaseReference;
 import com.musicapp.model.*;
 import java.io.File;
 import java.util.List;
@@ -54,5 +55,11 @@ public interface FirebaseService {
     
     void saveNewUserPlaylist(String uid, String name);
     
+    
+    DatabaseReference getDbRef();
     public void toggleFavoriteSong(String userId, Song song);
+    
+    public String getCurrentUserId();
+    public String getCurrentUserRole();
+    
 }

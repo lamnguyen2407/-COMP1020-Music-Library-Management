@@ -1,6 +1,10 @@
 package com.musicapp.ui;
 
+import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
+import com.musicapp.service.DatabaseManager;
+
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -18,8 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class FavoriteSongViewController implements Initializable,
-        MainViewController.MainViewAware {
+public class FavoriteSongViewController implements Initializable, MainViewController.MainViewAware {
 
     // ── FXML bindings ──────────────────────────────────────────────────────────
     @FXML private ImageView coverArtView;
@@ -41,14 +44,28 @@ public class FavoriteSongViewController implements Initializable,
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         playAllBtn.setOnAction(e -> playAll());
+        loadFavoriteSongs();
+    }
 
-        // TODO: Load favorite songs from Firebase
-        // Example:
-        //   List<Song> songs = FirebaseService.getFavoriteSongs(SessionManager.getCurrentUserId());
-        //   setFavoriteSongs(songs);
+    // ── Load from Firebase ─────────────────────────────────────────────────────
+    public void loadFavoriteSongs() {
+        if (SessionManager.currentUser == null) return;
 
-        // Placeholder — remove when Firebase is ready
-        setFavoriteSongs(new ArrayList<>());
+        new Thread(() -> {
+            try {
+                String favId = "fav_" + SessionManager.currentUser.getUserId();
+                List<String> songIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(favId);
+
+                if (songIds != null && !songIds.isEmpty()) {
+                    List<Song> songs = DatabaseManager.getInstance().getService().fetchSongsByIds(songIds);
+                    Platform.runLater(() -> setFavoriteSongs(songs));
+                } else {
+                    Platform.runLater(() -> setFavoriteSongs(new ArrayList<>()));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     // ── Public API ─────────────────────────────────────────────────────────────
@@ -92,9 +109,9 @@ public class FavoriteSongViewController implements Initializable,
         titleLabel.setPrefWidth(220);
         titleLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-padding: 0 0 0 12;");
 
-        // ── Heart button (red, click to remove) ──
-        Button heartBtn = new Button("❤️");
-        heartBtn.setStyle("-fx-background-color: transparent; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
+        // ── Heart button (filled, click to remove) ──
+        Button heartBtn = new Button("♥");
+        heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
         heartBtn.setOnAction(e -> removeFromFavorites(song));
 
         // ── Artist ──
@@ -118,14 +135,13 @@ public class FavoriteSongViewController implements Initializable,
         HBox.setMargin(durationLabel, new javafx.geometry.Insets(0, 40, 0, 0));
         HBox.setMargin(numberLabel,   new javafx.geometry.Insets(0, 0, 0, 40));
 
-        // Click on row → play
+        // Click row → play (ignore heart clicks)
         row.setOnMouseClicked(e -> {
             if (e.getTarget() != heartBtn) {
                 playSong(song, index);
             }
         });
 
-        // Hover
         row.setOnMouseEntered(e -> row.setStyle(rowStyle(true)));
         row.setOnMouseExited(e ->  row.setStyle(rowStyle(false)));
 
@@ -151,9 +167,9 @@ public class FavoriteSongViewController implements Initializable,
         buildRows();
         updateCount();
 
-        // TODO: Remove from Firebase
-        // Example:
-        //   FirebaseService.removeFromFavorites(SessionManager.getCurrentUserId(), song.getSongId());
+        if (SessionManager.currentUser != null) {
+            DatabaseManager.getInstance().getService().toggleFavoriteSong(SessionManager.currentUser.getUserId(), song);
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

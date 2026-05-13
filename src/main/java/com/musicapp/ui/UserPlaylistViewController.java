@@ -1,6 +1,11 @@
 package com.musicapp.ui;
 
+import com.google.firebase.database.FirebaseDatabase;
+import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
+import com.musicapp.service.DatabaseManager;
+
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -19,37 +24,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class UserPlaylistViewController implements Initializable,
-        MainViewController.MainViewAware {
+public class UserPlaylistViewController implements Initializable, MainViewController.MainViewAware {
 
-    // ── FXML bindings ──────────────────────────────────────────────────────────
     @FXML private ImageView coverArtView;
-    @FXML private Label     playlistNameLabel;
-    @FXML private Label     songCountLabel;
-    @FXML private Label     checkboxHeaderSpacer;
-    @FXML private Button    playBtn;
-    @FXML private Button    deleteBtn;
-    @FXML private VBox      songListContainer;
+    @FXML private Label playlistNameLabel;
+    @FXML private Label songCountLabel;
+    @FXML private Label checkboxHeaderSpacer;
+    @FXML private Button playBtn;
+    @FXML private Button deleteBtn;
+    @FXML private VBox songListContainer;
 
-    // ── State ──────────────────────────────────────────────────────────────────
-    private final List<Song>     songs        = new ArrayList<>();
-    private final List<CheckBox> checkBoxes   = new ArrayList<>();
-    private boolean              deleteMode   = false;
-    private MainViewController   mainController;
+    private final List<Song> songs = new ArrayList<>();
+    private final List<CheckBox> checkBoxes = new ArrayList<>();
+    private boolean deleteMode = false;
+    private MainViewController mainController;
+    
+    private String currentPlaylistId; // ✅ CẦN LƯU ID ĐỂ BIẾT ĐƯỜNG XÓA TRÊN FIREBASE
+    private List<String> favSongIds = new ArrayList<>(); // LƯU TRẠNG THÁI TIM
 
-    // ── MainViewAware ──────────────────────────────────────────────────────────
     @Override
     public void setMainController(MainViewController mainController) {
         this.mainController = mainController;
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // Data is injected via setPlaylistData()
-    }
+    public void initialize(URL location, ResourceBundle resources) {}
 
-    // ── Public API ─────────────────────────────────────────────────────────────
-    public void setPlaylistData(String name, String coverURL, List<Song> songList) {
+    // ✅ ĐÃ SỬA: Thêm tham số playlistId
+    public void setPlaylistData(String playlistId, String name, String coverURL, List<Song> songList) {
+        this.currentPlaylistId = playlistId;
         playlistNameLabel.setText(name);
         songs.clear();
         songs.addAll(songList);
@@ -58,12 +61,21 @@ public class UserPlaylistViewController implements Initializable,
             try { coverArtView.setImage(new Image(coverURL, true)); }
             catch (Exception ignored) {}
         }
-
         updateCount();
-        buildRows();
-    }
 
-    // ── Handlers ──────────────────────────────────────────────────────────────
+        // ✅ TẢI TRẠNG THÁI TIM TRƯỚC KHI VẼ GIAO DIỆN
+        new Thread(() -> {
+            try {
+                if (SessionManager.currentUser != null) {
+                    String favId = "fav_" + SessionManager.currentUser.getUserId();
+                    favSongIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(favId);
+                }
+                Platform.runLater(this::buildRows);
+            } catch (Exception e) {
+                Platform.runLater(this::buildRows);
+            }
+        }).start();
+    }
 
     @FXML
     private void handlePlay() {
@@ -74,12 +86,10 @@ public class UserPlaylistViewController implements Initializable,
     @FXML
     private void handleDelete() {
         if (!deleteMode) {
-            // Enter delete mode
             deleteMode = true;
             deleteBtn.setText("CONFIRM");
             buildRows();
         } else {
-            // Confirm — remove checked songs
             List<Song> toRemove = new ArrayList<>();
             for (int i = 0; i < checkBoxes.size(); i++) {
                 if (checkBoxes.get(i).isSelected()) {
@@ -88,9 +98,19 @@ public class UserPlaylistViewController implements Initializable,
             }
             songs.removeAll(toRemove);
 
-            // TODO: Remove from Firebase
-            // Example:
-            //   FirebaseService.removeSongsFromPlaylist(playlistId, toRemove);
+            // ✅ XÓA KHỎI FIREBASE
+            if (currentPlaylistId != null && !toRemove.isEmpty()) {
+                new Thread(() -> {
+                    try {
+                        for (Song s : toRemove) {
+                            FirebaseDatabase.getInstance().getReference("playlists")
+                                .child(currentPlaylistId).child("songIds").child(s.getSongId()).removeValueAsync();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+            }
 
             deleteMode = false;
             deleteBtn.setText("DELETE");
@@ -99,12 +119,10 @@ public class UserPlaylistViewController implements Initializable,
         }
     }
 
-    // ── Build rows ─────────────────────────────────────────────────────────────
     private void buildRows() {
         songListContainer.getChildren().clear();
         checkBoxes.clear();
 
-        // Show/hide checkbox header spacer
         checkboxHeaderSpacer.setVisible(deleteMode);
         checkboxHeaderSpacer.setManaged(deleteMode);
 
@@ -118,7 +136,6 @@ public class UserPlaylistViewController implements Initializable,
         row.setAlignment(Pos.CENTER_LEFT);
         row.setStyle(rowStyle(false));
 
-        // ── Checkbox (delete mode only) ──
         CheckBox cb = new CheckBox();
         cb.setVisible(deleteMode);
         cb.setManaged(deleteMode);
@@ -126,13 +143,11 @@ public class UserPlaylistViewController implements Initializable,
         HBox.setMargin(cb, new javafx.geometry.Insets(0, 0, 0, 40));
         checkBoxes.add(cb);
 
-        // ── # number ──
         Label numberLabel = new Label(String.valueOf(index + 1));
         numberLabel.setPrefWidth(40);
         numberLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888;");
         if (!deleteMode) HBox.setMargin(numberLabel, new javafx.geometry.Insets(0, 0, 0, 40));
 
-        // ── Thumbnail ──
         ImageView thumb = new ImageView();
         thumb.setFitWidth(44);
         thumb.setFitHeight(44);
@@ -142,25 +157,22 @@ public class UserPlaylistViewController implements Initializable,
             catch (Exception ignored) {}
         }
 
-        // ── Title (clickable) ──
         Label titleLabel = new Label(song.getTitle());
         titleLabel.setPrefWidth(220);
-        titleLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; " +
-                            "-fx-text-fill: #1a1a1a; -fx-padding: 0 0 0 12;");
+        titleLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-padding: 0 0 0 12;");
         titleLabel.setOnMouseClicked(e -> playSong(song, index));
 
-        // ── Heart button ──
-        Button heartBtn = new Button("♡");
-        heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #c07840; " +
-                          "-fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
+        // ✅ LOGIC ĐỒNG BỘ TIM
+        boolean isFav = favSongIds.contains(song.getSongId());
+        Button heartBtn = new Button(isFav ? "♥" : "♡");
+        String heartColor = isFav ? "#C0703A" : "#C0C0C0";
+        heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: " + heartColor + "; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
         heartBtn.setOnAction(e -> handleAddToFavorites(song, heartBtn));
 
-        // ── Artist ──
         Label artistLabel = new Label(song.getArtist());
         artistLabel.setPrefWidth(160);
         artistLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #555555;");
 
-        // ── Genre ──
         Label genreLabel = new Label(song.getGenre());
         genreLabel.setPrefWidth(120);
         genreLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #555555;");
@@ -168,15 +180,12 @@ public class UserPlaylistViewController implements Initializable,
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // ── Duration ──
         Label durationLabel = new Label(formatDuration(song.getDuration()));
         durationLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888; -fx-min-width: 40;");
         HBox.setMargin(durationLabel, new javafx.geometry.Insets(0, 40, 0, 0));
 
-        row.getChildren().addAll(cb, numberLabel, thumb, titleLabel, heartBtn,
-                                 artistLabel, genreLabel, spacer, durationLabel);
+        row.getChildren().addAll(cb, numberLabel, thumb, titleLabel, heartBtn, artistLabel, genreLabel, spacer, durationLabel);
 
-        // Click row → play (ignore clicks on checkbox and heart)
         row.setOnMouseClicked(e -> {
             if (e.getTarget() != cb && e.getTarget() != heartBtn) {
                 playSong(song, index);
@@ -189,21 +198,28 @@ public class UserPlaylistViewController implements Initializable,
         return row;
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
     private void playSong(Song song, int index) {
         if (mainController != null) {
             mainController.showPlayerBar(song, songs, index);
         }
     }
 
+    // ✅ GỌI API TOGGLE TIM
     private void handleAddToFavorites(Song song, Button heartBtn) {
-        heartBtn.setText("❤️");
-        heartBtn.setDisable(true);
-
-        // TODO: Add to Firebase favorite playlist
-        // Example:
-        //   FirebaseService.addToFavorites(SessionManager.getCurrentUserId(), song.getSongId());
+        if (SessionManager.currentUser == null) return;
+        
+        boolean currentlyFav = heartBtn.getText().equals("♥");
+        if (currentlyFav) {
+            heartBtn.setText("♡");
+            heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0C0C0; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
+            favSongIds.remove(song.getSongId());
+        } else {
+            heartBtn.setText("♥");
+            heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
+            favSongIds.add(song.getSongId());
+        }
+        
+        DatabaseManager.getInstance().getService().toggleFavoriteSong(SessionManager.currentUser.getUserId(), song);
     }
 
     private void updateCount() {

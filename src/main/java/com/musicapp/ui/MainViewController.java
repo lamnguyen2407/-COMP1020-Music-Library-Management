@@ -12,7 +12,6 @@ import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
 import com.google.firebase.database.*;
 
-import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,9 +21,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -121,12 +118,20 @@ public class MainViewController implements Initializable {
     }
 
     // ══════════════════════════════════════════
-    // AUDIO ENGINE (ĐIỀU KHIỂN NHẠC)
+    // AUDIO ENGINE (ĐIỀU KHIỂN NHẠC) - ĐÃ CẮM DÂY VOLUME & PROGRESS
     // ══════════════════════════════════════════
 
     public void setMediaPlayer(MediaPlayer player) {
-        if (this.mediaPlayer != null) this.mediaPlayer.stop();
+        if (this.mediaPlayer != null) {
+            this.mediaPlayer.stop();
+            this.mediaPlayer.dispose(); // Dọn bộ nhớ loa cũ
+        }
         this.mediaPlayer = player;
+        
+        // CỰC KỲ QUAN TRỌNG: Cắm dây diện sang thanh nhạc Playback
+        if (playbackController != null) {
+            playbackController.bindMediaPlayer(this.mediaPlayer);
+        }
         
         // Tự động chuyển bài khi hát xong
         this.mediaPlayer.setOnEndOfMedia(() -> {
@@ -146,34 +151,56 @@ public class MainViewController implements Initializable {
         }
     }
 
+    // THÊM HÀM NÀY ĐỂ TUA NHẠC
+    public void seekAudio(double seconds) {
+        if (this.mediaPlayer != null) {
+            this.mediaPlayer.seek(Duration.seconds(seconds));
+        }
+    }
+
     // ══════════════════════════════════════════
     // HIỂN THỊ THANH NHẠC
     // ══════════════════════════════════════════
 
     public void showPlayerBar(Song currentSong, List<Song> queue, int index) {
         try {
-            // 1. Mồi Playlist cho Backend
+            // ĐÃ FIX: Nếu queue là null (bài lẻ), phải xóa sạch hàng chờ cũ
             if (queue != null && !queue.isEmpty()) {
                 com.musicapp.service.PlaybackService.getInstance().setPlaylist(queue, index);
+            } else {
+                com.musicapp.service.PlaybackService.getInstance().clearQueue(); 
             }
+            
             com.musicapp.service.PlaybackService.getInstance().play(currentSong);
 
-            // 2. Chơi nhạc thật
             if (currentSong.getAudioURL() != null && !currentSong.getAudioURL().isEmpty()) {
                 String uriString = currentSong.getAudioURL().trim().replace(" ", "%20");
-                Media hit = new Media(uriString);
-                setMediaPlayer(new MediaPlayer(hit));
+                setMediaPlayer(new MediaPlayer(new Media(uriString)));
                 mediaPlayer.play();
             }
 
-            // 3. Đá UI sang cho PlaybackViewController
             if (playbackController != null) {
                 playbackController.showBar();
                 playbackController.setSongData(currentSong);
             }
-
         } catch (Exception e) { 
-            System.err.println("❌ LỖI KHỞI TẠO MEDIA: " + e.getMessage());
+            e.printStackTrace(); 
+        }
+    }
+
+    // HÀM CHUYỂN BÀI LẺ (NEXT/PREV) ĐỂ KHÔNG NÁT DANH SÁCH
+    public void playSongFromService(Song song) {
+        try {
+            if (song.getAudioURL() != null && !song.getAudioURL().isEmpty()) {
+                String uriString = song.getAudioURL().trim().replace(" ", "%20");
+                setMediaPlayer(new MediaPlayer(new Media(uriString)));
+                mediaPlayer.play();
+            }
+            if (playbackController != null) {
+                playbackController.setSongData(song);
+            }
+        } catch (Exception e) { 
+            System.err.println("❌ Lỗi chuyển bài: " + e.getMessage());
         }
     }
 
