@@ -44,7 +44,6 @@ public class SongListController implements Initializable, MainViewController.Mai
     public static SongListController instance; 
     
     private MainViewController mainController;
-    private static MediaPlayer currentPlayer;
     
     @FXML private ImageView coverImageView;
     @FXML private Label titleLabel, subtitleLabel, descriptionLabel;
@@ -148,27 +147,25 @@ public class SongListController implements Initializable, MainViewController.Mai
     }
 
     public void startPlaying(SongItem item) {
+        if (mainController == null) return;
+        
         try {
-            if (currentPlayer != null) {
-                MediaPlayer.Status oldStatus = currentPlayer.getStatus();
-                if (oldStatus != MediaPlayer.Status.UNKNOWN && oldStatus != MediaPlayer.Status.HALTED) {
-                    try { currentPlayer.stop(); } catch (Exception ignored) {}
+            java.util.List<Song> queue = new java.util.ArrayList<>();
+            int playingIndex = 0;
+            int i = 0;
+            
+            for (SongItem sItem : songs) {
+                Song song = new Song(sItem.songId, sItem.title, sItem.artist, sItem.genre, sItem.duration, sItem.releaseYear, sItem.audioURL, sItem.imageURL);
+                queue.add(song);
+                if (sItem.songId != null && sItem.songId.equals(item.songId)) {
+                    playingIndex = i;
                 }
-                currentPlayer.dispose();
-            }
-
-            String path = item.audioURL;
-            if (path == null || path.isEmpty()) return;
-            
-            String uriString = path.trim().replace(" ", "%20");
-            Media hit = new Media(uriString);
-            currentPlayer = new MediaPlayer(hit);
-            
-            if (mainController != null) {
-                mainController.showPlayerBar(item.title, item.artist, item.imageURL, currentPlayer);
+                i++;
             }
             
-            currentPlayer.setOnReady(() -> currentPlayer.play());
+            if (!queue.isEmpty()) {
+                mainController.showPlayerBar(queue.get(playingIndex), queue, playingIndex);
+            }
         } catch (Exception ex) {
             System.err.println("❌ Lỗi MediaPlayer: " + ex.getMessage());
         }
@@ -239,8 +236,7 @@ public class SongListController implements Initializable, MainViewController.Mai
     private void setupRoleBasedUI() {
         try {
             if (SessionManager.isAdmin) {
-                if (playButton != null) { playButton.setVisible(false); playButton.setManaged(false); }
-                if (shuffleButton != null) { shuffleButton.setVisible(false); shuffleButton.setManaged(false); }
+                // Play & Shuffle are kept visible so admins can play the songs too
             } else {
                 if (addBtn != null) { addBtn.setVisible(false); addBtn.setManaged(false); }
                 if (deleteBtn != null) { deleteBtn.setVisible(false); deleteBtn.setManaged(false); }
@@ -251,6 +247,29 @@ public class SongListController implements Initializable, MainViewController.Mai
     // ==========================================
     // ACTION HANDLERS
     // ==========================================
+    @FXML
+    private void onPlayClicked() {
+        if (!songs.isEmpty()) {
+            currentIndex = 0;
+            playSongByIndex(currentIndex);
+        }
+    }
+
+    @FXML
+    private void onShuffleClicked() {
+        if (!songs.isEmpty() && mainController != null) {
+            java.util.List<SongItem> tempItems = new java.util.ArrayList<>(songs);
+            java.util.Collections.shuffle(tempItems);
+            
+            java.util.List<Song> shuffledQueue = new java.util.ArrayList<>();
+            for (SongItem sItem : tempItems) {
+                shuffledQueue.add(new Song(sItem.songId, sItem.title, sItem.artist, sItem.genre, sItem.duration, sItem.releaseYear, sItem.audioURL, sItem.imageURL));
+            }
+            
+            mainController.showPlayerBar(shuffledQueue.get(0), shuffledQueue, 0);
+        }
+    }
+
     @FXML 
     private void onAddSongClicked() {
         try {

@@ -56,7 +56,13 @@ public class LoginController {
                 Platform.runLater(() -> {
                     source.setDisable(false); // Mở lại nút
                     System.out.println("Login Failed: " + errorMessage);
-                    // Hiển thị Alert báo lỗi ở đây
+                    
+                    // HIỂN THỊ ALERT CHO USER BIẾT
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Login Error");
+                    alert.setHeaderText(null);
+                    alert.setContentText(errorMessage);
+                    alert.showAndWait();
                 });
             }
         });

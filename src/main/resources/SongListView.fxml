@@ -25,9 +25,9 @@
             <Region prefHeight="16" />
             
             <HBox spacing="12">
-                <Button fx:id="playButton" prefHeight="38" prefWidth="120" style="-fx-background-color: #C0703A; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="PLAY" />
+                <Button fx:id="playButton" onAction="#onPlayClicked" prefHeight="38" prefWidth="120" style="-fx-background-color: #C0703A; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="PLAY" />
                 
-                <Button fx:id="shuffleButton" prefHeight="38" prefWidth="120" style="-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-border-color: #C0703A; -fx-font-weight: bold; -fx-cursor: hand;" text="SHUFFLE" />
+                <Button fx:id="shuffleButton" onAction="#onShuffleClicked" prefHeight="38" prefWidth="120" style="-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-border-color: #C0703A; -fx-font-weight: bold; -fx-cursor: hand;" text="SHUFFLE" />
 
                 <Button fx:id="addBtn" onAction="#onAddSongClicked" prefHeight="38" prefWidth="120" style="-fx-background-color: #C0703A; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="ADD" />
                 

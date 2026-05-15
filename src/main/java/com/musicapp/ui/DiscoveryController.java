@@ -64,6 +64,8 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
 	@FXML
 	private HBox latestCard1, latestCard2, latestCard3, latestCard4, latestCard5, latestCard6, latestCard7, latestCard8,
 			latestCard9;
+	@FXML
+	private ImageView bannerImage;
 
 	private static ObservableList<SongListController.SongItem> SESSION_TRENDING_CACHE = null;
     
@@ -122,6 +124,9 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
 	@Override
     public void initialize(URL location, ResourceBundle resources) {
         // Tuyệt đối KHÔNG gọi populateSampleData() ở đây để tránh IndexOutOfBounds
+        if (bannerImage != null && todaysHitBanner != null) {
+            bannerImage.fitWidthProperty().bind(todaysHitBanner.widthProperty());
+        }
         setupClickHandlers();
         fetchAlbumsFromFirebase();
         fetchLatestSongsFromFirebase(); // Vẫn giữ để lấy mục Latest 9 bài
@@ -568,19 +573,17 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
 			// --- LOGIC TÁCH ẢNH RIÊNG ---
 			String coverPath = "/images/playlist_cover.png"; // Ảnh mặc định
 
-			// ĐÃ FIX: Thêm chữ 's' vào chữ Hits cho khớp với tên lúc truyền vào
 			if (listTitle.equals("Today's Hits")) {
 				coverPath = "/images/todayhit.jpg";
 			} else if (listTitle.equals("All Songs")) {
 				coverPath = "/images/allsong.jpg";
 			}
 
-			ctrl.setData(finalId, listTitle, "Curated for you", "System Playlist", coverPath, // Sử dụng biến coverPath
-																								// vừa tách
+			ctrl.setData(finalId, listTitle, "Curated for you", "System Playlist", coverPath,
 					2026, "Various", new java.util.ArrayList<>());
 
 			if (mainController != null) {
-				mainController.getContentArea().getChildren().setAll(view);
+				mainController.navigateToView(view);
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -597,7 +600,7 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
 			}
 
 			if (mainController != null) {
-				mainController.getContentArea().getChildren().setAll(view);
+				mainController.navigateToView(view);
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();

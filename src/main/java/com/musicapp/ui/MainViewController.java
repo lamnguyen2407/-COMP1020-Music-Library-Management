@@ -36,6 +36,7 @@ public class MainViewController implements Initializable {
     // FXML — TopBar
     // ══════════════════════════════════════════
     @FXML private HBox topBar;
+    @FXML private Button btnBack;
     @FXML private TextField searchField;
     @FXML private Label userNameLabel;
     @FXML private ImageView userImageView;
@@ -55,6 +56,7 @@ public class MainViewController implements Initializable {
     // State
     // ══════════════════════════════════════════
     private MediaPlayer mediaPlayer; 
+    private java.util.Stack<Node> viewHistory = new java.util.Stack<>();
 
     private static final String FXML_DISCOVERY = "/DiscoveryView.fxml";
     private static final String FXML_ACCOUNT = "/AccountView.fxml";
@@ -85,6 +87,30 @@ public class MainViewController implements Initializable {
     // ══════════════════════════════════════════
     // NAVIGATION HANDLERS
     // ══════════════════════════════════════════
+
+    private void setViewWithHistory(Node view) {
+        // If the loaded view is a ScrollPane (e.g. DiscoveryView), extract its content
+        // to avoid nesting ScrollPane inside mainScrollPane which causes 0x0 rendering
+        Node actualView = view;
+        if (view instanceof javafx.scene.control.ScrollPane) {
+            javafx.scene.control.ScrollPane sp = (javafx.scene.control.ScrollPane) view;
+            if (sp.getContent() != null) {
+                actualView = sp.getContent();
+            }
+        }
+        
+        if (!contentArea.getChildren().isEmpty()) {
+            viewHistory.push(contentArea.getChildren().get(0));
+        }
+        contentArea.getChildren().setAll(actualView);
+    }
+
+    @FXML private void onNavBack() {
+        if (!viewHistory.isEmpty()) {
+            Node previousView = viewHistory.pop();
+            contentArea.getChildren().setAll(previousView);
+        }
+    }
 
     @FXML private void onNavHome() { setActiveNav(btnHome); loadView(FXML_DISCOVERY); }
     @FXML private void onNavAccount() { setActiveNav(btnAccount); loadView(FXML_ACCOUNT); }
@@ -252,7 +278,7 @@ public class MainViewController implements Initializable {
             ctrl.setMainController(this); 
             ctrl.setData("SONG_LIST_VIEW", title, subtitle, desc, "/images/allsong.jpg", 0, "", new java.util.ArrayList<>());            
             ctrl.setSongsList(data);
-            contentArea.getChildren().setAll(view);
+            setViewWithHistory(view);
         } catch (IOException e) { e.printStackTrace(); }
     }
     
@@ -262,7 +288,7 @@ public class MainViewController implements Initializable {
             Node view = loader.load();
             Object childController = loader.getController();
             if (childController instanceof MainViewAware) ((MainViewAware) childController).setMainController(this);
-            contentArea.getChildren().setAll(view);
+            setViewWithHistory(view);
         } catch (IOException e) { e.printStackTrace(); }
     }
 
@@ -304,7 +330,7 @@ public class MainViewController implements Initializable {
             AlbumViewController controller = loader.getController();
             controller.setMainController(this);
             controller.setAlbumData(albumName, artist, genre, year, imageURL, songs);
-            contentArea.getChildren().setAll(view);
+            setViewWithHistory(view);
         } catch (Exception e) { e.printStackTrace(); }
     }
 
@@ -327,7 +353,7 @@ public class MainViewController implements Initializable {
             
             ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", "Searching...", null, 0, "Various", new java.util.ArrayList<>());
             ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE"); 
-            contentArea.getChildren().setAll(view);
+            setViewWithHistory(view);
 
             new Thread(() -> {
                 try {
@@ -367,8 +393,33 @@ public class MainViewController implements Initializable {
             Node view = loader.load();
             Object childController = loader.getController();
             if (childController instanceof MainViewAware) ((MainViewAware) childController).setMainController(this);
-            contentArea.getChildren().setAll(view);
-        } catch (IOException e) { e.printStackTrace(); }
+            setViewWithHistory(view);
+        } catch (Throwable e) { 
+            e.printStackTrace(); 
+            try {
+                java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter("c:\\Users\\Yoga\\-COMP1020-Music-Library-Management\\REAL_CRASH.txt", true));
+                pw.println("====== CRASH in loadView(" + fxmlPath + ") ======");
+                e.printStackTrace(pw);
+                if (e.getCause() != null) {
+                    pw.println("--- CAUSE ---");
+                    e.getCause().printStackTrace(pw);
+                    if (e.getCause().getCause() != null) {
+                        pw.println("--- ROOT CAUSE ---");
+                        e.getCause().getCause().printStackTrace(pw);
+                    }
+                }
+                pw.close();
+            } catch (Exception ex) {}
+            
+            String errorMsg = e.toString();
+            if (e.getCause() != null) {
+                errorMsg += "\nCause: " + e.getCause().toString();
+            }
+            final String finalMsg = errorMsg;
+            javafx.application.Platform.runLater(() -> {
+                System.err.println("FATAL LOAD ERROR: " + finalMsg);
+            });
+        }
     }
 
     private void setActiveNav(Button selected) {
@@ -379,4 +430,9 @@ public class MainViewController implements Initializable {
 
     public interface MainViewAware { void setMainController(MainViewController mainController); }
     public javafx.scene.layout.StackPane getContentArea() { return contentArea; }
+    
+    // Public method for child controllers to navigate with history support
+    public void navigateToView(Node view) {
+        setViewWithHistory(view);
+    }
 }
