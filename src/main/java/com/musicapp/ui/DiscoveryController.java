@@ -102,7 +102,7 @@ public class DiscoveryController implements Initializable, MainViewController.Ma
                     
                     Platform.runLater(() -> {
                         TRENDING_SONGS.clear();
-                        int lim = Math.min(5, songs.size());
+                        int lim = Math.min(6, songs.size());
                         for (int i = 0; i < lim; i++) {
                             Song s = songs.get(i);
                             TRENDING_SONGS.add(new SongListController.SongItem(
