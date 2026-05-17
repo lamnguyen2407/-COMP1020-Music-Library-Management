@@ -59,4 +59,7 @@ public class LibraryManager {
 		songCache.clear();
 		loadFromFirebase();
 	}
+	public Map<String, Song> getSongCache() {
+		return this.songCache;
+	}
 }
