@@ -10,17 +10,18 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.FlowPane?>
 
 <ScrollPane fx:id="discoveryScrollPane" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: #F2EDE6; -fx-background-color: #F2EDE6; -fx-border-color: transparent;" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.musicapp.ui.DiscoveryController">
 
-    <VBox fx:id="contentRoot" spacing="32" style="-fx-background-color: #F2EDE6; -fx-padding: 28 32 40 32;">
+    <VBox fx:id="contentRoot" alignment="TOP_CENTER" spacing="30" style="-fx-background-color: #F2EDE6; -fx-padding: 28 40 40 40;">
 
-        <VBox spacing="14">
+        <VBox spacing="14" maxWidth="910">
             <HBox alignment="CENTER_LEFT" spacing="6">
                 <Label style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;" text="Trending Song" />
             </HBox>
 
-            <HBox alignment="CENTER_LEFT" spacing="14">
+            <FlowPane alignment="CENTER" hgap="20" vgap="20">
                 <StackPane fx:id="trendingCard1" prefHeight="215" prefWidth="165" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
                     <VBox alignment="BOTTOM_LEFT">
                         <StackPane prefHeight="160" prefWidth="165" style="-fx-background-radius: 14 14 0 0">
@@ -68,13 +69,13 @@
                   </VBox>
                </children>
             </StackPane>
-            </HBox>
+            </FlowPane>
         </VBox>
 
-        <VBox spacing="10">
-			<Label style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;" text="Updated Playlist" />            <StackPane fx:id="todaysHitBanner" prefHeight="300" style="-fx-background-color: #1A1A1A; -fx-background-radius: 10;">
+        <VBox spacing="10" maxWidth="910">
+			<Label style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;" text="Updated Playlist" />            <StackPane fx:id="todaysHitBanner" maxWidth="910" prefHeight="300" style="-fx-background-color: #1A1A1A; -fx-background-radius: 10;">
                 <children>
-                    <ImageView fx:id="bannerImage" fitHeight="300" fitWidth="800" preserveRatio="false" style="-fx-opacity: 0.7;" />
+                    <ImageView fx:id="bannerImage" fitHeight="300" fitWidth="910" preserveRatio="false" style="-fx-opacity: 0.7;" />
                     <VBox alignment="CENTER_LEFT" spacing="5">
                         <padding><Insets left="40" /></padding>
                         <Label style="-fx-font-size: 64px; -fx-font-weight: bold; -fx-text-fill: #D4AF37;" text="Today's Hits" />
@@ -84,12 +85,12 @@
             </StackPane>
         </VBox>
 
-        <VBox spacing="14">
+        <VBox spacing="14" maxWidth="910">
             <HBox fx:id="newAlbumsHeader" alignment="CENTER_LEFT" spacing="6" style="-fx-cursor: hand;">
                 <Label style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;" text="New Album Release" />
             </HBox>
 
-            <HBox alignment="CENTER_LEFT" spacing="14">
+            <FlowPane alignment="CENTER" hgap="20" vgap="20">
                 <!-- Card 1 -->
                 <StackPane fx:id="newAlbumCard1" prefHeight="215" prefWidth="165" style="-fx-background-color: #E8DDD0; -fx-background-radius: 14; -fx-cursor: hand;">
                     <VBox alignment="BOTTOM_LEFT">
@@ -157,10 +158,10 @@
                   </VBox>
                </children>
             </StackPane>
-            </HBox>
+            </FlowPane>
         </VBox>
 
-        <VBox spacing="10">
+        <VBox spacing="10" maxWidth="910">
             <HBox alignment="CENTER_LEFT" spacing="6">
                 <Label style="-fx-font-family: 'Georgia'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C2316;" text="Latest Song" />
             </HBox>
