@@ -251,8 +251,8 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
                 selectedAlbum.getSongIdList()
             );
 
-            // DÙNG CÁI NÀY: Gọi qua getter của MainViewController
-            mainController.getContentArea().getChildren().setAll(view);
+            // Use navigateToView for proper Back button support
+            mainController.navigateToView(view);
 
         } catch (Exception e) {
             e.printStackTrace();

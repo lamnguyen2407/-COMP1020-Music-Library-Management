@@ -29,6 +29,8 @@
                     <Label style="-fx-text-fill: white; -fx-font-size: 20px;" text="♪" />
                 </StackPane>
             </HBox>
+            
+            <Button fx:id="btnBack" text="&lt; Back" onAction="#onNavBack" style="-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand;" />
 
             <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
                 <TextField fx:id="searchField" maxWidth="480" prefWidth="420" promptText="🎤  Search for songs" styleClass="search-field" />
@@ -58,7 +60,7 @@
                 <Button fx:id="btnSettings" maxWidth="Infinity" onAction="#onNavSettings" styleClass="nav-btn" text="🚪  Sign Out" />
             </VBox>
 
-            <ScrollPane fx:id="mainScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll" vbarPolicy="AS_NEEDED" HBox.hgrow="ALWAYS">
+            <ScrollPane fx:id="mainScrollPane" fitToHeight="false" fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll" vbarPolicy="AS_NEEDED" HBox.hgrow="ALWAYS">
                 <StackPane fx:id="contentArea" minHeight="600" styleClass="content-area">
                     <Label styleClass="placeholder-label" text="Loading Content..." />
                 </StackPane>

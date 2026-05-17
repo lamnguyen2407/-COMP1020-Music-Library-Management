@@ -1,6 +1,9 @@
-<<<<<<< HEAD
-/target/
-=======
 target/
 *.class
->>>>>>> c2cfbb896caedde0bba3145df0215310fa0655cb
+
+# Launcher and build artifacts
+src/main/java/com/musicapp/Launcher.java
+cp.txt
+cp_run.txt
+files.txt
+run_log.txt

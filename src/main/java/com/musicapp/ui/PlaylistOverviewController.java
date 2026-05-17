@@ -148,7 +148,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                         ctrl.setPlaylistData(playlistId, name, coverUrl, finalSongs);
                         
                         if (mainController != null) {
-                            mainController.getContentArea().getChildren().setAll(view);
+                            mainController.navigateToView(view);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -287,11 +287,15 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     }
 
     private void updateMainContent(Node view) {
-        if (contentArea == null && playlistListContainer.getScene() != null) {
-            contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
-        }
-        if (contentArea != null) {
-            contentArea.getChildren().setAll(view);
+        if (mainController != null) {
+            mainController.navigateToView(view);
+        } else {
+            if (contentArea == null && playlistListContainer.getScene() != null) {
+                contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
+            }
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(view);
+            }
         }
     }
 
@@ -334,7 +338,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
             ctrl.setMainController(this.mainController);
 
             if (mainController != null) {
-                mainController.getContentArea().getChildren().setAll(view);
+                mainController.navigateToView(view);
             }
         } catch (IOException e) {
             e.printStackTrace();
