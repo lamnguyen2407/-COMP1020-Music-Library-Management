@@ -271,6 +271,28 @@ public class FirebaseServiceImpl implements FirebaseService {
     }
     
     @Override
+    public void removeSongFromAlbum(String albumId, String songId) {
+        if (albumId == null || songId == null) return;
+        this.dbRef.child("albums")
+                  .child(albumId)
+                  .child("songIds")
+                  .child(songId)
+                  .removeValueAsync();
+        System.out.println("Song " + songId + " removed from album " + albumId);
+    }
+
+    @Override
+    public void removeSongFromPlaylist(String playlistId, String songId) {
+        if (playlistId == null || songId == null) return;
+        this.dbRef.child("playlists")
+                  .child(playlistId)
+                  .child("songIds")
+                  .child(songId)
+                  .removeValueAsync();
+        System.out.println("Song " + songId + " removed from playlist " + playlistId);
+    }
+
+    @Override
     public List<String> fetchSongIdsFromPlaylist(String playlistId) {
         List<String> ids = new ArrayList<>();
         CompletableFuture<DataSnapshot> future = new CompletableFuture<>();
@@ -481,5 +503,43 @@ public class FirebaseServiceImpl implements FirebaseService {
                 System.err.println("Error toggling favorite: " + error.getMessage());
             }
         });
+    }
+    
+    @Override
+    public void removeSongContextually(String contextId, String songId) {
+        if (songId == null) return;
+        
+        boolean isLibraryView = (contextId == null || contextId.toLowerCase().contains("all") || contextId.toLowerCase().contains("library"));
+
+        if (isLibraryView) {
+            deleteSong(songId); 
+        } else if (contextId.startsWith("SYSTEM_") || contextId.startsWith("pl_") || contextId.startsWith("fav_")) {
+            removeSongFromPlaylist(contextId, songId);
+        } else {
+            removeSongFromAlbum(contextId, songId);
+        }
+    }
+    
+    @Override
+    public List<Song> fetchSongsContextually(String contextId, String contextTitle) {
+        List<Song> targetSongs = new ArrayList<>();
+        boolean isLibraryView = (contextTitle != null && 
+             (contextTitle.toLowerCase().contains("all") || contextTitle.toLowerCase().contains("library")));
+        
+        if (isLibraryView) {
+            return fetchSongs();
+        } else if (contextId != null) {
+            List<String> songIds;
+            if (contextId.startsWith("SYSTEM_") || contextId.startsWith("pl_") || contextId.startsWith("fav_")) {
+                songIds = fetchSongIdsFromPlaylist(contextId);
+            } else {
+                songIds = fetchSongIdsFromAlbum(contextId);
+            }
+            
+            if (songIds != null && !songIds.isEmpty()) {
+                return fetchSongsByIds(songIds);
+            }
+        }
+        return targetSongs;
     }
 }

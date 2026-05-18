@@ -38,4 +38,10 @@ public interface FirebaseService {
     
     String getCurrentUserId();
     String getCurrentUserRole();
+    
+    void removeSongFromAlbum(String albumId, String songId);
+    void removeSongFromPlaylist(String playlistId, String songId);
+    
+    void removeSongContextually(String contextId, String songId);
+    List<Song> fetchSongsContextually(String contextId, String contextTitle);
 }

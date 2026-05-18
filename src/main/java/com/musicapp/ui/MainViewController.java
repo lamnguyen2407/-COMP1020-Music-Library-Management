@@ -110,6 +110,8 @@ public class MainViewController implements Initializable {
     @FXML 
     private void onNavSettings() { 
         try {
+            shutdownAudio();
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/WelcomeView.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) btnHome.getScene().getWindow();
@@ -373,4 +375,14 @@ public class MainViewController implements Initializable {
     public void navigateToView(Node view) {
         setViewWithHistory(view);
     }
+    
+    public void shutdownAudio() {
+        if (this.mediaPlayer != null) {
+            this.mediaPlayer.stop();
+            this.mediaPlayer.dispose();
+            this.mediaPlayer = null;
+        }
+    }
+    
+    
 }

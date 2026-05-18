@@ -140,7 +140,6 @@ public class SongListController implements Initializable, MainViewController.Mai
 
     public void startPlaying(SongItem item) {
         if (mainController == null) return;
-        
         try {
             List<Song> queue = new ArrayList<>();
             int playingIndex = 0;
@@ -154,7 +153,6 @@ public class SongListController implements Initializable, MainViewController.Mai
                 }
                 i++;
             }
-            
             if (!queue.isEmpty()) {
                 mainController.showPlayerBar(queue.get(playingIndex), queue, playingIndex);
             }
@@ -176,39 +174,15 @@ public class SongListController implements Initializable, MainViewController.Mai
                     favSongIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(favId);
                 }
 
-                boolean isLibraryView = (currentAlbumTitle != null && 
-                     (currentAlbumTitle.toLowerCase().contains("all") || currentAlbumTitle.toLowerCase().contains("library")));
-                
-                if (isLibraryView) {
-                    List<Song> firebaseSongs = DatabaseManager.getInstance().getService().fetchSongs();
-                    for (Song s : firebaseSongs) {
-                        SongItem item = new SongItem(s.getSongId(), s.getTitle(), s.getArtist(), 
-                             s.getGenre(), s.getDuration(), s.getReleaseYear(), s.getAudioURL(), s.getImageURL());
-                        item.isFavorite = favSongIds.contains(s.getSongId());
-                        convertedList.add(item);
-                    }
-                } else if (currentAlbumId != null) {
-                    if (currentAlbumId.startsWith("SYSTEM_") || currentAlbumId.startsWith("pl_") || currentAlbumId.startsWith("fav_")) {
-                        currentSongIdList = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(currentAlbumId);
-                    } else {
-                        currentSongIdList = DatabaseManager.getInstance().getService().fetchSongIdsFromAlbum(currentAlbumId);
-                    }
-                    
-                    if (currentSongIdList != null && !currentSongIdList.isEmpty()) {
-                        List<Song> songsFromDb = DatabaseManager.getInstance().getService().fetchSongsByIds(currentSongIdList);
-                        for (Song s : songsFromDb) {
-                            SongItem item = new SongItem(s.getSongId(), s.getTitle(), s.getArtist(), 
-                                 s.getGenre(), s.getDuration(), s.getReleaseYear(), s.getAudioURL(), s.getImageURL());
-                            item.isFavorite = favSongIds.contains(s.getSongId());
-                            convertedList.add(item);
-                        }
-                    }
-                } else {
-                    return;
-                }
-                
-                if (currentAlbumTitle != null && currentAlbumTitle.contains("Search Results")) {
-                    return; 
+                // UI Controller delegates payload fetching entirely to the service layer
+                List<Song> databasePayload = DatabaseManager.getInstance().getService()
+                    .fetchSongsContextually(currentAlbumId, currentAlbumTitle);
+
+                for (Song s : databasePayload) {
+                    SongItem item = new SongItem(s.getSongId(), s.getTitle(), s.getArtist(), 
+                         s.getGenre(), s.getDuration(), s.getReleaseYear(), s.getAudioURL(), s.getImageURL());
+                    item.isFavorite = favSongIds.contains(s.getSongId());
+                    convertedList.add(item);
                 }
 
                 List<SongItem> finalList = convertedList;
@@ -217,15 +191,6 @@ public class SongListController implements Initializable, MainViewController.Mai
                  System.err.println("Error refreshing track details: " + e.getMessage()); 
             }
         }).start();
-    }
-
-    private void MathUI() {
-        try {
-            if (!SessionManager.isAdmin) {
-                if (addBtn != null) { addBtn.setVisible(false); addBtn.setManaged(false); }
-                if (deleteBtn != null) { deleteBtn.setVisible(false); deleteBtn.setManaged(false); }
-            }
-        } catch (Exception e) {}
     }
 
     private void setupRoleBasedUI() {
@@ -255,7 +220,6 @@ public class SongListController implements Initializable, MainViewController.Mai
             for (SongItem sItem : tempItems) {
                 shuffledQueue.add(new Song(sItem.songId, sItem.title, sItem.artist, sItem.genre, sItem.duration, sItem.releaseYear, sItem.audioURL, sItem.imageURL));
             }
-            
             mainController.showPlayerBar(shuffledQueue.get(0), shuffledQueue, 0);
         }
     }
@@ -265,7 +229,6 @@ public class SongListController implements Initializable, MainViewController.Mai
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddSongModal.fxml"));
             Parent root = loader.load();
-            
             AddSongModalController modalCtrl = loader.getController();
             
             if (currentAlbumId != null) {
@@ -278,14 +241,12 @@ public class SongListController implements Initializable, MainViewController.Mai
             stage.showAndWait(); 
             
             Song addedSong = modalCtrl.getCreatedSong();
-            
             if (addedSong != null) {
                 SongItem newItem = new SongItem(
                     addedSong.getSongId(), addedSong.getTitle(), addedSong.getArtist(),
                     addedSong.getGenre(), addedSong.getDuration(), addedSong.getReleaseYear(),
                     addedSong.getAudioURL(), addedSong.getImageURL()
                 );
-                
                 songs.add(newItem);
                 if (currentSongIdList != null) {
                     currentSongIdList.add(addedSong.getSongId());
@@ -309,10 +270,14 @@ public class SongListController implements Initializable, MainViewController.Mai
                 resetDeleteBtn();
                 return;
             }
+
             new Thread(() -> {
                 try {
                     for (SongItem item : itemsToRemove) {
-                        DatabaseManager.getInstance().getService().deleteSong(item.songId);
+                        DatabaseManager.getInstance().getService().removeSongContextually(
+                            currentAlbumTitle != null && currentAlbumTitle.toLowerCase().contains("all") ? "ALL_SONGS" : currentAlbumId, 
+                            item.songId
+                        );
                     }
                     Platform.runLater(() -> {
                         songs.removeAll(itemsToRemove);
@@ -400,7 +365,6 @@ public class SongListController implements Initializable, MainViewController.Mai
         
         SongCell() {
             this.setPadding(new Insets(0)); 
-            
             root.setAlignment(Pos.CENTER_LEFT);
             root.setPadding(new Insets(0, 40, 0, 40));
             root.setMinHeight(62);
@@ -410,7 +374,6 @@ public class SongListController implements Initializable, MainViewController.Mai
 
             indexLabel.setPrefWidth(40);
             indexLabel.setMinWidth(40);
-            
             thumb.setFitWidth(40); thumb.setFitHeight(40);
             
             nameLabel.setPrefWidth(190); 
@@ -436,7 +399,6 @@ public class SongListController implements Initializable, MainViewController.Mai
             genreLabel.setMinWidth(130);
 
             HBox.setHgrow(spacer, Priority.ALWAYS);
-            
             timeLabel.setPrefWidth(60);
             timeLabel.setAlignment(Pos.CENTER_RIGHT);
             
@@ -515,13 +477,11 @@ public class SongListController implements Initializable, MainViewController.Mai
     public void setSongsList(ObservableList<SongItem> manualData) {
         if (manualData != null) {
             this.currentAlbumId = null;
-            
             new Thread(() -> {
                 try {
                     if (SessionManager.currentUser != null) {
                         String favId = "fav_" + SessionManager.currentUser.getUserId();
                         List<String> favIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(favId);
-                        
                         for (SongItem item : manualData) {
                             item.isFavorite = favIds.contains(item.getSongId());
                         }
@@ -539,7 +499,6 @@ public class SongListController implements Initializable, MainViewController.Mai
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddToPlaylistModal.fxml"));
             Parent root = loader.load();
-
             AddToPlaylistController controller = loader.getController();
             
             Song song = new Song(item.getSongId(), item.getTitle(), item.getArtist(), 
@@ -553,7 +512,6 @@ public class SongListController implements Initializable, MainViewController.Mai
             stage.setTitle("Add to Playlist");
             stage.initModality(Modality.APPLICATION_MODAL); 
             stage.showAndWait();
-
         } catch (IOException e) {
             System.err.println("Modal view execution exception: " + e.getMessage());
             e.printStackTrace();
