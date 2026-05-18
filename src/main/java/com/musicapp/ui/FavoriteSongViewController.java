@@ -7,6 +7,7 @@ import com.musicapp.service.DatabaseManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -24,30 +25,25 @@ import java.util.ResourceBundle;
 
 public class FavoriteSongViewController implements Initializable, MainViewController.MainViewAware {
 
-    // ── FXML bindings ──────────────────────────────────────────────────────────
     @FXML private ImageView coverArtView;
-    @FXML private Label     songCountLabel;
-    @FXML private VBox      songListContainer;
-    @FXML private Button    playAllBtn;
+    @FXML private Label songCountLabel;
+    @FXML private VBox songListContainer;
+    @FXML private Button playAllBtn;
 
-    // ── State ──────────────────────────────────────────────────────────────────
     private final List<Song> favoriteSongs = new ArrayList<>();
     private MainViewController mainController;
 
-    // ── MainViewAware ──────────────────────────────────────────────────────────
     @Override
     public void setMainController(MainViewController mainController) {
         this.mainController = mainController;
     }
 
-    // ── Initialize ─────────────────────────────────────────────────────────────
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         playAllBtn.setOnAction(e -> playAll());
         loadFavoriteSongs();
     }
 
-    // ── Load from Firebase ─────────────────────────────────────────────────────
     public void loadFavoriteSongs() {
         if (SessionManager.currentUser == null) return;
 
@@ -63,12 +59,12 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
                     Platform.runLater(() -> setFavoriteSongs(new ArrayList<>()));
                 }
             } catch (Exception e) {
+                System.err.println("Failed to fetch favorite songs payload: " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();
     }
 
-    // ── Public API ─────────────────────────────────────────────────────────────
     public void setFavoriteSongs(List<Song> songs) {
         favoriteSongs.clear();
         favoriteSongs.addAll(songs);
@@ -76,7 +72,6 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
         updateCount();
     }
 
-    // ── Build rows ─────────────────────────────────────────────────────────────
     private void buildRows() {
         songListContainer.getChildren().clear();
         for (int i = 0; i < favoriteSongs.size(); i++) {
@@ -89,37 +84,37 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
         row.setAlignment(Pos.CENTER_LEFT);
         row.setStyle(rowStyle(false));
 
-        // ── # number ──
         Label numberLabel = new Label(String.valueOf(index + 1));
         numberLabel.setPrefWidth(40);
         numberLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888;");
 
-        // ── Thumbnail ──
         ImageView thumb = new ImageView();
         thumb.setFitWidth(40);
         thumb.setFitHeight(40);
         thumb.setPreserveRatio(true);
         if (song.getImageURL() != null && !song.getImageURL().isEmpty()) {
-            try { thumb.setImage(new Image(song.getImageURL(), true)); }
-            catch (Exception ignored) {}
+            try { 
+                if (song.getImageURL().startsWith("http")) {
+                    thumb.setImage(new Image(song.getImageURL(), true)); 
+                } else {
+                    URL resource = getClass().getResource(song.getImageURL());
+                    if (resource != null) thumb.setImage(new Image(resource.toExternalForm(), true));
+                }
+            } catch (Exception ignored) {}
         }
 
-        // ── Title ──
         Label titleLabel = new Label(song.getTitle());
         titleLabel.setPrefWidth(220);
         titleLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-padding: 0 0 0 12;");
 
-        // ── Heart button (filled, click to remove) ──
+        // The Heart Icon ("tim") stays clean and intact here
         Button heartBtn = new Button("♥");
-        heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
-        heartBtn.setOnAction(e -> removeFromFavorites(song));
+        heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 14px; -fx-border-width: 0;");
 
-        // ── Artist ──
         Label artistLabel = new Label(song.getArtist());
         artistLabel.setPrefWidth(180);
         artistLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #555555;");
 
-        // ── Genre ──
         Label genreLabel = new Label(song.getGenre());
         genreLabel.setPrefWidth(160);
         genreLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #555555;");
@@ -127,17 +122,22 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // ── Duration ──
+        // A proper, dedicated rectangular Delete Button positioned safely near the end of the row
+        Button deleteBtn = new Button("Delete");
+        deleteBtn.setStyle("-fx-background-color: #C0703A; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 4 10 4 10; -fx-cursor: hand;");
+        deleteBtn.setOnAction(e -> removeFromFavorites(song));
+
         Label durationLabel = new Label(formatDuration(song.getDuration()));
-        durationLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888; -fx-min-width: 40;");
+        durationLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888; -fx-min-width: 40; -fx-alignment: center-right;");
 
-        row.getChildren().addAll(numberLabel, thumb, titleLabel, heartBtn, artistLabel, genreLabel, spacer, durationLabel);
-        HBox.setMargin(durationLabel, new javafx.geometry.Insets(0, 40, 0, 0));
-        HBox.setMargin(numberLabel,   new javafx.geometry.Insets(0, 0, 0, 40));
+        row.getChildren().addAll(numberLabel, thumb, titleLabel, heartBtn, artistLabel, genreLabel, spacer, deleteBtn, durationLabel);
+        
+        HBox.setMargin(deleteBtn, new Insets(0, 20, 0, 0));
+        HBox.setMargin(durationLabel, new Insets(0, 40, 0, 0));
+        HBox.setMargin(numberLabel,   new Insets(0, 0, 0, 40));
 
-        // Click row → play (ignore heart clicks)
         row.setOnMouseClicked(e -> {
-            if (e.getTarget() != heartBtn) {
+            if (e.getTarget() != deleteBtn) {
                 playSong(song, index);
             }
         });
@@ -147,8 +147,6 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
 
         return row;
     }
-
-    // ── Handlers ──────────────────────────────────────────────────────────────
 
     private void playAll() {
         if (mainController != null && !favoriteSongs.isEmpty()) {
@@ -171,8 +169,6 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
             DatabaseManager.getInstance().getService().toggleFavoriteSong(SessionManager.currentUser.getUserId(), song);
         }
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void updateCount() {
         songCountLabel.setText(favoriteSongs.size() + " songs");

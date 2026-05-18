@@ -17,7 +17,7 @@ public class AddSongModalController implements Initializable {
     @FXML private TextField artistField;
     @FXML private TextField genreField;
     @FXML private TextField yearField;
-    @FXML private TextField durationField; // Quay trở lại làm FXML field
+    @FXML private TextField durationField; 
     @FXML private TextField audioUrlField; 
     @FXML private TextField imageUrlField;
 
@@ -26,74 +26,69 @@ public class AddSongModalController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Vẫn giữ Auto ID vì nó giúp mày không bị trùng dữ liệu trên Firebase
-        // Nếu mày muốn nhập ID tay nốt thì xóa dòng này và bỏ disable trong FXML
     }
 
     @FXML
     private void onSave() {
         try {
-            // 1. Lấy dữ liệu và kiểm tra trống
             String title = titleField.getText().trim();
             String audioUrl = audioUrlField.getText().trim();
             
             if (title.isEmpty() || audioUrl.isEmpty()) {
-                showAlert(Alert.AlertType.WARNING, "Thiếu thông tin", "Vui lòng nhập ít nhất là Tên bài và Link nhạc.");
+                showAlert(Alert.AlertType.WARNING, "Missing Information", "Title and Audio URL fields are required.");
                 return;
             }
 
-            // 2. Chuyển đổi dữ liệu số
-            String id = Song.generateAutoId(); // Hệ thống tự sinh ID ngầm
+            String id = Song.generateAutoId(); 
             int year = Integer.parseInt(yearField.getText().trim());
             int duration = Integer.parseInt(durationField.getText().trim());
 
-            // 3. Convert Link Drive
             String directAudioUrl = convertToDirectLink(audioUrl);
             String directImageUrl = convertToDirectLink(imageUrlField.getText().trim());
 
-            // 4. Tạo Object bài hát
             Song newSong = new Song(id, title, artistField.getText().trim(), genreField.getText().trim(), 
                                     duration, year, directAudioUrl, directImageUrl);
             
-            // 5. Lưu vào nhánh "songs"
-            DatabaseManager.getInstance().getService().getDbRef().child("songs").child(id)
-                .setValueAsync(newSong);
+            DatabaseManager.getInstance().getService().saveSong(newSong);
             
-            // 6. Nối dây vào Album/Playlist (nếu có)
             if (currentAlbumId != null && !currentAlbumId.isEmpty()) {
-                String folder = (currentAlbumId.startsWith("pl_") || currentAlbumId.contains("SYSTEM")) ? "playlists" : "albums";
-                DatabaseManager.getInstance().getService().getDbRef()
-                    .child(folder).child(currentAlbumId).child("songIdList").push().setValueAsync(id);
+                if (currentAlbumId.startsWith("pl_") || currentAlbumId.contains("SYSTEM")) {
+                    DatabaseManager.getInstance().getService().addSongToPlaylist(currentAlbumId, id);
+                } else {
+                    DatabaseManager.getInstance().getService().addSongToAlbum(currentAlbumId, id);
+                }
             }
             
             this.createdSong = newSong;
-            System.out.println("✅ Đã lưu bài hát thành công!");
+            System.out.println("Song saved successfully.");
             closeModal();
             
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi định dạng", "Năm và Thời lượng (giây) phải là con số!");
+            showAlert(Alert.AlertType.ERROR, "Invalid Format", "Year and Duration fields must contain valid integers.");
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể lưu bài hát.");
+            showAlert(Alert.AlertType.ERROR, "System Error", "Could not complete song insertion transaction.");
         }
     }
 
     @FXML private void onCancel() { closeModal(); }
 
     private void closeModal() {
-        Stage stage = (Stage) titleField.getScene().getWindow();
-        stage.close();
+        if (titleField.getScene() != null) {
+            Stage stage = (Stage) titleField.getScene().getWindow();
+            stage.close();
+        }
     }
 
-    // Các hàm Helper giữ nguyên
     public void setPredefinedData(String artist, String genre, int year, String imageUrl) {
-        if (artistField != null) artistField.setText("");
-        if (genreField != null) genreField.setText("");
-        if (yearField != null) yearField.setText(String.valueOf(""));
-        if (imageUrlField != null) imageUrlField.setText(""); 
+        if (artistField != null) artistField.setText(artist != null ? artist : "");
+        if (genreField != null) genreField.setText(genre != null ? genre : "");
+        if (yearField != null) yearField.setText(year > 0 ? String.valueOf(year) : "");
+        if (imageUrlField != null) imageUrlField.setText(imageUrl != null ? imageUrl : ""); 
     }
 
     public void setTargetAlbumId(String albumId) { this.currentAlbumId = albumId; }
+    
     public Song getCreatedSong() { return createdSong; }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
@@ -111,7 +106,6 @@ public class AddSongModalController implements Initializable {
 
         try {
             String fileId = "";
-            // Dùng Regex để tìm ID (chuỗi khoảng 33 ký tự nằm sau d/ hoặc id=)
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("([\\w-]{25,})");
             java.util.regex.Matcher matcher = pattern.matcher(driveUrl);
             
@@ -120,7 +114,6 @@ public class AddSongModalController implements Initializable {
             }
 
             if (!fileId.isEmpty()) {
-                // Trả về đúng định dạng Lâm test thành công
                 return "https://drive.google.com/uc?export=view&id=" + fileId;
             }
         } catch (Exception e) {

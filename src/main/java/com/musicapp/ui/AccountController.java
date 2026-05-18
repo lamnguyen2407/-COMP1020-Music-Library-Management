@@ -46,10 +46,9 @@ public class AccountController implements Initializable {
     }
 
     private void loadUserData() {
-        String path = "users/" + currentUserId;
-
         DatabaseManager.getInstance().getService().getDbRef()
-                .child(path)
+                .child("users")
+                .child(currentUserId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -59,8 +58,8 @@ public class AccountController implements Initializable {
                     String role = snapshot.child("role").getValue(String.class);
                     
                     String fullName = snapshot.hasChild("fullname") 
-                                      ? snapshot.child("fullname").getValue(String.class) 
-                                      : snapshot.child("name").getValue(String.class);
+                                    ? snapshot.child("fullname").getValue(String.class) 
+                                    : snapshot.child("name").getValue(String.class);
 
                     Platform.runLater(() -> {
                         savedUsername = username;
@@ -100,15 +99,14 @@ public class AccountController implements Initializable {
             return;
         }
 
-        String path = "users/" + currentUserId;
-
         Map<String, Object> updates = new HashMap<>();
         updates.put("name", newUsername);
         updates.put("email", newEmail);
         updates.put("fullname", newName);
 
         DatabaseManager.getInstance().getService().getDbRef()
-                .child(path)
+                .child("users")
+                .child(currentUserId)
                 .updateChildren(updates, (error, ref) -> {
                     if (error == null) {
                         Platform.runLater(() -> {

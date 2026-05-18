@@ -51,14 +51,18 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (SessionManager.isAdmin) {
-            addAlbumBtn.setVisible(true); addAlbumBtn.setManaged(true);
-            deleteAlbumBtn.setVisible(true); deleteAlbumBtn.setManaged(true);
+            addAlbumBtn.setVisible(true); 
+            addAlbumBtn.setManaged(true);
+            deleteAlbumBtn.setVisible(true); 
+            deleteAlbumBtn.setManaged(true);
             
             addAlbumBtn.setOnAction(event -> openAddAlbumModal());
             deleteAlbumBtn.setOnAction(event -> toggleDeleteMode()); 
         } else {
-            addAlbumBtn.setVisible(false); addAlbumBtn.setManaged(false);
-            deleteAlbumBtn.setVisible(false); deleteAlbumBtn.setManaged(false);
+            addAlbumBtn.setVisible(false); 
+            addAlbumBtn.setManaged(false);
+            deleteAlbumBtn.setVisible(false); 
+            deleteAlbumBtn.setManaged(false);
         }
 
         refreshData();
@@ -72,10 +76,10 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
                     currentAlbums.clear();
                     currentAlbums.addAll(dbAlbums);
                     displayAlbums(currentAlbums);
-                    System.out.println("✅ Đã load " + currentAlbums.size() + " albums từ Firebase.");
+                    System.out.println("Successfully loaded " + currentAlbums.size() + " albums from Firebase.");
                 });
             } catch (Exception e) {
-                System.err.println("❌ Lỗi khi load Albums từ Firebase: " + e.getMessage());
+                System.err.println("Error fetching albums from database: " + e.getMessage());
             }
         }).start();
     }
@@ -89,7 +93,6 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
             displayAlbums(currentAlbums); 
         } else {
             if (!selectedForDeletion.isEmpty()) {
-                // THỰC HIỆN XÓA THẬT TRÊN FIREBASE
                 new Thread(() -> {
                     try {
                         for (Album album : selectedForDeletion) {
@@ -101,7 +104,7 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
                             finishDeleteMode();
                         });
                     } catch (Exception e) {
-                        System.err.println("❌ Lỗi khi xóa album: " + e.getMessage());
+                        System.err.println("Batch deletion execution exception: " + e.getMessage());
                     }
                 }).start();
             } else {
@@ -122,34 +125,25 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddAlbumModal.fxml"));
             Parent root = loader.load();
             
-            // Lấy controller của modal để hứng dữ liệu
             AddAlbumModalController modalController = loader.getController();
 
             Stage modalStage = new Stage();
             modalStage.setTitle("Add New Album");
             modalStage.setScene(new Scene(root));
             modalStage.initModality(Modality.APPLICATION_MODAL);
-            if (addAlbumBtn.getScene() != null) modalStage.initOwner(addAlbumBtn.getScene().getWindow());
+            if (addAlbumBtn.getScene() != null) {
+                modalStage.initOwner(addAlbumBtn.getScene().getWindow());
+            }
             
-            // Mở bảng lên và code sẽ dừng ở đây chờ bạn bấm Save/Cancel
             modalStage.showAndWait();
             
-            // ---- XỬ LÝ LÀM MỚI GIAO DIỆN NGAY LẬP TỨC ----
             Album createdAlbum = modalController.getNewAlbum();
-            
             if (createdAlbum != null) {
-                // Nếu có Album mới tạo -> Chèn thẳng vào giao diện mà không cần chờ mạng!
                 currentAlbums.add(createdAlbum);
-                
-                // Ép giao diện vẽ lại danh sách Album ngay lập tức
-                Platform.runLater(() -> {
-                    displayAlbums(currentAlbums);
-                });
-                
-                System.out.println("✅ Đã ép UI hiển thị ngay Album: " + createdAlbum.getTitle());
+                Platform.runLater(() -> displayAlbums(currentAlbums));
+                System.out.println("Instant UI view synchronization applied for album: " + createdAlbum.getTitle());
             } else {
-                // Trường hợp người dùng bấm Cancel, không làm gì cả
-                System.out.println("Đã đóng bảng, không có Album nào được tạo.");
+                System.out.println("Modal dismissed. No album generated.");
             }
             
         } catch (IOException e) { 
@@ -180,31 +174,29 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
         imageContainer.setStyle("-fx-background-color: #EAEAEA; -fx-background-radius: 8;");
         
         ImageView coverImage = new ImageView();
-        coverImage.setFitWidth(140); coverImage.setFitHeight(140);
-        Rectangle clip = new Rectangle(140, 140); clip.setArcWidth(16); clip.setArcHeight(16);
+        coverImage.setFitWidth(140); 
+        coverImage.setFitHeight(140);
+        Rectangle clip = new Rectangle(140, 140); 
+        clip.setArcWidth(16); 
+        clip.setArcHeight(16);
         coverImage.setClip(clip);
 
         if (album.getImageURL() != null && !album.getImageURL().isEmpty()) {
             try {
                 String imgUrl = album.getImageURL().trim();
-                
-                // Kiểm tra xem là link local (trong máy) hay link web online
                 if (imgUrl.startsWith("/")) {
-                    // Đọc ảnh từ thư mục resources (ví dụ: /images/shapeofyou.jpg)
                     coverImage.setImage(new Image(getClass().getResourceAsStream(imgUrl)));
                 } else {
-                    // Đọc ảnh từ web (http...)
                     coverImage.setImage(new Image(imgUrl, true));
                 }
-                
                 imageContainer.getChildren().add(coverImage);
             } catch (Exception e) {
-                // NẾU LỖI: Chỉ in ra console chứ không làm sập giao diện!
-                System.err.println("⚠️ Bỏ qua ảnh lỗi của Album '" + album.getTitle() + "': " + e.getMessage());
+                System.err.println("Bypassing broken graphic node link on album '" + album.getTitle() + "': " + e.getMessage());
             }
         }
 
-        VBox textContainer = new VBox(3); textContainer.setAlignment(Pos.CENTER);
+        VBox textContainer = new VBox(3); 
+        textContainer.setAlignment(Pos.CENTER);
         Label titleLabel = new Label(album.getTitle());
         titleLabel.setStyle("-fx-text-fill: #1A1A1A; -fx-font-weight: bold; -fx-font-size: 14px;");
         Label artistLabel = new Label(album.getArtist() + " • " + album.getReleaseYear());
@@ -229,17 +221,14 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
         return card;
     }
 
- // Tìm chỗ này trong NewAlbumReleaseController
- // Ví dụ trong hàm xử lý Click vào Album
     private void loadAlbumDetailView(Album selectedAlbum) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
             Parent view = loader.load();
             
             SongListController controller = loader.getController();
-            controller.setMainController(this.mainController); // Truyền sếp sang cho thằng con tiếp theo
+            controller.setMainController(this.mainController); 
 
-            // Đổ data (8 tham số chuẩn Cách 1)
             controller.setData(
                 selectedAlbum.getAlbumId(),
                 selectedAlbum.getTitle(),
@@ -251,7 +240,6 @@ public class NewAlbumReleaseController implements Initializable, MainViewControl
                 selectedAlbum.getSongIdList()
             );
 
-            // Use navigateToView for proper Back button support
             mainController.navigateToView(view);
 
         } catch (Exception e) {

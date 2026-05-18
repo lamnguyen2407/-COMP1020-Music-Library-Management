@@ -1,19 +1,25 @@
 package com.musicapp.ui;
+
 import com.musicapp.service.LoginCallback;
 import com.musicapp.model.*;
+import com.musicapp.service.DatabaseManager;
+import com.musicapp.model.SessionManager;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.*;
-import javafx.scene.control.*;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import java.io.IOException;
 
-import com.musicapp.model.SessionManager;
-import com.musicapp.service.DatabaseManager;
-
 public class LoginController {
+
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
     
@@ -21,29 +27,25 @@ public class LoginController {
      
     @FXML
     public void handleLogin(ActionEvent event) {
-        // 2. Nếu đang trong quá trình login thì thoát luôn, không chạy dòng dưới
         if (isLoggingIn) return; 
 
         String identifier = emailField.getText().trim();
         String password = passwordField.getText();
 
-        if(identifier.isEmpty() || password.isEmpty()) {
-            System.out.println("Error: Điền thông tin đã chứ!");
+        if (identifier.isEmpty() || password.isEmpty()) {
+            System.out.println("Validation Error: Fields cannot be empty.");
             return;
         }
 
-        // 3. Bắt đầu xử lý: Khóa trạng thái lại
         isLoggingIn = true; 
         System.out.println("Checking credentials on Firebase...");
         
-        // Vô hiệu hóa nút bấm để user khỏi "spam" click
         Node source = (Node) event.getSource();
         source.setDisable(true);
 
         DatabaseManager.getInstance().getService().authenticateUser(identifier, password, new LoginCallback() {
             @Override 
             public void onSuccess(User user, String role) {
-                // Đăng nhập xong thì không cần reset vì đã chuyển trang
                 SessionManager.currentUser = user;
                 SessionManager.isAdmin = "admin".equalsIgnoreCase(role);
                 Platform.runLater(() -> goToMainView(event));
@@ -51,13 +53,11 @@ public class LoginController {
             
             @Override 
             public void onError(String errorMessage) {
-                // QUAN TRỌNG: Nếu lỗi thì phải mở khóa để user thử lại
                 isLoggingIn = false; 
                 Platform.runLater(() -> {
-                    source.setDisable(false); // Mở lại nút
-                    System.out.println("Login Failed: " + errorMessage);
+                    source.setDisable(false); 
+                    System.err.println("Login Failed: " + errorMessage);
                     
-                    // HIỂN THỊ ALERT CHO USER BIẾT
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Login Error");
                     alert.setHeaderText(null);
@@ -67,6 +67,7 @@ public class LoginController {
             }
         });
     }
+
     @FXML 
     public void goBack(ActionEvent event) {
         try {
@@ -74,8 +75,7 @@ public class LoginController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 800));
             stage.show();
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -87,8 +87,7 @@ public class LoginController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 800));
             stage.show();
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -100,8 +99,7 @@ public class LoginController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 800));
             stage.show();
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

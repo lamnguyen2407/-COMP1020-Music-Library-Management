@@ -1,7 +1,6 @@
 package com.musicapp.model;
 
 import java.util.*;
-
 import com.google.firebase.database.Exclude;
 
 public class Playlist {
@@ -9,11 +8,8 @@ public class Playlist {
     private String ownerId;
     private String name;
     private boolean isPublic;
-    
     private Map<String, Boolean> songIds;
-    
     private String coverImage; 
-    
     private String type; 
 
     public Playlist() {
@@ -21,7 +17,7 @@ public class Playlist {
     }
 
     public Playlist(String name, String ownerId, String type, String coverImage) {
-        this.playlistId = "PL_" + UUID.randomUUID().toString(); // Thêm tiền tố PL_ cho dễ quản lý
+        this.playlistId = "PL_" + UUID.randomUUID().toString(); 
         this.name = name;
         this.ownerId = ownerId;
         this.isPublic = false;
@@ -30,7 +26,6 @@ public class Playlist {
         this.songIds = new HashMap<>();
     }
 
-   
     public String getPlaylistId() { return playlistId; }
     public void setPlaylistId(String playlistId) { this.playlistId = playlistId; }
 
@@ -50,16 +45,13 @@ public class Playlist {
     public void setType(String type) { this.type = type; }
 
     public Map<String, Boolean> getSongIds() { 
-    	if (this.songIds == null) {
+        if (this.songIds == null) {
             this.songIds = new HashMap<>();
         }
         return this.songIds;
     }
     
     public void setSongIds(Map<String, Boolean> songIds) { this.songIds = songIds; }
-
-   
-
 
     public void addSongToPlaylist(String songId) {
         if (this.songIds == null) this.songIds = new HashMap<>();

@@ -24,34 +24,29 @@ public class AddAlbumModalController {
             String artist = artistField.getText().trim();
             String yearStr = releaseYearField.getText().trim();
             String genre = genreField.getText().trim();
-            
-            // Lấy link gốc người dùng nhập
             String rawImage = imageUrlField.getText().trim();
 
             if (title.isBlank() || artist.isBlank() || yearStr.isBlank()) {
-                showAlert(Alert.AlertType.WARNING, "Thiếu thông tin", "Vui lòng nhập đầy đủ Title, Artist và Release Year!");
+                showAlert(Alert.AlertType.WARNING, "Missing Information", "Please fill in Title, Artist, and Release Year.");
                 return;
             }
 
             int year = Integer.parseInt(yearStr);
-
-            // BÍ QUYẾT Ở ĐÂY: Chuyển đổi link Drive /view thành link tải trực tiếp
             String directImage = convertToDirectLink(rawImage);
 
-            // Tạo Album với link đã được convert
             newAlbum = new Album(title, artist, year, directImage, genre);
-            System.out.println("--- ADMIN ACTION: PUSHING TO FIREBASE ---");
             
+            System.out.println("Admin Action: Pushing album to Firebase");
             DatabaseManager.getInstance().getService().saveAlbum(newAlbum);
-            System.out.println("✅ Đã lưu thành công: " + newAlbum.getTitle());
+            System.out.println("Album saved successfully: " + newAlbum.getTitle());
 
             closeModal();
             
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi định dạng", "Release Year (Năm) phải là một con số!");
+            showAlert(Alert.AlertType.ERROR, "Invalid Format", "Release Year must be a valid numerical value.");
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Lỗi hệ thống", "Không thể lưu vào Firebase: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "System Error", "Unable to save data to Firebase: " + e.getMessage());
         }
     }
 
@@ -80,13 +75,11 @@ public class AddAlbumModalController {
         alert.showAndWait();
     }
 
- // THÊM HÀM NÀY: Hàm thần thánh chuyển link Drive thành link ảnh trực tiếp
     private String convertToDirectLink(String driveUrl) {
         if (driveUrl == null || !driveUrl.contains("drive.google.com")) return driveUrl;
         try {
             String fileId = "";
             
-            // Cắt lấy ID của file từ các dạng link Drive khác nhau
             if (driveUrl.contains("/d/")) {
                 fileId = driveUrl.split("/d/")[1].split("/")[0];
             } else if (driveUrl.contains("id=")) {
@@ -94,12 +87,10 @@ public class AddAlbumModalController {
             }
             
             if (!fileId.isEmpty()) {
-                // CÁCH SỬA: Đổi từ export=download sang server hiển thị ảnh trực tiếp của Google
-                // Điều này giúp JavaFX nhận diện đúng MIME type là image/png hoặc image/jpeg
                 return "https://drive.google.com/uc?export=view&id=" + fileId;
             }
         } catch (Exception e) {
-            System.err.println("Lỗi convert link: " + e.getMessage());
+            System.err.println("Link conversion error: " + e.getMessage());
         }
         return driveUrl;
     }
