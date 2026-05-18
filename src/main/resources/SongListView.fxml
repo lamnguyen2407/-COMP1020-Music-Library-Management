@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="0" style="-fx-background-color: #FAF7F4;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.musicapp.ui.SongListController">
+<VBox spacing="0" style="-fx-background-color: #FAF7F4;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.musicapp.ui.SongListController">
 
     <HBox spacing="40" style="-fx-background-color: #FAF7F4; -fx-padding: 32 40 24 40;">
         <ImageView id="coverImageView" fx:id="coverImageView" fitHeight="230" fitWidth="230" preserveRatio="false" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 0, 4);" />
@@ -38,18 +38,22 @@
 
     <Separator style="-fx-opacity: 0.3;"><padding><Insets left="40" right="40" /></padding></Separator>
 
-<HBox fx:id="headerBox" alignment="CENTER_LEFT" spacing="0" style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
-	<Label fx:id="checkHeader" managed="false" maxWidth="35" minWidth="35" prefWidth="35" text="[ ]" visible="false" />
+    <HBox fx:id="headerBox" alignment="CENTER_LEFT" spacing="0" style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
+        <Label fx:id="checkHeader" managed="false" maxWidth="35" minWidth="35" prefWidth="35" text="[ ]" visible="false" />
         
-        <Label prefWidth="40" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="#" />
+        <Label maxWidth="40" minWidth="40" prefWidth="40" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="#" />
         
-        <Label fx:id="col1Header" prefWidth="280" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold; -fx-padding: 0 0 0 50;" text="SONG" />
+        <Label fx:id="col1Header" maxWidth="300" minWidth="300" prefWidth="300" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="SONG" />
         
-		<Label fx:id="col2Header" prefWidth="180" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="ARTIST" />        
-        <Label fx:id="col3Header" prefWidth="150" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="GENRE" />
+        <Label fx:id="col2Header" maxWidth="180" minWidth="180" prefWidth="180" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="ARTIST" />        
+        <Label fx:id="col3Header" maxWidth="150" minWidth="150" prefWidth="150" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="GENRE" />
         
         <Region HBox.hgrow="ALWAYS" />
         
-		<Label alignment="CENTER_RIGHT" prefWidth="40" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="TIME" />    </HBox>
-   <ListView fx:id="songListView" fixedCellSize="62" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0 0 20 0; -fx-border-color: transparent;" VBox.vgrow="ALWAYS" />
+        <Region maxWidth="30" minWidth="30" prefWidth="30" />
+        
+        <Label alignment="CENTER_RIGHT" maxWidth="40" minWidth="40" prefWidth="40" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="TIME" />
+    </HBox>
+
+    <ListView fx:id="songListView" fixedCellSize="62" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0 0 20 0; -fx-border-color: transparent;" VBox.vgrow="ALWAYS" />
 </VBox>

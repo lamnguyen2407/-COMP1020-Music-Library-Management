@@ -174,7 +174,6 @@ public class SongListController implements Initializable, MainViewController.Mai
                     favSongIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(favId);
                 }
 
-                // UI Controller delegates payload fetching entirely to the service layer
                 List<Song> databasePayload = DatabaseManager.getInstance().getService()
                     .fetchSongsContextually(currentAlbumId, currentAlbumTitle);
 
@@ -261,6 +260,13 @@ public class SongListController implements Initializable, MainViewController.Mai
     private void onDeleteToggleClicked() {
         isDeleteMode = !isDeleteMode;
         songListView.refresh();
+        
+        // Sync header checkbox column state
+        if (checkHeader != null) {
+            checkHeader.setVisible(isDeleteMode);
+            checkHeader.setManaged(isDeleteMode);
+        }
+
         if (isDeleteMode) {
             deleteBtn.setText("CONFIRM");
             deleteBtn.setStyle("-fx-background-color: #CC3300; -fx-text-fill: white;");
@@ -294,6 +300,10 @@ public class SongListController implements Initializable, MainViewController.Mai
         deleteBtn.setText("DELETE");
         deleteBtn.setStyle("-fx-background-color: #C0703A; -fx-text-fill: white;");
         deleteBtn.setDisable(false);
+        if (checkHeader != null) {
+            checkHeader.setVisible(false);
+            checkHeader.setManaged(false);
+        }
     }
     
     public void setData(String id, String title, String sub, String desc, String cover, int year, String genre, List<String> songIds) {
@@ -371,15 +381,23 @@ public class SongListController implements Initializable, MainViewController.Mai
 
             checkBox.setMinWidth(35);
             checkBox.setPrefWidth(35);
+            checkBox.setMaxWidth(35);
 
             indexLabel.setPrefWidth(40);
             indexLabel.setMinWidth(40);
-            thumb.setFitWidth(40); thumb.setFitHeight(40);
+            indexLabel.setMaxWidth(40);
             
-            nameLabel.setPrefWidth(190); 
-            nameLabel.setStyle("-fx-font-weight: bold; -fx-padding: 0 0 0 10;"); 
+            thumb.setFitWidth(40); 
+            thumb.setFitHeight(40);
+            
+            nameLabel.setPrefWidth(220); 
+            nameLabel.setMinWidth(220);
+            nameLabel.setMaxWidth(220);
+            nameLabel.setStyle("-fx-font-weight: bold; -fx-padding: 0 0 0 12;"); 
             
             heartBtn.setPrefWidth(40);
+            heartBtn.setMinWidth(40);
+            heartBtn.setMaxWidth(40);
             heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0C0C0; -fx-cursor: hand; -fx-padding: 0;"); 
             
             if (SessionManager.isAdmin) {
@@ -387,20 +405,33 @@ public class SongListController implements Initializable, MainViewController.Mai
                 heartBtn.setManaged(false);
             }
             
+            // Explicit song details container matched to FXML sizing bounds
             HBox songCol = new HBox(0, thumb, nameLabel, heartBtn);
             songCol.setAlignment(Pos.CENTER_LEFT);
-            songCol.setPrefWidth(280); 
-            songCol.setMinWidth(280);
+            songCol.setPrefWidth(300); 
+            songCol.setMinWidth(300);
+            songCol.setMaxWidth(300);
 
             artistLabel.setPrefWidth(180);
             artistLabel.setMinWidth(180);
+            artistLabel.setMaxWidth(180);
 
-            genreLabel.setPrefWidth(130);
-            genreLabel.setMinWidth(130);
+            genreLabel.setPrefWidth(150);
+            genreLabel.setMinWidth(150);
+            genreLabel.setMaxWidth(150);
 
             HBox.setHgrow(spacer, Priority.ALWAYS);
-            timeLabel.setPrefWidth(60);
+            
+            addBtn.setPrefWidth(30);
+            addBtn.setMinWidth(30);
+            addBtn.setMaxWidth(30);
+            addBtn.setCursor(Cursor.HAND);
+            
+            timeLabel.setPrefWidth(40);
+            timeLabel.setMinWidth(40);
+            timeLabel.setMaxWidth(40);
             timeLabel.setAlignment(Pos.CENTER_RIGHT);
+            timeLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #7A6A60;");
             
             root.getChildren().addAll(checkBox, indexLabel, songCol, artistLabel, genreLabel, spacer, addBtn, timeLabel);
             
@@ -413,10 +444,8 @@ public class SongListController implements Initializable, MainViewController.Mai
             
             plusLabel.setStyle("-fx-text-fill: #b3b3b3; -fx-font-size: 20px; -fx-font-weight: bold;");
             addBtn.getChildren().add(plusLabel);
-            addBtn.setPrefWidth(30);
-            addBtn.setCursor(Cursor.HAND);
             
-            addBtn.setOnMouseEntered(e -> plusLabel.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"));
+            addBtn.setOnMouseEntered(e -> plusLabel.setStyle("-fx-text-fill: #C0703A; -fx-font-size: 20px; -fx-font-weight: bold;"));
             addBtn.setOnMouseExited(e -> plusLabel.setStyle("-fx-text-fill: #b3b3b3; -fx-font-size: 20px; -fx-font-weight: bold;"));
 
             Tooltip.install(addBtn, new Tooltip("Add to playlist"));
