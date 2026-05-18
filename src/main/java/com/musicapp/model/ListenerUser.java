@@ -3,7 +3,7 @@ package com.musicapp.model;
 import java.util.*;
 
 public class ListenerUser extends User {
-	private Map<String, Boolean> playlistIds = new HashMap<>();
+    private Map<String, Boolean> playlistIds = new HashMap<>();
     private String fullname;
     
     public ListenerUser() {
@@ -20,30 +20,31 @@ public class ListenerUser extends User {
     }
 
     public Map<String, Boolean> getPlaylistIds() { 
-    	if (this.playlistIds == null) {
+        if (this.playlistIds == null) {
             this.playlistIds = new HashMap<>();
         }
         return this.playlistIds;
     }
+
     public String getFullname() {
-    	return this.fullname;
+        return this.fullname;
     }
+
     public void setFullname(String fullname) {
-    	this.fullname = fullname;
+        this.fullname = fullname;
     }
+
     public void setPlaylistIds(Map<String, Boolean> playlistIds) { 
         this.playlistIds = playlistIds; 
     }
 
     public void addPlaylistId(String playlistId) {
-    	this.playlistIds.put(playlistId, true);
-       
+        this.playlistIds.put(playlistId, true);
     }
 
     public void removePlaylistId(String playlistId) {
-    	if (this.playlistIds != null) {
-    		this.playlistIds.remove(playlistId);
-    	}
-        
+        if (this.playlistIds != null) {
+            this.playlistIds.remove(playlistId);
+        }
     }
 }

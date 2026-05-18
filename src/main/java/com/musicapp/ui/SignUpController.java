@@ -1,15 +1,28 @@
 package com.musicapp.ui;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 import java.util.UUID;
+
+import com.musicapp.model.ListenerUser;
+import com.musicapp.model.SessionManager;
+import com.musicapp.service.DatabaseManager;
+
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.*;
-import javafx.scene.control.*;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import java.io.IOException;
-import com.musicapp.model.ListenerUser;
-import com.musicapp.service.DatabaseManager;
+
 public class SignUpController {
+
     @FXML private TextField emailField;
     @FXML private TextField usernameField;
     @FXML private TextField fullnameField;
@@ -17,35 +30,35 @@ public class SignUpController {
 
     @FXML
     public void handleSignUp(ActionEvent event) {
-        String email = emailField.getText();
-        String username = usernameField.getText();
+        String email = emailField.getText().trim();
+        String username = usernameField.getText().trim();
         String password = passwordField.getText();
-        String fullname = fullnameField.getText();
+        String fullname = fullnameField.getText().trim();
         
-        if(email.isEmpty() || username.isEmpty() || password.isEmpty() || fullname.isEmpty()) {
-            System.out.println("Error: Please input again !");
+        if (email.isEmpty() || username.isEmpty() || password.isEmpty() || fullname.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Missing Information", "Please fill out all fields to register.");
             return;
         }
-        // 1. Create new unique id for listener
+
         String newUserId = UUID.randomUUID().toString();
-        
-        // 2. Create new ListenerUser 
         ListenerUser newUser = new ListenerUser(newUserId, fullname, email, username, password);
         
         try {
-        	DatabaseManager.getInstance().getService().saveUser(newUser);
-        	System.out.println("New user successfully saved to Firebase !");
+            System.out.println("Saving new profile to database...");
+            DatabaseManager.getInstance().getService().saveUser(newUser);
+            System.out.println("User profile successfully synchronized with database.");
+            
+            // Set session states to prevent null pointer crashes in downstream view contexts
+            SessionManager.currentUser = newUser;
+            SessionManager.isAdmin = false;
+            
+        } catch (Exception e) {
+            System.err.println("Database transaction failure: " + e.getMessage());
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Registration Error", "Could not synchronize credentials with network node.");
+            return;
         }
-        catch (Exception e) {
-        	System.out.println("Error saving to Firebase!!! " + e.getMessage());
-        	e.printStackTrace();
-        	return;
-        }
-        System.out.println("Switch to main Dashboard...");
-        /* Test
-        //System.out.println("New User Registered");
-        //System.out.println("Fullname: " + fullname + " | Email: " + email + " | Username: " + username);
-        */
+        
         goToMainView(event);
     }
     
@@ -56,8 +69,7 @@ public class SignUpController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 800));
             stage.show();
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -69,8 +81,7 @@ public class SignUpController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 800));
             stage.show();
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -82,9 +93,24 @@ public class SignUpController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 800));
             stage.show();
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

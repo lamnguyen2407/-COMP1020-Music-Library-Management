@@ -6,9 +6,9 @@ import java.util.*;
 public class PlaybackService {
     private static PlaybackService instance;
 
-    private LinkedList<Song> nextqueue; // play next song
-    private Stack<Song> history;        // play prev song
-    private Song currentSong;           // current playing song
+    private LinkedList<Song> nextqueue; 
+    private Stack<Song> history;        
+    private Song currentSong;           
     
     private PlaybackService() {
         this.nextqueue = new LinkedList<>();
@@ -35,7 +35,6 @@ public class PlaybackService {
     public void play(Song song) {
         if (song == null) return;
         
-     
         if (this.currentSong != null && !this.currentSong.getSongId().equals(song.getSongId())) {
             history.push(this.currentSong);
         }
@@ -45,7 +44,7 @@ public class PlaybackService {
     
     public Song next() {
         if (nextqueue.isEmpty()) {
-            System.out.println("Off the waiting list");
+            System.out.println("End of queue reached.");
             return null; 
         }
         
@@ -54,13 +53,13 @@ public class PlaybackService {
         }
         
         currentSong = nextqueue.poll(); 
-        System.out.println("Move to the next song: " + currentSong.getTitle());
+        System.out.println("Moved to next song: " + currentSong.getTitle());
         return currentSong;
     }
     
     public Song previous() {
         if (history.isEmpty()) {
-            System.out.println("No previous song played");
+            System.out.println("No previous song in history.");
             return null; 
         }
         
@@ -69,7 +68,7 @@ public class PlaybackService {
         }
         
         currentSong = history.pop(); 
-        System.out.println("Move to the previous song: " + currentSong.getTitle());
+        System.out.println("Moved to previous song: " + currentSong.getTitle());
         return currentSong;
     }
     
@@ -83,6 +82,6 @@ public class PlaybackService {
     
     public void clearQueue() {
         this.nextqueue.clear();
-        System.out.println("Clear next queue");
+        System.out.println("Next queue cleared.");
     }
 }

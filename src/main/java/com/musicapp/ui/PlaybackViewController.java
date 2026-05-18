@@ -13,9 +13,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.Node;
-
-import java.util.List;
 
 public class PlaybackViewController {
 
@@ -29,7 +26,6 @@ public class PlaybackViewController {
     private Song currentSongModel;
     private boolean isFavorite = false;
 
-    // ✅ THÊM 3 BIẾN NÀY ĐỂ CHỐNG LỖI "BÓNG MA" (RÒ RỈ BỘ NHỚ)
     private javafx.scene.media.MediaPlayer currentPlayer;
     private javafx.beans.value.ChangeListener<Number> volumeListener;
     private javafx.beans.value.ChangeListener<javafx.util.Duration> timeListener;
@@ -45,9 +41,8 @@ public class PlaybackViewController {
         }
     }
 
-    // ✅ HÀM CẮM DÂY ĐÃ ĐƯỢC CHỐNG ĐẠN 100%
     public void bindMediaPlayer(javafx.scene.media.MediaPlayer player) {
-        // 1. NGẮT DÂY ĐIỆN VỚI CÁI LOA CŨ (RẤT QUAN TRỌNG)
+        // Detach listeners from the previous media player instance to prevent memory leaks
         if (this.currentPlayer != null) {
             if (volumeListener != null && volumeSlider != null) {
                 volumeSlider.valueProperty().removeListener(volumeListener);
@@ -60,21 +55,22 @@ public class PlaybackViewController {
         this.currentPlayer = player;
         if (player == null) return;
 
-        // 2. CẮM DÂY CHO LOA MỚI VÀ GẮN ÁO GIÁP BẢO VỆ
+        // Attach listener to the volume slider
         if (volumeSlider != null) {
             volumeListener = (obs, oldVal, newVal) -> {
                 try {
-                    // Chỉ chỉnh âm lượng khi loa đang hoạt động, không chạm vào loa đã bị Hủy (DISPOSED)
                     if (this.currentPlayer.getStatus() != javafx.scene.media.MediaPlayer.Status.DISPOSED 
                         && this.currentPlayer.getStatus() != javafx.scene.media.MediaPlayer.Status.UNKNOWN) {
                         this.currentPlayer.setVolume(newVal.doubleValue() / 100.0);
                     }
-                } catch (Exception e) { /* Bỏ qua lỗi vặt nếu loa đang giật lag */ }
+                } catch (Exception e) {
+                    // Ignore transient exceptions during state changes
+                }
             };
             volumeSlider.valueProperty().addListener(volumeListener);
         }
 
-        // Cắm dây thanh chạy tiến độ nhạc
+        // Attach listener to the track progress tracking timeline
         timeListener = (obs, oldTime, newTime) -> {
             if (progressSlider != null && !progressSlider.isPressed()) {
                 progressSlider.setValue(newTime.toSeconds());
@@ -85,7 +81,7 @@ public class PlaybackViewController {
         };
         player.currentTimeProperty().addListener(timeListener);
 
-        // 3. KHI LOA ĐÃ NẠP XONG NHẠC THÌ MỚI LẤY THÔNG SỐ
+        // Configure slider boundaries once media engine resources are fully buffered
         player.setOnReady(() -> {
             try {
                 if (volumeSlider != null) {
@@ -131,7 +127,8 @@ public class PlaybackViewController {
         }
 
         if (SessionManager.currentUser != null && btnLike != null && song.getSongId() != null) {
-            com.google.firebase.database.FirebaseDatabase.getInstance().getReference("playlists")
+            DatabaseManager.getInstance().getService().getDbRef()
+                .child("playlists")
                 .child("fav_" + SessionManager.currentUser.getUserId())
                 .child("songIds")
                 .child(song.getSongId())
@@ -189,6 +186,4 @@ public class PlaybackViewController {
             mainController.playSongFromService(prevSong);
         }
     }
-
-
 }
