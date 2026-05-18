@@ -1,66 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<StackPane
-    style="-fx-background-color: linear-gradient(to bottom, #d4bfb0, #c4a898, #b89080);"
-    xmlns="http://javafx.com/javafx"
-    xmlns:fx="http://javafx.com/fxml"
-    fx:controller="com.musicapp.ui.PlaybackViewController">
+<VBox spacing="0" style="-fx-background-color: #FAF7F4;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.musicapp.ui.SongListController">
 
-    <VBox alignment="TOP_CENTER" spacing="0" maxWidth="560.0" StackPane.alignment="CENTER">
+    <HBox spacing="40" style="-fx-background-color: #FAF7F4; -fx-padding: 32 40 24 40;">
+        <ImageView id="coverImageView" fx:id="coverImageView" fitHeight="230" fitWidth="230" preserveRatio="false" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 0, 4);" />
 
-        <StackPane prefWidth="560.0" prefHeight="300.0">
-            <ImageViewff
-                fx:id="albumArtView"
-                fitWidth="560.0" fitHeight="300.0"
-                preserveRatio="false"
-                style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 16, 0, 0, 4);" />
-
-            <ProgressBar
-                fx:id="progressBar"
-                prefWidth="530.0" prefHeight="4.0"
-                progress="0.0"
-                style="-fx-accent: #C0703A;"
-                StackPane.alignment="BOTTOM_CENTER">
-                <StackPane.margin><Insets bottom="10" /></StackPane.margin>
-            </ProgressBar>
-        </StackPane>
-
-        <VBox alignment="CENTER" spacing="0" style="-fx-background-color: linear-gradient(to bottom, #b89080, #a87870);" prefWidth="560.0">
-            <padding><Insets bottom="20" left="24" right="24" top="14" /></padding>
-
-            <HBox alignment="CENTER" spacing="10">
-                <Label fx:id="genreLabel" text="Pop" style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 11px; -fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 10; -fx-padding: 2 8 2 8;" />
-                <Label fx:id="yearLabel" text="2026" style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 11px;" />
-            </HBox>
+        <VBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
+            <Label fx:id="titleLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2C1810;" text="All Songs" />
+            <Label fx:id="subtitleLabel" style="-fx-font-size: 15px; -fx-text-fill: #C0703A; -fx-font-style: italic;" text="Library Management" />
             
             <Region prefHeight="10" />
-
-            <HBox alignment="CENTER" spacing="28.0">
-                <Button onAction="#onShuffle" text="⇄" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px; -fx-cursor: hand;" />
-                <Button onAction="#onPrev" text="⏮" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 22px; -fx-cursor: hand;" />
-                
-                <StackPane style="-fx-background-color: #C0703A; -fx-background-radius: 50; -fx-cursor: hand;" prefSize="50, 50" onMouseClicked="#onPlayPause">
-                    <Label fx:id="playBtnIcon" text="▶" style="-fx-text-fill: white; -fx-font-size: 20px;" />
-                </StackPane>
-
-                <Button onAction="#onNext" text="⏭" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 22px; -fx-cursor: hand;" />
-                <Button onAction="#onRepeat" text="↻" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px; -fx-cursor: hand;" />
-            </HBox>
-
-            <Region prefHeight="14.0" />
-
-            <Label fx:id="songTitleLabel" text="Song Title" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;" />
-            <Label fx:id="artistLabel" text="Artist Name" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.7);" />
-
-            <Region prefHeight="15" />
+            <Label fx:id="descriptionLabel" maxWidth="500" style="-fx-font-size: 13px; -fx-text-fill: #7A6A60; -fx-line-spacing: 3;" text="Admin can add new tracks or remove existing ones from the system." wrapText="true" />
             
-            <Button fx:id="editSongBtn" text="EDIT SONG INFO" onAction="#onEditSong"
-                    style="-fx-background-color: rgba(255,255,255,0.1); -fx-border-color: white; -fx-text-fill: white; -fx-font-size: 10px; -fx-border-radius: 5;" />
+            <Region prefHeight="16" />
+            
+            <HBox spacing="12">
+                <Button fx:id="playButton" onAction="#onPlayClicked" prefHeight="38" prefWidth="120" style="-fx-background-color: #C0703A; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="PLAY" />
+                
+                <Button fx:id="shuffleButton" onAction="#onShuffleClicked" prefHeight="38" prefWidth="120" style="-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-border-color: #C0703A; -fx-font-weight: bold; -fx-cursor: hand;" text="SHUFFLE" />
+
+                <Button fx:id="addBtn" onAction="#onAddSongClicked" prefHeight="38" prefWidth="120" style="-fx-background-color: #C0703A; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="ADD" />
+                
+                <Button fx:id="deleteBtn" onAction="#onDeleteToggleClicked" prefHeight="38" prefWidth="120" style="-fx-background-color: #C0703A; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="DELETE" />
+            </HBox>
         </VBox>
-    </VBox>
-</StackPane>
+    </HBox>
+
+    <Separator style="-fx-opacity: 0.3;"><padding><Insets left="40" right="40" /></padding></Separator>
+
+    <HBox fx:id="headerBox" alignment="CENTER_LEFT" spacing="0" style="-fx-background-color: #FAF7F4; -fx-padding: 12 40 8 40;">
+        <Label fx:id="checkHeader" managed="false" maxWidth="35" minWidth="35" prefWidth="35" text="[ ]" visible="false" />
+        
+        <Label maxWidth="40" minWidth="40" prefWidth="40" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="#" />
+        
+        <Label fx:id="col1Header" maxWidth="300" minWidth="300" prefWidth="300" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="SONG" />
+        
+        <Label fx:id="col2Header" maxWidth="180" minWidth="180" prefWidth="180" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="ARTIST" />        
+        <Label fx:id="col3Header" maxWidth="150" minWidth="150" prefWidth="150" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="GENRE" />
+        
+        <Region HBox.hgrow="ALWAYS" />
+        
+        <Region maxWidth="30" minWidth="30" prefWidth="30" />
+        
+        <Label alignment="CENTER_RIGHT" maxWidth="40" minWidth="40" prefWidth="40" style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;" text="TIME" />
+    </HBox>
+
+    <ListView fx:id="songListView" fixedCellSize="62" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0 0 20 0; -fx-border-color: transparent;" VBox.vgrow="ALWAYS" />
+</VBox>

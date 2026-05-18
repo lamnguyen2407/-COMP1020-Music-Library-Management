@@ -127,15 +127,12 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
         cb.setVisible(deleteMode);
         cb.setManaged(deleteMode);
         cb.setPrefWidth(32);
-        HBox.setMargin(cb, new Insets(0, 0, 0, 40));
+        HBox.setMargin(cb, new Insets(0, 8, 0, 0));
         checkBoxes.add(cb);
 
         Label numberLabel = new Label(String.valueOf(index + 1));
         numberLabel.setPrefWidth(40);
         numberLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888;");
-        if (!deleteMode) {
-            HBox.setMargin(numberLabel, new Insets(0, 0, 0, 40));
-        }
 
         ImageView thumb = new ImageView();
         thumb.setFitWidth(40);
@@ -157,10 +154,10 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
         titleLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-padding: 0 0 0 12;");
 
         Button heartBtn = new Button("♥");
-        heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 14px; -fx-border-width: 0;");
-
+        heartBtn.setPrefWidth(40);
+        heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 14px; -fx-border-width: 0; -fx-cursor: hand;");
         heartBtn.setOnAction(e -> handleAddToFavorites(song, heartBtn));
-        
+
         Label artistLabel = new Label(song.getArtist());
         artistLabel.setPrefWidth(180);
         artistLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #555555;");
@@ -173,13 +170,13 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Label durationLabel = new Label(formatDuration(song.getDuration()));
-        durationLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888; -fx-min-width: 40;");
+        durationLabel.setPrefWidth(60);
+        durationLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888; -fx-alignment: center-right;");
 
         row.getChildren().addAll(cb, numberLabel, thumb, titleLabel, heartBtn, artistLabel, genreLabel, spacer, durationLabel);
-        HBox.setMargin(durationLabel, new Insets(0, 40, 0, 0));
 
         row.setOnMouseClicked(e -> {
-            if (e.getTarget() != cb) {
+            if (e.getTarget() != cb && e.getTarget() != heartBtn) {
                 playSong(song, index);
             }
         });
@@ -189,6 +186,8 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
 
         return row;
     }
+
+
 
     private void playAll() {
         if (mainController != null && !favoriteSongs.isEmpty()) {
@@ -207,7 +206,7 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
     }
 
     private String rowStyle(boolean hovered) {
-        return "-fx-padding: 8 0 8 0; -fx-border-color: #f0ebe5; -fx-border-width: 0 0 1 0;" +
+        return "-fx-padding: 8 40 8 40; -fx-border-color: #f0ebe5; -fx-border-width: 0 0 1 0;" +
                (hovered ? " -fx-background-color: #f5efe9;" : "") + " -fx-cursor: hand;";
     }
 
