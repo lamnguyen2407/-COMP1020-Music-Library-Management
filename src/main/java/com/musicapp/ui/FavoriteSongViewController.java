@@ -159,6 +159,8 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
         Button heartBtn = new Button("♥");
         heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 14px; -fx-border-width: 0;");
 
+        heartBtn.setOnAction(e -> handleAddToFavorites(song, heartBtn));
+        
         Label artistLabel = new Label(song.getArtist());
         artistLabel.setPrefWidth(180);
         artistLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #555555;");
@@ -211,5 +213,20 @@ public class FavoriteSongViewController implements Initializable, MainViewContro
 
     private String formatDuration(int seconds) {
         return String.format("%d:%02d", seconds / 60, seconds % 60);
+    }
+    
+    private void handleAddToFavorites(Song song, Button heartBtn) {
+        if (SessionManager.currentUser == null) return;
+        
+        boolean currentlyFav = heartBtn.getText().equals("♥");
+        if (currentlyFav) {
+            heartBtn.setText("♡");
+            heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0C0C0; -fx-font-size: 14px; -fx-border-width: 0;");
+        } else {
+            heartBtn.setText("♥");
+            heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0703A; -fx-font-size: 14px; -fx-border-width: 0;");
+        }
+        
+        DatabaseManager.getInstance().getService().toggleFavoriteSong(SessionManager.currentUser.getUserId(), song);
     }
 }

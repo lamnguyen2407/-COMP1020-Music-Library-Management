@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class CreatePlaylistModalController implements Initializable {
+public class CreatePlaylistModalController implements Initializable, MainViewController.MainViewAware {
 
     @FXML private TextField playlistNameField;
     @FXML private TextField descriptionField;
@@ -30,6 +30,12 @@ public class CreatePlaylistModalController implements Initializable {
     
     private File selectedImageFile;
     private StackPane contentArea;
+    private MainViewController mainController;
+
+    @Override
+    public void setMainController(MainViewController mainController) {
+        this.mainController = mainController;
+    }
 
     public void setContentArea(StackPane contentArea) {
         this.contentArea = contentArea;
@@ -104,11 +110,15 @@ public class CreatePlaylistModalController implements Initializable {
             Node view = loader.load();
 
             PlaylistOverviewController ctrl = loader.getController();
+            ctrl.setMainController(this.mainController);
+
             if (newName != null) {
-                ctrl.addNewPlaylist(newName, cover);
+                ctrl.refreshData(); 
             }
 
-            if (contentArea != null) {
+            if (mainController != null) {
+                mainController.navigateToView(view);
+            } else if (contentArea != null) {
                 contentArea.getChildren().setAll(view);
             }
         } catch (IOException e) {

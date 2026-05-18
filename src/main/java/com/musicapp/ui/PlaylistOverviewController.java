@@ -211,6 +211,12 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CreatePlaylistModal.fxml"));
             Node view = loader.load();
+            
+            // Pass navigation references to the modal controller
+            CreatePlaylistModalController ctrl = loader.getController();
+            ctrl.setMainController(this.mainController);
+            ctrl.setContentArea(this.contentArea);
+            
             updateMainContent(view);
         } catch (IOException e) {
             e.printStackTrace();
