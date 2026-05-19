@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
-import com.musicapp.service.LibraryManager;
 import com.musicapp.service.SearchEngine;
 
 import javafx.application.Platform;
@@ -50,6 +49,8 @@ public class MainViewController implements Initializable {
     private MediaPlayer mediaPlayer; 
     private java.util.Stack<Node> viewHistory = new java.util.Stack<>();
 
+    private SearchEngine searchEngine;
+
     private static final String FXML_DISCOVERY = "/DiscoveryView.fxml";
     private static final String FXML_ACCOUNT = "/AccountView.fxml";
     private static final String FXML_PLAYLIST = "/PlaylistOverview.fxml";
@@ -59,6 +60,11 @@ public class MainViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         userNameLabel.setText(SessionManager.isAdmin ? "Admin View" : "User View");
         loadView(FXML_DISCOVERY);
+        
+        // Initialize Search Engine in background to avoid blocking UI
+        new Thread(() -> {
+            searchEngine = new SearchEngine();
+        }).start();
 
         if (playbackController != null) {
             playbackController.setMainController(this);
@@ -311,14 +317,11 @@ public class MainViewController implements Initializable {
             ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE"); 
             setViewWithHistory(view);
 
-            // Delegated to SearchEngine Service
+            if (searchEngine == null) return;
+
             new Thread(() -> {
                 try {
-                    LibraryManager libraryManager = new LibraryManager(DatabaseManager.getInstance().getService());
-                    libraryManager.loadFromFirebase(); 
-                    
-                    SearchEngine engine = new SearchEngine(libraryManager);
-                    List<Song> searchResults = engine.search(query);
+                    List<Song> searchResults = searchEngine.search(query);
                     
                     var results = javafx.collections.FXCollections.<SongListController.SongItem>observableArrayList();
                     for (Song song : searchResults) {
@@ -330,7 +333,8 @@ public class MainViewController implements Initializable {
                     }
                     
                     Platform.runLater(() -> {
-                        ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, 0, "Various", new java.util.ArrayList<>());
+                        String statusText = results.size() + " songs found";
+                        ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", statusText, null, 0, "Various", new java.util.ArrayList<>());
                         ctrl.setSongsList(results); 
                     });
                 } catch (Exception e) { 
