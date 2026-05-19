@@ -25,4 +25,19 @@ public class LinearSearchStrategy implements SearchStrategy {
         }
         return result;
     }
+
+    @Override
+    public List<Song> search(Map<String, Song> songCache, String kw) {
+        List<Song> result = new ArrayList<>();
+        if (kw == null || kw.trim().isEmpty()) return result;
+        
+        String lowerKeyword = kw.toLowerCase().trim();
+        for (Song song : songCache.values()) {
+            if (song.getArtist().toLowerCase().contains(lowerKeyword) || 
+                song.getTitle().toLowerCase().contains(lowerKeyword)) {
+                result.add(song);
+            }
+        }
+        return result;
+    }
 }
