@@ -103,7 +103,7 @@ public class SongListController implements Initializable, MainViewController.Mai
     public void initialize(URL location, ResourceBundle resources) {
         instance = this;
         setupRoleBasedUI();
-        refreshData();
+
         songListView.setItems(songs);
         songListView.setCellFactory(lv -> new SongCell());
         songs.addListener((javafx.collections.ListChangeListener.Change<? extends SongItem> c) -> {
