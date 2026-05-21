@@ -2,6 +2,8 @@ package com.musicapp.model;
 
 import java.util.*;
 
+import com.google.firebase.database.Exclude;
+
 public class Album {
     private String albumId;
     private String title;
@@ -15,15 +17,6 @@ public class Album {
         this.songIds = new HashMap<>();
     }
     
-    public Album(String albumId, String title, String artist, int releaseYear, String imageURL, String genre) {
-        this.albumId = albumId;
-        this.title = title;
-        this.artist = artist;
-        this.releaseYear = releaseYear;
-        this.imageURL = imageURL;
-        this.genre = genre;
-        this.songIds = new HashMap<>();
-    }
 
     public Album(String title, String artist, int releaseYear, String imageURL, String genre) {
         this.albumId = "ALBUM_" + UUID.randomUUID().toString(); 
@@ -60,7 +53,8 @@ public class Album {
     public void setSongIds(Map<String, Boolean> songIds) {
         this.songIds = songIds;
     }
-
+    
+    @Exclude 
     public List<String> getSongIdList() {
         if (this.songIds == null) return new ArrayList<>();
         return new ArrayList<>(this.songIds.keySet());
