@@ -43,8 +43,9 @@ public class MusicService {
     public List<Album> getNewestAlbums() {
         List<Album> allAlbums = firebaseService.fetchAlbums();
         List<Album> result = new ArrayList<>();
-        
         if (allAlbums == null || allAlbums.isEmpty()) return result;
+        /*
+         * Sorting array list of albums to : 
 
         allAlbums.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
         Set<String> seenArtists = new HashSet<>();
@@ -57,6 +58,25 @@ public class MusicService {
             }
             if (result.size() == 5) break; 
         }
+        */
+        
+        // Using priority queue
+        PriorityQueue<Album> pq = new PriorityQueue<>(new Comparator<Album>() {
+        	@Override
+        	public int compare(Album a, Album b) {
+        		if(a.getReleaseYear() == b.getReleaseYear()) {
+        			return b.getAlbumId().compareTo(a.getAlbumId());
+        		}
+        		return Integer.compare(a.getReleaseYear(), b.getReleaseYear());
+        	}
+        });
+        for(Album alb: allAlbums) {
+        	pq.offer(alb);
+        	while(pq.size() > 5) pq.poll();
+        }
+        while(!pq.isEmpty()) {
+        	result.add(pq.poll());
+        }
         return result;
     }
 
@@ -65,7 +85,8 @@ public class MusicService {
         List<Song> result = new ArrayList<>();
         
         if (allSongs == null || allSongs.isEmpty()) return result;
-
+        /*
+         * Sorting array list of songs to get latest songs
         allSongs.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
         Map<String, Integer> artistCount = new HashMap<>();
         
@@ -78,6 +99,23 @@ public class MusicService {
                 artistCount.put(artist, count + 1);
             }
             if (result.size() == 9) break; 
+        }
+        */
+        
+        // Using priority queue 
+        PriorityQueue<Song> pq = new PriorityQueue<>((a, b) -> {
+        	if(a.getReleaseYear() == b.getReleaseYear()) {
+        		return b.getSongId().compareTo(a.getSongId());
+        	}
+        	return Integer.compare(a.getReleaseYear(), b.getReleaseYear());
+        });
+        
+        for(Song s: allSongs) {
+        	pq.offer(s);
+        	while(pq.size() > 9) pq.poll();
+        }
+        while(!pq.isEmpty()) {
+        	result.add(pq.poll());
         }
         return result;
     }
