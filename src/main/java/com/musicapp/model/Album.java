@@ -9,16 +9,12 @@ public class Album {
     private int releaseYear;
     private String genre;
     private String imageURL;
-    
-    // CÚ FIX QUAN TRỌNG: Đổi List thành Map để chuẩn NoSQL Firebase
     private Map<String, Boolean> songIds;
     
-    // 1. Constructor rỗng cho Firebase
     public Album() {
         this.songIds = new HashMap<>();
     }
     
-    // 2. Constructor lấy từ Firebase về
     public Album(String albumId, String title, String artist, int releaseYear, String imageURL, String genre) {
         this.albumId = albumId;
         this.title = title;
@@ -29,7 +25,6 @@ public class Album {
         this.songIds = new HashMap<>();
     }
 
-    // 3. Constructor tạo mới từ UI
     public Album(String title, String artist, int releaseYear, String imageURL, String genre) {
         this.albumId = "ALBUM_" + UUID.randomUUID().toString(); 
         this.title = title;
@@ -40,9 +35,6 @@ public class Album {
         this.songIds = new HashMap<>();
     }
     
-    // ==========================================
-    // GETTERS & SETTERS CƠ BẢN
-    // ==========================================
     public String getAlbumId() { return this.albumId; }
     public void setAlbumId(String albumId) { this.albumId = albumId; }
     
@@ -61,9 +53,6 @@ public class Album {
     public String getGenre() { return this.genre; }
     public void setGenre(String genre) { this.genre = genre; }
     
-    // ==========================================
-    // XỬ LÝ DANH SÁCH BÀI HÁT (Map)
-    // ==========================================
     public Map<String, Boolean> getSongIds() {
         return this.songIds;
     }
@@ -72,19 +61,16 @@ public class Album {
         this.songIds = songIds;
     }
 
-    // Hàm hỗ trợ UI lấy List String ID
     public List<String> getSongIdList() {
         if (this.songIds == null) return new ArrayList<>();
         return new ArrayList<>(this.songIds.keySet());
     }
     
-    // Hàm thêm bài hát chuẩn NoSQL
     public void addSongId(String songId) {
         if (this.songIds == null) this.songIds = new HashMap<>();
         this.songIds.put(songId, true);
     }
 
-    // Hàm xóa bài hát khỏi Album
     public void removeSongId(String songId) {
         if (this.songIds != null) {
             this.songIds.remove(songId);

@@ -3,6 +3,7 @@ package com.musicapp.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -18,6 +19,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -62,12 +64,15 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
         setupRoleBasedView();
         
-        // Chỉ hiển thị với Listener, ẩn với Admin
         if (SessionManager.isAdmin) {
-            favoriteRow.setVisible(false);
-            favoriteRow.setManaged(false);
+            if (favoriteRow != null) {
+                favoriteRow.setVisible(false);
+                favoriteRow.setManaged(false);
+            }
         } else {
-            favoriteRow.setOnMouseClicked(e -> loadFavoriteSongView());
+            if (favoriteRow != null) {
+                favoriteRow.setOnMouseClicked(e -> loadFavoriteSongView());
+            }
         }
         refreshData();
     }
@@ -104,33 +109,27 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
                         for (Playlist p : userPlaylists) {
                             if (p.getPlaylistId().startsWith("fav_")) continue;
-                            
                             addCustomPlaylistRow(p);
                         }
                     });
                 }
             } catch (Exception e) {
-                System.err.println("[Error] Lỗi khi load dữ liệu: " + e.getMessage());
+                System.err.println("Error reloading view presentation sets: " + e.getMessage());
             }
         }).start();
     }
 
-    // ✅ ĐÃ FIX: Chuyển hướng sang giao diện Playlist xịn của User
-    private void addCustomPlaylistRow(Playlist p) {
-        HBox row = buildPlaylistRow(p.getName(), "♫");
-        row.setOnMouseClicked(e -> {
-            loadUserPlaylistView(p.getPlaylistId(), p.getName(), "/images/playlist_default.jpg");
-        });
+    private void addCustomPlaylistRow(Playlist playlist) {
+        HBox row = buildPlaylistRow(playlist.getName(), "♫");
+        row.setOnMouseClicked(e -> loadUserPlaylistView(playlist.getPlaylistId(), playlist.getName(), "/images/playlist_default.jpg"));
         playlistListContainer.getChildren().add(row);
     }
 
-    // ✅ THÊM HÀM MỚI: Load dữ liệu và mở UserPlaylistViewController
     private void loadUserPlaylistView(String playlistId, String name, String coverUrl) {
         new Thread(() -> {
             try {
-                // Tải danh sách bài hát thật từ Firebase
                 List<String> songIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(playlistId);
-                List<Song> songs = new java.util.ArrayList<>();
+                List<Song> songs = new ArrayList<>();
                 if (songIds != null && !songIds.isEmpty()) {
                     songs = DatabaseManager.getInstance().getService().fetchSongsByIds(songIds);
                 }
@@ -138,13 +137,11 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                 List<Song> finalSongs = songs;
                 Platform.runLater(() -> {
                     try {
-                        // Sửa tên file FXML cho đúng chữ thường nếu bạn mày lưu chữ thường
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/userplaylistview.fxml"));
                         Node view = loader.load();
                         UserPlaylistViewController ctrl = loader.getController();
                         
                         ctrl.setMainController(this.mainController);
-                        // Truyền dữ liệu xịn vào Controller mới
                         ctrl.setPlaylistData(playlistId, name, coverUrl, finalSongs);
                         
                         if (mainController != null) {
@@ -155,7 +152,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                     }
                 });
             } catch (Exception e) {
-                System.err.println("Lỗi load User Playlist: " + e.getMessage());
+                System.err.println("Error fetching user playlist structure: " + e.getMessage());
             }
         }).start();
     }
@@ -181,7 +178,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
     private void setupUserView() {
         if (favoriteRow != null) {
-            favoriteRow.setOnMouseClicked(e -> loadFavoriteSongView()); // Đã gọn gàng!
+            favoriteRow.setOnMouseClicked(e -> loadFavoriteSongView()); 
         }
     }
 
@@ -214,6 +211,12 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CreatePlaylistModal.fxml"));
             Node view = loader.load();
+            
+            // Pass navigation references to the modal controller
+            CreatePlaylistModalController ctrl = loader.getController();
+            ctrl.setMainController(this.mainController);
+            ctrl.setContentArea(this.contentArea);
+            
             updateMainContent(view);
         } catch (IOException e) {
             e.printStackTrace();
@@ -264,8 +267,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                 ((MainViewController.MainViewAware) ctrl).setMainController(this.mainController);
             }
             
-            ctrl.setData(id, title, sub, desc, cover, 2026, "Various", new java.util.ArrayList<>());
-            
+            ctrl.setData(id, title, sub, desc, cover, 2026, "Various", new ArrayList<>());
             updateMainContent(view);
         } catch (IOException e) {
             e.printStackTrace();
@@ -327,10 +329,8 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         return row;
     }
     
-    // ✅ HÀM MỞ GIAO DIỆN FAVORITE CỦA MÀY (Đã chuẩn hóa tên file fxml)
     private void loadFavoriteSongView() {
         try {
-            // Sửa tên file FXML cho đúng chữ thường nếu bạn mày lưu chữ thường
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/favoritesongview.fxml"));
             Node view = loader.load();
 

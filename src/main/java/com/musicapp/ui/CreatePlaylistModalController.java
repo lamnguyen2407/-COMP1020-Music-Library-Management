@@ -1,5 +1,8 @@
 package com.musicapp.ui;
 
+import com.musicapp.model.SessionManager;
+import com.musicapp.service.DatabaseManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -18,17 +21,21 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import com.musicapp.model.SessionManager;
-import com.musicapp.service.DatabaseManager;
-
-public class CreatePlaylistModalController implements Initializable {
+public class CreatePlaylistModalController implements Initializable, MainViewController.MainViewAware {
 
     @FXML private TextField playlistNameField;
     @FXML private TextField descriptionField;
     @FXML private VBox playlistCoverBox;
-    private ImageView uploadedImageView;
+    @FXML private ImageView uploadedImageView; 
+    
     private File selectedImageFile;
     private StackPane contentArea;
+    private MainViewController mainController;
+
+    @Override
+    public void setMainController(MainViewController mainController) {
+        this.mainController = mainController;
+    }
 
     public void setContentArea(StackPane contentArea) {
         this.contentArea = contentArea;
@@ -36,11 +43,12 @@ public class CreatePlaylistModalController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-    	if (uploadedImageView != null) {
-            uploadedImageView.setFitWidth(300);
-            uploadedImageView.setFitHeight(300);
-            uploadedImageView.setPreserveRatio(false);
+        if (uploadedImageView == null) {
+            uploadedImageView = new ImageView();
         }
+        uploadedImageView.setFitWidth(300);
+        uploadedImageView.setFitHeight(300);
+        uploadedImageView.setPreserveRatio(false);
 
         playlistCoverBox.setOnMouseClicked(e -> onCoverClicked());
         playlistCoverBox.setStyle("-fx-cursor: hand;");
@@ -49,7 +57,9 @@ public class CreatePlaylistModalController implements Initializable {
     private void onCoverClicked() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Playlist Cover Image");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.webp"));
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.webp")
+        );
 
         Stage stage = (Stage) playlistCoverBox.getScene().getWindow();
         File file = fileChooser.showOpenDialog(stage);
@@ -62,16 +72,15 @@ public class CreatePlaylistModalController implements Initializable {
                 playlistCoverBox.getChildren().clear();
                 playlistCoverBox.getChildren().add(uploadedImageView);
             } catch (Exception e) {
-                System.err.println("Error loading image: " + e.getMessage());
+                System.err.println("Error loading image asset: " + e.getMessage());
             }
         }
     }
 
     @FXML
     private void handleSavePlaylist() {
-        // Luôn lấy User tươi mới nhất từ Session khi nhấn nút
         if (SessionManager.currentUser == null) {
-            System.err.println("❌ Lỗi: Chưa đăng nhập!");
+            System.err.println("Session Error: User context identity missing.");
             return;
         }
         
@@ -83,19 +92,15 @@ public class CreatePlaylistModalController implements Initializable {
             return;
         }
 
-        // 1. Lưu xuống Firebase
         DatabaseManager.getInstance().getService().saveNewUserPlaylist(uid, name);
-        System.out.println("✅ Playlist Saved to Firebase: " + name);
+        System.out.println("Playlist transaction pushed to Firebase: " + name);
         
-        // 2. Chuyển hướng/Cập nhật UI chính
         navigateToPlaylistOverview(name, selectedImageFile);
-        
-      
     }
 
     @FXML
     private void onCancelClicked() {
-    	navigateToPlaylistOverview(null, null);
+        navigateToPlaylistOverview(null, null);
     }
 
     private void navigateToPlaylistOverview(String newName, File cover) {
@@ -105,22 +110,24 @@ public class CreatePlaylistModalController implements Initializable {
             Node view = loader.load();
 
             PlaylistOverviewController ctrl = loader.getController();
+            ctrl.setMainController(this.mainController);
+
             if (newName != null) {
-                ctrl.addNewPlaylist(newName, cover);
+                ctrl.refreshData(); 
             }
 
-            if (contentArea != null) {
+            if (mainController != null) {
+                mainController.navigateToView(view);
+            } else if (contentArea != null) {
                 contentArea.getChildren().setAll(view);
             }
         } catch (IOException e) {
-            System.err.println("Navigation failed: " + e.getMessage());
+            System.err.println("Interface routing navigation failed: " + e.getMessage());
         }
     }
     
-   
-    
     @FXML
-    private void onAddMusicClicked(MouseEvent event) { // Thêm MouseEvent vào cho chắc
-        System.out.println("[CreatePlaylist] Add Music triggered");
+    private void onAddMusicClicked(MouseEvent event) { 
+        System.out.println("Add music tracking execution event triggered.");
     }
 }

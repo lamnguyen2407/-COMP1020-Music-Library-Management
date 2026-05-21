@@ -5,12 +5,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
-import com.google.firebase.database.*;
+import com.musicapp.service.SearchEngine;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -32,31 +31,25 @@ import javafx.util.Duration;
 
 public class MainViewController implements Initializable {
     
-    // ══════════════════════════════════════════
-    // FXML — TopBar
-    // ══════════════════════════════════════════
+    // 1. FXML - TopBar
     @FXML private HBox topBar;
     @FXML private Button btnBack;
     @FXML private TextField searchField;
     @FXML private Label userNameLabel;
     @FXML private ImageView userImageView;
 
-    // ══════════════════════════════════════════
-    // FXML — Sidebar & Content
-    // ══════════════════════════════════════════
+    // 2. FXML - Sidebar & Content
     @FXML private Button btnHome, btnAccount, btnSearch, btnPlaylists, btnSettings;
     @FXML private StackPane contentArea;
 
-    // ══════════════════════════════════════════
-    // FXML — Nhúng PlaybackView (fx:id="playback")
-    // ══════════════════════════════════════════
+    // 3. FXML - Playback Controller
     @FXML private PlaybackViewController playbackController;
 
-    // ══════════════════════════════════════════
-    // State
-    // ══════════════════════════════════════════
+    // 4. State Variables
     private MediaPlayer mediaPlayer; 
     private java.util.Stack<Node> viewHistory = new java.util.Stack<>();
+
+    private SearchEngine searchEngine;
 
     private static final String FXML_DISCOVERY = "/DiscoveryView.fxml";
     private static final String FXML_ACCOUNT = "/AccountView.fxml";
@@ -67,12 +60,16 @@ public class MainViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         userNameLabel.setText(SessionManager.isAdmin ? "Admin View" : "User View");
         loadView(FXML_DISCOVERY);
+        
+        // Initialize Search Engine in background to avoid blocking UI
+        new Thread(() -> {
+            searchEngine = new SearchEngine();
+        }).start();
 
-        // Khởi tạo tham chiếu cho Controller con
         if (playbackController != null) {
             playbackController.setMainController(this);
         } else {
-            System.err.println("⚠️ CẢNH BÁO: Không tìm thấy playbackController!");
+            System.err.println("Warning: playbackController not found.");
         }
 
         if (searchField != null) {
@@ -84,13 +81,8 @@ public class MainViewController implements Initializable {
         }
     }
 
-    // ══════════════════════════════════════════
-    // NAVIGATION HANDLERS
-    // ══════════════════════════════════════════
-
+    // 5. Navigation Handlers
     private void setViewWithHistory(Node view) {
-        // If the loaded view is a ScrollPane (e.g. DiscoveryView), extract its content
-        // to avoid nesting ScrollPane inside mainScrollPane which causes 0x0 rendering
         Node actualView = view;
         if (view instanceof javafx.scene.control.ScrollPane) {
             javafx.scene.control.ScrollPane sp = (javafx.scene.control.ScrollPane) view;
@@ -124,6 +116,8 @@ public class MainViewController implements Initializable {
     @FXML 
     private void onNavSettings() { 
         try {
+            shutdownAudio();
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/WelcomeView.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) btnHome.getScene().getWindow();
@@ -143,23 +137,18 @@ public class MainViewController implements Initializable {
         }
     }
 
-    // ══════════════════════════════════════════
-    // AUDIO ENGINE (ĐIỀU KHIỂN NHẠC) - ĐÃ CẮM DÂY VOLUME & PROGRESS
-    // ══════════════════════════════════════════
-
+    // 6. Audio Engine Setup
     public void setMediaPlayer(MediaPlayer player) {
         if (this.mediaPlayer != null) {
             this.mediaPlayer.stop();
-            this.mediaPlayer.dispose(); // Dọn bộ nhớ loa cũ
+            this.mediaPlayer.dispose(); 
         }
         this.mediaPlayer = player;
         
-        // CỰC KỲ QUAN TRỌNG: Cắm dây diện sang thanh nhạc Playback
         if (playbackController != null) {
             playbackController.bindMediaPlayer(this.mediaPlayer);
         }
         
-        // Tự động chuyển bài khi hát xong
         this.mediaPlayer.setOnEndOfMedia(() -> {
             if (playbackController != null) playbackController.onNext();
         });
@@ -177,20 +166,15 @@ public class MainViewController implements Initializable {
         }
     }
 
-    // THÊM HÀM NÀY ĐỂ TUA NHẠC
     public void seekAudio(double seconds) {
         if (this.mediaPlayer != null) {
             this.mediaPlayer.seek(Duration.seconds(seconds));
         }
     }
 
-    // ══════════════════════════════════════════
-    // HIỂN THỊ THANH NHẠC
-    // ══════════════════════════════════════════
-
+    // 7. Player Bar Display Management
     public void showPlayerBar(Song currentSong, List<Song> queue, int index) {
         try {
-            // ĐÃ FIX: Nếu queue là null (bài lẻ), phải xóa sạch hàng chờ cũ
             if (queue != null && !queue.isEmpty()) {
                 com.musicapp.service.PlaybackService.getInstance().setPlaylist(queue, index);
             } else {
@@ -214,7 +198,6 @@ public class MainViewController implements Initializable {
         }
     }
 
-    // HÀM CHUYỂN BÀI LẺ (NEXT/PREV) ĐỂ KHÔNG NÁT DANH SÁCH
     public void playSongFromService(Song song) {
         try {
             if (song.getAudioURL() != null && !song.getAudioURL().isEmpty()) {
@@ -226,14 +209,11 @@ public class MainViewController implements Initializable {
                 playbackController.setSongData(song);
             }
         } catch (Exception e) { 
-            System.err.println("❌ Lỗi chuyển bài: " + e.getMessage());
+            System.err.println("Playback Error: " + e.getMessage());
         }
     }
 
-    // ══════════════════════════════════════════
-    // CÁC HÀM TƯƠNG THÍCH NGƯỢC
-    // ══════════════════════════════════════════
-
+    // Legacy Support Methods
     public void showPlayerBar(String songTitle, String artistName, String imagePath) {
         if (playbackController != null) {
             Song tempSong = new Song("temp_id", songTitle, artistName, "", 0, 2026, "", imagePath);
@@ -266,10 +246,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    // ══════════════════════════════════════════
-    // GIAO DIỆN CON (Songs & Albums)
-    // ══════════════════════════════════════════
-
+    // 8. Child Views Management
     public void openSongListView(String title, String subtitle, String desc, javafx.collections.ObservableList<SongListController.SongItem> data) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SongListView.fxml"));
@@ -279,7 +256,9 @@ public class MainViewController implements Initializable {
             ctrl.setData("SONG_LIST_VIEW", title, subtitle, desc, "/images/allsong.jpg", 0, "", new java.util.ArrayList<>());            
             ctrl.setSongsList(data);
             setViewWithHistory(view);
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { 
+            e.printStackTrace(); 
+        }
     }
     
     public void openAllAlbumsView() {
@@ -289,38 +268,22 @@ public class MainViewController implements Initializable {
             Object childController = loader.getController();
             if (childController instanceof MainViewAware) ((MainViewAware) childController).setMainController(this);
             setViewWithHistory(view);
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { 
+            e.printStackTrace(); 
+        }
     }
 
     public void fetchAndLoadAlbum(String albumName, String artist, String genre, int year, String imageURL, List<String> songIds) {
-        List<Song> realSongs = new ArrayList<>();
         if (songIds == null || songIds.isEmpty()) {
-            loadSongDetail(albumName, artist, genre, year, imageURL, realSongs);
+            loadSongDetail(albumName, artist, genre, year, imageURL, new ArrayList<>());
             return;
         }
 
-        DatabaseReference songsRef = FirebaseDatabase.getInstance().getReference("ADMIN_ALL_SONGS");
-        AtomicInteger loadedCount = new AtomicInteger(0);
-
-        for (String id : songIds) {
-            songsRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        Song song = snapshot.getValue(Song.class);
-                        if (song != null) realSongs.add(song);
-                    }
-                    checkIfFinished();
-                }
-                @Override public void onCancelled(DatabaseError error) { checkIfFinished(); }
-
-                private void checkIfFinished() {
-                    if (loadedCount.incrementAndGet() == songIds.size()) {
-                        Platform.runLater(() -> loadSongDetail(albumName, artist, genre, year, imageURL, realSongs));
-                    }
-                }
-            });
-        }
+        // Delegated to Service Layer
+        new Thread(() -> {
+            List<Song> realSongs = DatabaseManager.getInstance().getService().fetchSongsByIds(songIds);
+            Platform.runLater(() -> loadSongDetail(albumName, artist, genre, year, imageURL, realSongs));
+        }).start();
     }
 
     public void loadSongDetail(String albumName, String artist, String genre, int year, String imageURL, List<Song> songs) {
@@ -331,13 +294,12 @@ public class MainViewController implements Initializable {
             controller.setMainController(this);
             controller.setAlbumData(albumName, artist, genre, year, imageURL, songs);
             setViewWithHistory(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        }
     }
 
-    // ══════════════════════════════════════════
-    // SEARCH LOGIC
-    // ══════════════════════════════════════════
-
+    // 9. Search Integration
     private void handleSearchRequest() {
         String query = searchField.getText();
         if (query == null || query.trim().isEmpty()) return;
@@ -355,36 +317,36 @@ public class MainViewController implements Initializable {
             ctrl.setColumnHeaders("SONG", "ARTIST", "GENRE"); 
             setViewWithHistory(view);
 
+            if (searchEngine == null) return;
+
             new Thread(() -> {
                 try {
-                    List<Song> allSongs = DatabaseManager.getInstance().getService().fetchSongs();
-                    var results = javafx.collections.FXCollections.<SongListController.SongItem>observableArrayList();
-                    String lowerQuery = query.toLowerCase(); 
+                    List<Song> searchResults = searchEngine.search(query);
                     
-                    for (Song song : allSongs) {
-                        String title = song.getTitle() != null ? song.getTitle().toLowerCase() : "";
-                        String artist = song.getArtist() != null ? song.getArtist().toLowerCase() : "";
-                        if (title.contains(lowerQuery) || artist.contains(lowerQuery)) {
-                            results.add(new SongListController.SongItem(
-                                song.getSongId(), song.getTitle(), song.getArtist(), 
-                                song.getGenre(), song.getDuration(), song.getReleaseYear(), 
-                                song.getAudioURL(), song.getImageURL()
-                            ));
-                        }
+                    var results = javafx.collections.FXCollections.<SongListController.SongItem>observableArrayList();
+                    for (Song song : searchResults) {
+                        results.add(new SongListController.SongItem(
+                            song.getSongId(), song.getTitle(), song.getArtist(), 
+                            song.getGenre(), song.getDuration(), song.getReleaseYear(), 
+                            song.getAudioURL(), song.getImageURL()
+                        ));
                     }
+                    
                     Platform.runLater(() -> {
-                        ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", results.size() + " found", null, 0, "Various", new java.util.ArrayList<>());
+                        String statusText = results.size() + " songs found";
+                        ctrl.setData("SEARCH_VIEW", "Search Results", "Results for: \"" + query + "\"", statusText, null, 0, "Various", new java.util.ArrayList<>());
                         ctrl.setSongsList(results); 
                     });
-                } catch (Exception e) { e.printStackTrace(); }
+                } catch (Exception e) { 
+                    e.printStackTrace(); 
+                }
             }).start();
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { 
+            e.printStackTrace(); 
+        }
     }
 
-    // ══════════════════════════════════════════
-    // HELPERS
-    // ══════════════════════════════════════════
-
+    // 10. Core Helpers
     private void loadView(String fxmlPath) {
         try {
             URL resource = getClass().getResource(fxmlPath);
@@ -394,31 +356,9 @@ public class MainViewController implements Initializable {
             Object childController = loader.getController();
             if (childController instanceof MainViewAware) ((MainViewAware) childController).setMainController(this);
             setViewWithHistory(view);
-        } catch (Throwable e) { 
+        } catch (Exception e) { 
+            System.err.println("Fatal Load Error for " + fxmlPath + ": " + e.getMessage());
             e.printStackTrace(); 
-            try {
-                java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter("c:\\Users\\Yoga\\-COMP1020-Music-Library-Management\\REAL_CRASH.txt", true));
-                pw.println("====== CRASH in loadView(" + fxmlPath + ") ======");
-                e.printStackTrace(pw);
-                if (e.getCause() != null) {
-                    pw.println("--- CAUSE ---");
-                    e.getCause().printStackTrace(pw);
-                    if (e.getCause().getCause() != null) {
-                        pw.println("--- ROOT CAUSE ---");
-                        e.getCause().getCause().printStackTrace(pw);
-                    }
-                }
-                pw.close();
-            } catch (Exception ex) {}
-            
-            String errorMsg = e.toString();
-            if (e.getCause() != null) {
-                errorMsg += "\nCause: " + e.getCause().toString();
-            }
-            final String finalMsg = errorMsg;
-            javafx.application.Platform.runLater(() -> {
-                System.err.println("FATAL LOAD ERROR: " + finalMsg);
-            });
         }
     }
 
@@ -428,11 +368,25 @@ public class MainViewController implements Initializable {
         if (selected != null) selected.getStyleClass().add("nav-btn-active");
     }
 
-    public interface MainViewAware { void setMainController(MainViewController mainController); }
-    public javafx.scene.layout.StackPane getContentArea() { return contentArea; }
+    public interface MainViewAware { 
+        void setMainController(MainViewController mainController); 
+    }
     
-    // Public method for child controllers to navigate with history support
+    public javafx.scene.layout.StackPane getContentArea() { 
+        return contentArea; 
+    }
+    
     public void navigateToView(Node view) {
         setViewWithHistory(view);
     }
+    
+    public void shutdownAudio() {
+        if (this.mediaPlayer != null) {
+            this.mediaPlayer.stop();
+            this.mediaPlayer.dispose();
+            this.mediaPlayer = null;
+        }
+    }
+    
+    
 }

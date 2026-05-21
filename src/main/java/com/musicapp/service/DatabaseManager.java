@@ -3,7 +3,6 @@ package com.musicapp.service;
 public class DatabaseManager {
     
     private static DatabaseManager instance;
-    
     private FirebaseService firebaseService;
 
     private DatabaseManager() {

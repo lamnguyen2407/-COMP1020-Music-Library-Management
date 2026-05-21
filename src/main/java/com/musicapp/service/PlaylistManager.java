@@ -15,25 +15,17 @@ public class PlaylistManager {
         this.currentUserId = userId;
     }
 
-    // ==========================================
-    // CÚ FIX: CẬP NHẬT CONSTRUCTOR CHO PLAYLIST
-    // ==========================================
-    
-    // Cách 1: UI chỉ truyền Tên Playlist (Tự động gán ảnh mặc định)
     public Playlist createPlaylist(String name) {
-        // Tham số: name, ownerId, type ("user"), coverImage (link mặc định)
         Playlist newPlaylist = new Playlist(name, currentUserId, "user", "/images/default_playlist.png");
         
         playlistMap.put(newPlaylist.getPlaylistId(), newPlaylist);
         this.currentPlaylist = newPlaylist;
         
-        // Đẩy thẳng lên Firebase
         DatabaseManager.getInstance().getService().saveUserPlaylist(currentUserId, newPlaylist);
         
         return newPlaylist;
     }
 
-    // Cách 2: Dự phòng cho tương lai nếu User upload được ảnh bìa
     public Playlist createPlaylist(String name, String coverImage) {
         Playlist newPlaylist = new Playlist(name, currentUserId, "user", coverImage);
         
@@ -45,33 +37,25 @@ public class PlaylistManager {
         return newPlaylist;
     }
 
-    // ==========================================
-    // LOGIC ADD/REMOVE (Giữ nguyên, đã chuẩn)
-    // ==========================================
-
     public void addToPlaylist(Song song) {
         if (currentPlaylist != null && song != null) {
-            // Lấy ID từ Song và đưa vào Map của Playlist
             currentPlaylist.addSongToPlaylist(song.getSongId());
             
-            // Cập nhật lại toàn bộ Playlist đó lên Firebase
             DatabaseManager.getInstance().getService().saveUserPlaylist(currentUserId, currentPlaylist);
-            System.out.println("✅ Đã thêm bài hát và đồng bộ lên Firebase.");
+            System.out.println("Song added and synced to Firebase successfully.");
         } else {
-            System.err.println("❌ Lỗi: Hãy chọn một playlist và bài hát hợp lệ.");
+            System.err.println("Error: Please select a valid playlist and song.");
         }
     }
 
     public void removeFromPlaylist(String songId) {
         if (currentPlaylist != null && songId != null) {
-            // Xóa ID khỏi Map của Playlist
             currentPlaylist.removeSongFromPlaylist(songId);
             
-            // Cập nhật lại Firebase
             DatabaseManager.getInstance().getService().saveUserPlaylist(currentUserId, currentPlaylist);
-            System.out.println("✅ Đã xóa bài hát và đồng bộ lên Firebase.");
+            System.out.println("Song removed and synced to Firebase successfully.");
         } else {
-            System.err.println("❌ Lỗi: Không thể xóa. Playlist hoặc Song ID bị null.");
+            System.err.println("Error: Cannot remove. Playlist or Song ID is null.");
         }
     }
 
@@ -90,7 +74,7 @@ public class PlaylistManager {
     public void addSongToSpecificPlaylist(String playlistId, Song song) {
         Playlist target = playlistMap.get(playlistId);
         if (target == null) {
-            System.err.println("Cannot find playlist ID " + playlistId);
+            System.err.println("Cannot find playlist ID: " + playlistId);
             return;
         }
 

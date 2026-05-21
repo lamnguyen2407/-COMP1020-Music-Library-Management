@@ -3,7 +3,9 @@ package com.musicapp.ui;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.*;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 
@@ -31,7 +33,7 @@ public class WelcomeViewController {
         try {
             java.net.URL resourceUrl = getClass().getResource(fxmlPath);
             if (resourceUrl == null) {
-                System.err.println("❌ ERROR: Java cannot find the file at path: " + fxmlPath);
+                System.err.println("Routing Exception: Unable to resolve interface configuration at target descriptor: " + fxmlPath);
                 return;
             }
 
@@ -44,4 +46,6 @@ public class WelcomeViewController {
             e.printStackTrace();
         }
     }
+    
+    
 }

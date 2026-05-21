@@ -28,7 +28,6 @@ import java.util.List;
 
 public class AlbumViewController {
 
-    // ── FXML bindings ──────────────────────────────────────────────────────────
     @FXML private ImageView albumArtView;
     @FXML private Label albumNameLabel;
     @FXML private Label artistLabel;
@@ -36,17 +35,14 @@ public class AlbumViewController {
     @FXML private Button playBtn;
     @FXML private VBox songListContainer;
 
-    // ── State ──────────────────────────────────────────────────────────────────
     private List<Song> songs;
     private MainViewController mainController;
-    private List<String> favSongIds = new ArrayList<>(); // BIẾN MỚI: Lưu danh sách tim
+    private List<String> favSongIds = new ArrayList<>(); 
 
-    // ── Setter: reference to MainViewController (for showing player bar) ───────
     public void setMainController(MainViewController mainController) {
         this.mainController = mainController;
     }
 
-    // ── Setter: album data ─────────────────────────────────────────────────────
     public void setAlbumData(String albumName, String artist, String genre, int year, String imageURL, List<Song> songs) {
         this.songs = songs;
 
@@ -62,23 +58,20 @@ public class AlbumViewController {
             }
         }
 
-        // ✅ LẤY DỮ LIỆU TIM TRƯỚC KHI VẼ GIAO DIỆN
         new Thread(() -> {
             try {
                 if (SessionManager.currentUser != null) {
                     String favId = "fav_" + SessionManager.currentUser.getUserId();
                     favSongIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(favId);
                 }
-                // Lấy xong mới bắt đầu vẽ danh sách bài hát
                 Platform.runLater(this::buildSongRows);
             } catch (Exception e) {
-                System.err.println("Lỗi load tim trong Album: " + e.getMessage());
+                System.err.println("Error loading favorites in album view: " + e.getMessage());
                 Platform.runLater(this::buildSongRows);
             }
         }).start();
     }
 
-    // ── Build song rows dynamically ────────────────────────────────────────────
     private void buildSongRows() {
         songListContainer.getChildren().clear();
 
@@ -92,24 +85,17 @@ public class AlbumViewController {
     private HBox buildRow(Song song, int index) {
         HBox row = new HBox(12);
         row.setAlignment(Pos.CENTER_LEFT);
-        // Giữ style cũ của mày
         row.setStyle("-fx-padding: 10 40 10 40; -fx-border-color: #f0ebe5; -fx-border-width: 0 0 1 0; -fx-cursor: hand;");
 
-        // ✅ CẢI TIẾN: Gán sự kiện Click cho toàn bộ ROW thay vì chỉ Title
         row.setOnMouseClicked(e -> {
-            // Kiểm tra nếu người dùng click vào vùng trống hoặc Title thì mới phát nhạc
-            // Nếu click trúng mấy cái Button (Tim, Plus) thì để Button tự xử lý, không phát nhạc.
             if (!(e.getTarget() instanceof Button)) {
                 handleSongClick(song, index);
             }
         });
 
-        // ── Title ──
         Label titleLabel = new Label(song.getTitle());
         titleLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #1a1a1a;");
-        // (Bỏ dòng setOnMouseClicked cũ ở đây đi)
 
-        // ── Heart button ──
         boolean isFav = favSongIds.contains(song.getSongId());
         Button heartBtn = new Button(isFav ? "♥" : "♡");
         
@@ -121,22 +107,18 @@ public class AlbumViewController {
         String heartColor = isFav ? "#C0703A" : "#C0C0C0";
         heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: " + heartColor + "; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-width: 0;");
         
-        // Ngăn sự kiện click lan ra ngoài Row khi bấm nút Tim
         heartBtn.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> e.consume());
         heartBtn.setOnAction(e -> handleAddToFavorites(song, heartBtn));
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // ── Plus button ──
         Button plusBtn = new Button("+");
         if (SessionManager.isAdmin) {
             plusBtn.setVisible(false);
             plusBtn.setManaged(false);
         }
         plusBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C0C0C0; -fx-font-size: 16px; -fx-cursor: hand; -fx-border-width: 0;");
-
-        // Ngăn sự kiện click lan ra ngoài Row khi bấm nút Plus
         plusBtn.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> e.consume());
 
         ContextMenu dropdown = new ContextMenu();
@@ -146,20 +128,16 @@ public class AlbumViewController {
 
         plusBtn.setOnAction(e -> dropdown.show(plusBtn, plusBtn.localToScreen(0, plusBtn.getHeight()).getX(), plusBtn.localToScreen(0, plusBtn.getHeight()).getY()));
 
-        // ── Duration ──
         Label durationLabel = new Label(formatDuration(song.getDuration()));
         durationLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888; -fx-min-width: 40;");
 
         row.getChildren().addAll(titleLabel, heartBtn, spacer, plusBtn, durationLabel);
 
-        // Hover effect (giữ nguyên logic của mày)
         row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 10 40 10 40; -fx-border-color: #f0ebe5; -fx-border-width: 0 0 1 0; -fx-background-color: #f5efe9; -fx-cursor: hand;"));
         row.setOnMouseExited(e -> row.setStyle("-fx-padding: 10 40 10 40; -fx-border-color: #f0ebe5; -fx-border-width: 0 0 1 0; -fx-cursor: hand;"));
 
         return row;
     }
-
-    // ── Handlers ──────────────────────────────────────────────────────────────
 
     @FXML
     private void handlePlay() {
@@ -177,11 +155,9 @@ public class AlbumViewController {
         }
     }
 
-    // ✅ ĐÃ FIX: Xử lý logic Thả Tim
     private void handleAddToFavorites(Song song, Button heartBtn) {
         if (SessionManager.currentUser == null) return;
 
-        // Đảo trạng thái UI ngay lập tức
         boolean currentlyFav = heartBtn.getText().equals("♥");
         if (currentlyFav) {
             heartBtn.setText("♡");
@@ -193,11 +169,9 @@ public class AlbumViewController {
             favSongIds.add(song.getSongId());
         }
 
-        // Gọi API lên Firebase
         DatabaseManager.getInstance().getService().toggleFavoriteSong(SessionManager.currentUser.getUserId(), song);
     }
 
-    // ✅ ĐÃ FIX: Xử lý logic Add To Playlist Modal
     private void handleAddToPlaylist(Song song) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddToPlaylistModal.fxml"));
@@ -211,7 +185,6 @@ public class AlbumViewController {
             stage.setTitle("Add to Playlist");
             stage.initModality(Modality.APPLICATION_MODAL);
             
-            // Gán owner để modal hiện đè lên trên app thay vì cửa sổ rời
             if (songListContainer != null && songListContainer.getScene() != null) {
                 stage.initOwner(songListContainer.getScene().getWindow());
             }
@@ -219,12 +192,10 @@ public class AlbumViewController {
             stage.showAndWait();
 
         } catch (IOException e) {
-            System.err.println("❌ Lỗi mở AddToPlaylistModal: " + e.getMessage());
+            System.err.println("Error triggering AddToPlaylistModal instance: " + e.getMessage());
             e.printStackTrace();
         }
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private String formatDuration(int seconds) {
         int m = seconds / 60;

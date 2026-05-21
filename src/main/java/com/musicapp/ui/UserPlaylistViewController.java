@@ -1,6 +1,5 @@
 package com.musicapp.ui;
 
-import com.google.firebase.database.FirebaseDatabase;
 import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
@@ -39,8 +38,8 @@ public class UserPlaylistViewController implements Initializable, MainViewContro
     private boolean deleteMode = false;
     private MainViewController mainController;
     
-    private String currentPlaylistId; // ✅ CẦN LƯU ID ĐỂ BIẾT ĐƯỜNG XÓA TRÊN FIREBASE
-    private List<String> favSongIds = new ArrayList<>(); // LƯU TRẠNG THÁI TIM
+    private String currentPlaylistId; 
+    private List<String> favSongIds = new ArrayList<>(); 
 
     @Override
     public void setMainController(MainViewController mainController) {
@@ -50,7 +49,6 @@ public class UserPlaylistViewController implements Initializable, MainViewContro
     @Override
     public void initialize(URL location, ResourceBundle resources) {}
 
-    // ✅ ĐÃ SỬA: Thêm tham số playlistId
     public void setPlaylistData(String playlistId, String name, String coverURL, List<Song> songList) {
         this.currentPlaylistId = playlistId;
         playlistNameLabel.setText(name);
@@ -58,12 +56,17 @@ public class UserPlaylistViewController implements Initializable, MainViewContro
         songs.addAll(songList);
 
         if (coverURL != null && !coverURL.isEmpty()) {
-            try { coverArtView.setImage(new Image(coverURL, true)); }
-            catch (Exception ignored) {}
+            try { 
+                if (coverURL.startsWith("http")) {
+                    coverArtView.setImage(new Image(coverURL, true)); 
+                } else {
+                    URL resource = getClass().getResource(coverURL);
+                    if (resource != null) coverArtView.setImage(new Image(resource.toExternalForm(), true));
+                }
+            } catch (Exception ignored) {}
         }
         updateCount();
 
-        // ✅ TẢI TRẠNG THÁI TIM TRƯỚC KHI VẼ GIAO DIỆN
         new Thread(() -> {
             try {
                 if (SessionManager.currentUser != null) {
@@ -98,16 +101,19 @@ public class UserPlaylistViewController implements Initializable, MainViewContro
             }
             songs.removeAll(toRemove);
 
-            // ✅ XÓA KHỎI FIREBASE
             if (currentPlaylistId != null && !toRemove.isEmpty()) {
                 new Thread(() -> {
                     try {
                         for (Song s : toRemove) {
-                            FirebaseDatabase.getInstance().getReference("playlists")
-                                .child(currentPlaylistId).child("songIds").child(s.getSongId()).removeValueAsync();
+                            DatabaseManager.getInstance().getService().getDbRef()
+                                .child("playlists")
+                                .child(currentPlaylistId)
+                                .child("songIds")
+                                .child(s.getSongId())
+                                .removeValueAsync();
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        System.err.println("Failed to remove track transaction links: " + e.getMessage());
                     }
                 }).start();
             }
@@ -153,8 +159,14 @@ public class UserPlaylistViewController implements Initializable, MainViewContro
         thumb.setFitHeight(44);
         thumb.setPreserveRatio(true);
         if (song.getImageURL() != null && !song.getImageURL().isEmpty()) {
-            try { thumb.setImage(new Image(song.getImageURL(), true)); }
-            catch (Exception ignored) {}
+            try { 
+                if (song.getImageURL().startsWith("http")) {
+                    thumb.setImage(new Image(song.getImageURL(), true)); 
+                } else {
+                    URL resource = getClass().getResource(song.getImageURL());
+                    if (resource != null) thumb.setImage(new Image(resource.toExternalForm(), true));
+                }
+            } catch (Exception ignored) {}
         }
 
         Label titleLabel = new Label(song.getTitle());
@@ -162,7 +174,6 @@ public class UserPlaylistViewController implements Initializable, MainViewContro
         titleLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-padding: 0 0 0 12;");
         titleLabel.setOnMouseClicked(e -> playSong(song, index));
 
-        // ✅ LOGIC ĐỒNG BỘ TIM
         boolean isFav = favSongIds.contains(song.getSongId());
         Button heartBtn = new Button(isFav ? "♥" : "♡");
         String heartColor = isFav ? "#C0703A" : "#C0C0C0";
@@ -204,7 +215,6 @@ public class UserPlaylistViewController implements Initializable, MainViewContro
         }
     }
 
-    // ✅ GỌI API TOGGLE TIM
     private void handleAddToFavorites(Song song, Button heartBtn) {
         if (SessionManager.currentUser == null) return;
         
