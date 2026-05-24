@@ -38,6 +38,7 @@ public interface FirebaseService {
     
     String getCurrentUserId();
     String getCurrentUserRole();
+    void setSession(String userId, String role);
     
     void removeSongFromAlbum(String albumId, String songId);
     void removeSongFromPlaylist(String playlistId, String songId);

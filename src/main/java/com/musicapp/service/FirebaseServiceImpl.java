@@ -35,6 +35,12 @@ public class FirebaseServiceImpl implements FirebaseService {
     @Override
     public String getCurrentUserRole() { return currentUserRole; }
 
+    @Override
+    public void setSession(String userId, String role) {
+        this.currentUserId = userId;
+        this.currentUserRole = role;
+    }
+
     public FirebaseServiceImpl() {
         try {
             InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-config.json");
