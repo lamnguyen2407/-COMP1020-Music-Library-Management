@@ -45,4 +45,6 @@ public interface FirebaseService {
     
     void removeSongContextually(String contextId, String songId);
     List<Song> fetchSongsContextually(String contextId, String contextTitle);
+    
+    void registerNewUser(String email, String username, String password, String fullname, RegisterCallback callback);
 }

@@ -44,21 +44,7 @@ public class MusicService {
         List<Album> allAlbums = firebaseService.fetchAlbums();
         List<Album> result = new ArrayList<>();
         if (allAlbums == null || allAlbums.isEmpty()) return result;
-        /*
-         * Sorting array list of albums to : 
-
-        allAlbums.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
-        Set<String> seenArtists = new HashSet<>();
-        
-        for (Album a : allAlbums) {
-            String artist = a.getArtist();
-            if (!seenArtists.contains(artist)) { 
-                result.add(a);
-                seenArtists.add(artist);
-            }
-            if (result.size() == 5) break; 
-        }
-        */
+    
         
         // Using priority queue
         PriorityQueue<Album> pq = new PriorityQueue<>(new Comparator<Album>() {
@@ -81,42 +67,41 @@ public class MusicService {
     }
 
     public List<Song> getLatestSongs() {
-        List<Song> allSongs = firebaseService.fetchSongs();
+        List<Song> allSongs = DatabaseManager.getInstance().getService().fetchSongs();
         List<Song> result = new ArrayList<>();
-        
+
         if (allSongs == null || allSongs.isEmpty()) return result;
-        /*
-         * Sorting array list of songs to get latest songs
-        allSongs.sort((a, b) -> Integer.compare(b.getReleaseYear(), a.getReleaseYear()));
-        Map<String, Integer> artistCount = new HashMap<>();
-        
+
+
+        Map<String, Song> uniqueArtistSongs = new HashMap<>();
         for (Song s : allSongs) {
-            String artist = s.getArtist();
-            int count = artistCount.getOrDefault(artist, 0);
-            
-            if (count < 1) { 
-                result.add(s);
-                artistCount.put(artist, count + 1);
+            String artistName = s.getArtist(); 
+      
+            if (!uniqueArtistSongs.containsKey(artistName)) {
+                uniqueArtistSongs.put(artistName, s);
             }
-            if (result.size() == 9) break; 
         }
-        */
-        
-        // Using priority queue 
+
         PriorityQueue<Song> pq = new PriorityQueue<>((a, b) -> {
-        	if(a.getReleaseYear() == b.getReleaseYear()) {
-        		return b.getSongId().compareTo(a.getSongId());
-        	}
-        	return Integer.compare(a.getReleaseYear(), b.getReleaseYear());
+            if(a.getReleaseYear() == b.getReleaseYear()) {
+                return b.getSongId().compareTo(a.getSongId());
+            }
+            return Integer.compare(a.getReleaseYear(), b.getReleaseYear());
         });
+
+        for (Song s : uniqueArtistSongs.values()) {
+            pq.offer(s);
+            while(pq.size() > 9) {
+                pq.poll();
+            }
+        }
+
+        while (!pq.isEmpty()) {
+            result.add(pq.poll());
+        }
         
-        for(Song s: allSongs) {
-        	pq.offer(s);
-        	while(pq.size() > 9) pq.poll();
-        }
-        while(!pq.isEmpty()) {
-        	result.add(pq.poll());
-        }
+        Collections.reverse(result);
+        
         return result;
     }
 }
