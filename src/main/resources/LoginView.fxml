@@ -43,8 +43,8 @@
                   <children>
 
                      <!-- Email label + field -->
-                     <Label style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Email address or username" />
-                     <TextField fx:id="emailField" onAction="#handleLogin" promptText="Email address or username" style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
+                     <Label style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Your email adress" />
+                     <TextField fx:id="emailField" onAction="#handleLogin" promptText="Your email adress" style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
 
                      <!-- Password label + field -->
                      <Label style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Password" />

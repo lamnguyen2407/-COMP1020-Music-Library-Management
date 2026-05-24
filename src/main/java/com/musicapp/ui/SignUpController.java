@@ -1,13 +1,11 @@
 package com.musicapp.ui;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
-import java.util.UUID;
 
-import com.musicapp.model.ListenerUser;
 import com.musicapp.model.SessionManager;
+import com.musicapp.model.User;
 import com.musicapp.service.DatabaseManager;
+import com.musicapp.service.RegisterCallback;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -41,10 +39,33 @@ public class SignUpController {
         }
 
         if(username.equals("admin") || username.equals("admin1")) {
-        	showAlert(Alert.AlertType.WARNING, "Registration Failed", "Username is already taken");
+            showAlert(Alert.AlertType.WARNING, "Registration Failed", "Username is already taken");
             return;
         }
-        attemptRegistration(email, username, password, fullname, 0, event);
+        
+        // Vô hiệu hóa nút Đăng ký để tránh user click 2 lần liên tục
+        Node source = (Node) event.getSource();
+        source.setDisable(true);
+
+        // GIAO VIỆC CHO SERVICE XỬ LÝ DATABASE
+        DatabaseManager.getInstance().getService().registerNewUser(email, username, password, fullname, new RegisterCallback() {
+            @Override
+            public void onSuccess(User user) {
+                Platform.runLater(() -> {
+                    SessionManager.currentUser = user;
+                    SessionManager.isAdmin = false;
+                    goToMainView(event);
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Platform.runLater(() -> {
+                    source.setDisable(false); // Bật lại nút nếu lỗi
+                    showAlert(Alert.AlertType.WARNING, "Registration Failed", errorMessage);
+                });
+            }
+        });
     }
     
     @FXML 
@@ -97,91 +118,5 @@ public class SignUpController {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
-    }
-    private int getIntegerKey(String text) {
-    	int key = 0, prime = 29;
-    	for(int i = 0; i < text.length(); ++i) {
-    		key = key * prime + text.charAt(i);
-    	}
-    	return key & Integer.MAX_VALUE; // avoid exceeding the limitation of Integer datatype
-    }
-    private void attemptRegistration(String email, String username, String password, String fullname, int i, ActionEvent event) {
-        // Check globally if the user name is taken 
-        DatabaseManager.getInstance().getService().getDbRef().child("users")
-            .orderByChild("name").equalTo(username)
-            .addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
-                @Override
-                public void onDataChange(com.google.firebase.database.DataSnapshot usernameSnapshot) {
-                    if (usernameSnapshot.exists()) {
-                        Platform.runLater(() -> showAlert(Alert.AlertType.WARNING, "Registration Failed", "Username is already taken."));
-                        return;
-                    }
-
-                    // If user name is free, check globally if the email is taken 
-                    DatabaseManager.getInstance().getService().getDbRef().child("users")
-                        .orderByChild("email").equalTo(email)
-                        .addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
-                            @Override
-                            public void onDataChange(com.google.firebase.database.DataSnapshot emailSnapshot) {
-                                if (emailSnapshot.exists()) {
-                                    Platform.runLater(() -> showAlert(Alert.AlertType.WARNING, "Registration Failed", "Email is already taken."));
-                                    return;
-                                }
-
-                                // If both text fields are globally unique, proceed with ID generation
-                                proceedWithIdGeneration(email, username, password, fullname, i, event);
-                            }
-
-                            @Override
-                            public void onCancelled(com.google.firebase.database.DatabaseError error) {
-                                Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Database Error", error.getMessage()));
-                            }
-                        });
-                }
-
-                @Override
-                public void onCancelled(com.google.firebase.database.DatabaseError error) {
-                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Database Error", error.getMessage()));
-                }
-            });
-    }
-
-    // Process new user data
-    private void proceedWithIdGeneration(String email, String username, String password, String fullname, int i, ActionEvent event) {
-        int keyUser = getIntegerKey(username);
-        int keyEmail = getIntegerKey(email);
-
-        int indexUser = ( (keyUser % 997) + i * (991 - (keyUser % 991)) ) % 997;
-        int indexEmail = ( (keyEmail % 997) + i * (991 - (keyEmail % 991))) % 997;
-        String generatedUserId = String.format("L%03d%03d", Math.abs(indexUser), Math.abs(indexEmail));
-
-        DatabaseManager.getInstance().getService().getDbRef().child("users").child(generatedUserId)
-            .addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
-                @Override
-                public void onDataChange(com.google.firebase.database.DataSnapshot snapshot) {
-                    if (!snapshot.exists()) {
-                        ListenerUser newUser = new ListenerUser(generatedUserId, fullname, email, username, password);
-                        try {
-                            DatabaseManager.getInstance().getService().saveUser(newUser);
-                            DatabaseManager.getInstance().getService().setSession(newUser.getUserId(), newUser.getRole());
-                            Platform.runLater(() -> {
-                                SessionManager.currentUser = newUser;
-                                SessionManager.isAdmin = false;
-                                goToMainView(event);
-                            });
-                        } catch (Exception e) {
-                            Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Network Error", "Failed to save user data."));
-                        }
-                    } else {
-                        // Hash Collision (Different user entirely landed on same hash indices)
-                        proceedWithIdGeneration(email, username, password, fullname, i + 1, event);
-                    }
-                }
-
-                @Override
-                public void onCancelled(com.google.firebase.database.DatabaseError error) {
-                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Database Error", error.getMessage()));
-                }
-            });
     }
 }

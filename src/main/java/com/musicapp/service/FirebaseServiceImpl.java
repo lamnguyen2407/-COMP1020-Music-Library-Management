@@ -371,40 +371,92 @@ public class FirebaseServiceImpl implements FirebaseService {
         usersRef.child(user.getUserId()).setValueAsync(user);
     }
     
-    @Override 
-    public void authenticateUser(String loginIdentifier, String password, LoginCallback callback) {
-        DatabaseReference usersRef = dbRef.child("users");
-        String identifer = loginIdentifier.contains("@") ? "email" : "name";
-        usersRef.orderByChild(identifer).equalTo(loginIdentifier).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                if(snapshot.exists()) {
-                    for(DataSnapshot userSnap: snapshot.getChildren()) {
-                        String pw = userSnap.child("password").getValue(String.class);
-                        if(pw != null && pw.equals(password)) {
-                            String role = userSnap.child("role").getValue(String.class);
-                            User loginUser = null;
-                            if("admin".equals(role)) {
-                                loginUser = userSnap.getValue(Admin.class);
-                            }
-                            else {
-                                loginUser = userSnap.getValue(ListenerUser.class);
-                            }
-                            
-                            FirebaseServiceImpl.this.currentUserId = loginUser.getUserId();
-                            FirebaseServiceImpl.this.currentUserRole = role;
+    private int getIntegerKey(String text) {
+        int key = 0, prime = 29;
+        for(int i = 0; i < text.length(); ++i) {
+            key = key * prime + text.charAt(i);
+        }
+        return key & Integer.MAX_VALUE;
+    }
 
-                            callback.onSuccess(loginUser, role);
-                            return;
+    @Override
+    public void registerNewUser(String email, String username, String password, String fullname, RegisterCallback callback) {
+        dbRef.child("users").orderByChild("username").equalTo(username)
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot usernameSnapshot) {
+                    if (usernameSnapshot.exists()) {
+                        callback.onError("Username is already taken.");
+                        return;
+                    }
+                    proceedWithEmailHash(email, username, password, fullname, 0, callback);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    callback.onError("Database Error: " + error.getMessage());
+                }
+            });
+    }
+
+    private void proceedWithEmailHash(String email, String username, String password, String fullname, int i, RegisterCallback callback) {
+        int keyEmail = getIntegerKey(email);
+        int indexEmail = ( (keyEmail % 997) + i * (991 - (keyEmail % 991))) % 997;
+        String generatedUserId = String.format("U%08d", Math.abs(indexEmail));
+
+        dbRef.child("users").child(generatedUserId)
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (!snapshot.exists()) {
+                        ListenerUser newUser = new ListenerUser(generatedUserId, fullname, email, username, password);
+                        try {
+                            saveUser(newUser); 
+                            setSession(newUser.getUserId(), newUser.getRole()); 
+                            callback.onSuccess(newUser);
+                        } catch (Exception e) {
+                            callback.onError("Failed to save user data.");
+                        }
+                    } else {
+                        String dbEmail = snapshot.child("email").getValue(String.class);
+                        if (email.equalsIgnoreCase(dbEmail)) {
+                            callback.onError("Email is already taken.");
+                        } else {
+                            proceedWithEmailHash(email, username, password, fullname, i + 1, callback);
                         }
                     }
-                    callback.onError("Incorrect Password!");
                 }
-                else {
-                    callback.onError("Account not found!");
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    callback.onError("Database Error: " + error.getMessage());
+                }
+            });
+    }
+    
+    @Override
+    public void authenticateUser(String email, String password, LoginCallback callback) {
+        int keyEmail = getIntegerKey(email);
+        int indexEmail = ( (keyEmail % 997) + 0 * (991 - (keyEmail % 991))) % 997;
+        String targetId = String.format("U%08d", Math.abs(indexEmail));
+
+        dbRef.child("users").child(targetId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String dbPassword = snapshot.child("password").getValue(String.class);
+                    
+                    if (password.equals(dbPassword)) {
+                        ListenerUser user = snapshot.getValue(ListenerUser.class);
+                        callback.onSuccess(user, user.getRole());
+                    } else {
+                        callback.onError("Incorrect password. Please try again.");
+                    }
+                } else {
+                      callback.onError("Account does not exist.");
                 }
             }
-            
+
             @Override
             public void onCancelled(DatabaseError error) {
                 callback.onError("Database Error: " + error.getMessage());
