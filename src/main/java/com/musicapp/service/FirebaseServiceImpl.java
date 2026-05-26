@@ -381,7 +381,7 @@ public class FirebaseServiceImpl implements FirebaseService {
     	
     	int keyEmail = getIntegerKey(email);
         int indexEmail = ((keyEmail % 997) + i * (991 - (keyEmail % 991))) % 997;
-        String generatedUserId = String.format("U%03d", Math.abs(indexEmail));
+        String generatedUserId = String.format("U%08d", Math.abs(indexEmail));
         
         dbRef.child("users").child(generatedUserId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -454,7 +454,7 @@ public class FirebaseServiceImpl implements FirebaseService {
     	}
     	int keyEmail = getIntegerKey(email);
     	int indexEmail = ((keyEmail % 997) + i * (991 - (keyEmail % 991))) % 997;
-    	String targetId = String.format("U%03d", Math.abs(indexEmail));
+    	String targetId = String.format("U%08d", Math.abs(indexEmail));
     	dbRef.child("users").child(targetId).addListenerForSingleValueEvent(new ValueEventListener() {
     		@Override
     		public void onDataChange(DataSnapshot snapshot) {
