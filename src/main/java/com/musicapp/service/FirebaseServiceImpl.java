@@ -4,30 +4,23 @@ import com.musicapp.model.*;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.cloud.StorageClient;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.Bucket;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class FirebaseServiceImpl implements FirebaseService {
 
     private DatabaseReference dbRef;
     private String currentUserId;
     private String currentUserRole;
-    private final String BUCKET_NAME = "music-library-management-59ce4.appspot.com";
     
     @Override
     public String getCurrentUserId() { return currentUserId; }
@@ -44,36 +37,28 @@ public class FirebaseServiceImpl implements FirebaseService {
     public FirebaseServiceImpl() {
         try {
             InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-config.json");
+            
+            if (serviceAccount == null) {
+                throw new RuntimeException("Firebase config file not found in resources!");
+            }
 
             FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .setDatabaseUrl("https://music-library-management-59ce4-default-rtdb.firebaseio.com/") 
-                .setStorageBucket(BUCKET_NAME)
-                .build();
+                .build(); 
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
             }
 
             dbRef = FirebaseDatabase.getInstance().getReference();
-            System.out.println("Connected to Firebase Database and Storage successfully");
+            System.out.println("Connected to Firebase Realtime Database successfully");
 
         } catch (Exception e) {
             System.err.println("Error initializing Firebase: " + e.getMessage());
         }
     }
 
-    @Override
-    public String uploadFileToStorage(File file, String folderName) throws Exception {
-        Bucket bucket = StorageClient.getInstance().bucket();
-        String blobName = folderName + "/" + UUID.randomUUID().toString() + "_" + file.getName();
-        String contentType = file.getName().endsWith(".mp3") ? "audio/mpeg" : "image/jpeg";
-
-        Blob blob = bucket.create(blobName, new FileInputStream(file), contentType);
-
-        String encodedBlobName = URLEncoder.encode(blobName, StandardCharsets.UTF_8.toString());
-        return "https://firebasestorage.googleapis.com/v0/b/" + bucket.getName() + "/o/" + encodedBlobName + "?alt=media";
-    }
 
     @Override
     public List<Song> fetchSongs() {
@@ -101,7 +86,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         });
         
         try { 
-            latch.await(); 
+            latch.await(10, TimeUnit.SECONDS); 
         } catch (InterruptedException e) { 
             e.printStackTrace(); 
         }
@@ -131,8 +116,12 @@ public class FirebaseServiceImpl implements FirebaseService {
         if(songIds == null || songIds.isEmpty()) return songList;
         
         CountDownLatch latch = new CountDownLatch(songIds.size());
+        Song[] tempArray = new Song[songIds.size()];
         
-        for (String id : songIds) {
+        for (int i = 0; i < songIds.size(); i++) {
+            final int index = i;
+            String id = songIds.get(i);
+            
             this.dbRef.child("songs").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
@@ -140,9 +129,7 @@ public class FirebaseServiceImpl implements FirebaseService {
                         Song song = snapshot.getValue(Song.class);
                         if (song != null) {
                             song.setSongId(snapshot.getKey());
-                            synchronized (songList) {
-                                songList.add(song);
-                            }
+                            tempArray[index] = song; 
                         }
                     }
                     latch.countDown(); 
@@ -156,9 +143,13 @@ public class FirebaseServiceImpl implements FirebaseService {
         }
 
         try {
-            latch.await(); 
+            latch.await(10, TimeUnit.SECONDS); 
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+
+        for (Song s : tempArray) {
+            if (s != null) songList.add(s);
         }
 
         return songList;
@@ -189,7 +180,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         });
         
         try { 
-            latch.await(); 
+            latch.await(10, TimeUnit.SECONDS); 
         } catch (InterruptedException e) { 
             e.printStackTrace(); 
         }
@@ -216,30 +207,12 @@ public class FirebaseServiceImpl implements FirebaseService {
 
     @Override
     public Playlist fetchPlaylist(String playlistId) {
-        final Playlist[] result = new Playlist[1];
-        CountDownLatch latch = new CountDownLatch(1);
-
-        this.dbRef.child("playlists").child(playlistId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    result[0] = snapshot.getValue(Playlist.class);
-                    if(result[0] != null) {
-                        result[0].setPlaylistId(snapshot.getKey());
-                    }
-                }
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.err.println("Error fetching playlist: " + error.getMessage());
-                latch.countDown();
-            }
-        });
-
-        try { latch.await(); } catch (InterruptedException e) { e.printStackTrace(); }
-        return result[0];
+        try {
+            return fetchPlaylistByIdAsync(playlistId).get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
@@ -316,7 +289,7 @@ public class FirebaseServiceImpl implements FirebaseService {
             });
 
         try {
-            DataSnapshot snapshot = future.get(10, java.util.concurrent.TimeUnit.SECONDS);
+            DataSnapshot snapshot = future.get(10, TimeUnit.SECONDS);
             if (snapshot != null && snapshot.exists()) {
                 for (DataSnapshot child : snapshot.getChildren()) {
                     Object value = child.getValue();
@@ -353,7 +326,7 @@ public class FirebaseServiceImpl implements FirebaseService {
             });
 
         try {
-            DataSnapshot snapshot = future.get(10, java.util.concurrent.TimeUnit.SECONDS);
+            DataSnapshot snapshot = future.get(10, TimeUnit.SECONDS);
             if (snapshot != null && snapshot.exists()) {
                 for (DataSnapshot child : snapshot.getChildren()) {
                     ids.add(child.getKey()); 
@@ -436,9 +409,20 @@ public class FirebaseServiceImpl implements FirebaseService {
     
     @Override
     public void authenticateUser(String email, String password, LoginCallback callback) {
-        int keyEmail = getIntegerKey(email);
-        int indexEmail = ( (keyEmail % 997) + 0 * (991 - (keyEmail % 991))) % 997;
-        String targetId = String.format("U%08d", Math.abs(indexEmail));
+        String targetId;
+
+        if (email.equalsIgnoreCase("admin1@musicapp.com")) { 
+            targetId = "admin1"; 
+        } 
+        
+        else if (email.equalsIgnoreCase("admin2@musicapp.com")) { 
+            targetId = "admin2"; 
+        } 
+        else {
+            int keyEmail = getIntegerKey(email);
+            int indexEmail = ( (keyEmail % 997) + 0 * (991 - (keyEmail % 991))) % 997;
+            targetId = String.format("U%08d", Math.abs(indexEmail));
+        }
 
         dbRef.child("users").child(targetId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -447,8 +431,8 @@ public class FirebaseServiceImpl implements FirebaseService {
                     String dbPassword = snapshot.child("password").getValue(String.class);
                     
                     if (password.equals(dbPassword)) {
-                        ListenerUser user = snapshot.getValue(ListenerUser.class);
-                        callback.onSuccess(user, user.getRole());
+                        User user = snapshot.getValue(ListenerUser.class); 
+                        callback.onSuccess(user, snapshot.child("role").getValue(String.class));
                     } else {
                         callback.onError("Incorrect password. Please try again.");
                     }
@@ -482,15 +466,21 @@ public class FirebaseServiceImpl implements FirebaseService {
             });
 
         try {
-            DataSnapshot playlistIdsSnapshot = userFuture.get(5, java.util.concurrent.TimeUnit.SECONDS);
+            DataSnapshot playlistIdsSnapshot = userFuture.get(5, TimeUnit.SECONDS);
             
             if (playlistIdsSnapshot.exists()) {
+                List<CompletableFuture<Playlist>> fetchFutures = new ArrayList<>();
+                
                 for (DataSnapshot idSnapshot : playlistIdsSnapshot.getChildren()) {
                     String pId = idSnapshot.getKey(); 
-                    Playlist p = fetchPlaylistById(pId); 
-                    if (p != null) {
-                        playlists.add(p);
-                    }
+                    fetchFutures.add(fetchPlaylistByIdAsync(pId)); 
+                }
+                
+                CompletableFuture.allOf(fetchFutures.toArray(new CompletableFuture[0])).join();
+                
+                for (CompletableFuture<Playlist> future : fetchFutures) {
+                    Playlist p = future.get();
+                    if (p != null) playlists.add(p);
                 }
             }
         } catch (Exception e) {
@@ -500,24 +490,25 @@ public class FirebaseServiceImpl implements FirebaseService {
         return playlists; 
     }
 
-    private Playlist fetchPlaylistById(String playlistId) throws Exception {
-        CompletableFuture<DataSnapshot> pFuture = new CompletableFuture<>();
+    private CompletableFuture<Playlist> fetchPlaylistByIdAsync(String playlistId) {
+        CompletableFuture<Playlist> pFuture = new CompletableFuture<>();
         this.dbRef.child("playlists").child(playlistId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) { pFuture.complete(snapshot); }
-            @Override
-            public void onCancelled(DatabaseError error) { pFuture.completeExceptionally(error.toException()); }
-        });
-        
-        DataSnapshot ds = pFuture.get(5, java.util.concurrent.TimeUnit.SECONDS);
-        if (ds.exists()) {
-            Playlist p = ds.getValue(Playlist.class);
-            if(p != null) {
-                p.setPlaylistId(ds.getKey());
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Playlist p = snapshot.getValue(Playlist.class);
+                    if (p != null) p.setPlaylistId(snapshot.getKey());
+                    pFuture.complete(p);
+                } else {
+                    pFuture.complete(null);
+                }
             }
-            return p;
-        }
-        return null;
+            @Override
+            public void onCancelled(DatabaseError error) {
+                pFuture.completeExceptionally(error.toException());
+            }
+        });
+        return pFuture;
     }
     
     @Override
