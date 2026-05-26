@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface FirebaseService {
 
-    String uploadFileToStorage(File file, String folderName) throws Exception;
 
     List<Song> fetchSongs();
     void saveSong(Song song);
