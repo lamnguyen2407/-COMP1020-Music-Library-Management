@@ -327,7 +327,7 @@ public class TestRunner {
         }
         key = key & Integer.MAX_VALUE;
         int index = ((key % 997) + i * (991 - (key % 991))) % 997;
-        return String.format("U%08d", Math.abs(index));
+        return String.format("U%03d", Math.abs(index));
     }
 
     // ─────────────────────────────────────────────────────────────

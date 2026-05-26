@@ -43,12 +43,12 @@
                   <children>
 
                      <!-- Email label + field -->
-                     <Label style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Your email adress" />
-                     <TextField fx:id="emailField" onAction="#handleLogin" promptText="Your email adress" style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
+                     <Label style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Email address" />
+                     <TextField fx:id="emailField" onAction="#handleLogin" promptText="Enter your email address" style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
 
                      <!-- Password label + field -->
                      <Label style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Password" />
-                     <PasswordField fx:id="passwordField" onAction="#handleLogin" promptText="Password" style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
+                     <PasswordField fx:id="passwordField" onAction="#handleLogin" promptText="Enter your password" style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14 10 14; -fx-font-size: 13px;" />
                      <StackPane prefHeight="40.0" prefWidth="360.0">
                         <children>
                            <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleLogin" prefHeight="40.0" prefWidth="118.0" style="-fx-background-color: #c07840; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 24; -fx-border-width: 0; -fx-padding: 11 28 11 28; -fx-cursor: hand;" text="LOG IN" />
