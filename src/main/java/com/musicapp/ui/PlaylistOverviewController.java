@@ -121,7 +121,78 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
     private void addCustomPlaylistRow(Playlist playlist) {
         HBox row = buildPlaylistRow(playlist.getName(), "♫");
-        row.setOnMouseClicked(e -> loadUserPlaylistView(playlist.getPlaylistId(), playlist.getName(), "/images/playlist_default.jpg"));
+
+        // Remove the default chevron ›
+        row.getChildren().remove(row.getChildren().size() - 1);
+
+        // Build 3-dot button
+        Label menuBtn = new Label("⋮");
+        menuBtn.setStyle("-fx-font-size: 20px; -fx-text-fill: #9E8E84; -fx-cursor: hand; -fx-padding: 4 8 4 8;");
+
+        // Build dropdown popup
+        javafx.scene.control.PopupControl popup = new javafx.scene.control.PopupControl();
+
+        Label deleteLabel = new Label("Delete");
+        deleteLabel.setStyle(
+            "-fx-font-size: 14px; -fx-text-fill: #2C1810; -fx-padding: 10 20 10 20; " +
+            "-fx-cursor: hand; -fx-background-color: white;"
+        );
+        deleteLabel.setMinWidth(140);
+
+        deleteLabel.setOnMouseEntered(e ->
+            deleteLabel.setStyle(
+                "-fx-font-size: 14px; -fx-text-fill: white; -fx-padding: 10 20 10 20; " +
+                "-fx-cursor: hand; -fx-background-color: #1E90FF;"
+            )
+        );
+        deleteLabel.setOnMouseExited(e ->
+            deleteLabel.setStyle(
+                "-fx-font-size: 14px; -fx-text-fill: #2C1810; -fx-padding: 10 20 10 20; " +
+                "-fx-cursor: hand; -fx-background-color: white;"
+            )
+        );
+
+        VBox popupContent = new VBox(deleteLabel);
+        popupContent.setStyle(
+            "-fx-background-color: white; " +
+            "-fx-border-color: #CCCCCC; " +
+            "-fx-border-width: 1; " +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);"
+        );
+        popup.getScene().setRoot(popupContent);
+
+        menuBtn.setOnMouseClicked(e -> {
+            e.consume();
+            if (popup.isShowing()) {
+                popup.hide();
+            } else {
+                javafx.geometry.Bounds bounds = menuBtn.localToScreen(menuBtn.getBoundsInLocal());
+                popup.show(menuBtn, bounds.getMinX(), bounds.getMaxY());
+            }
+        });
+
+        deleteLabel.setOnMouseClicked(e -> {
+            popup.hide();
+            new Thread(() -> {
+                try {
+                    DatabaseManager.getInstance().getService().deletePlaylist(playlist.getPlaylistId());
+                } catch (Exception ex) {
+                    System.err.println("Error deleting playlist: " + ex.getMessage());
+                }
+                Platform.runLater(() -> {
+                    javafx.scene.Parent parent = row.getParent();
+                    if (parent instanceof VBox) {
+                        ((VBox) parent).getChildren().remove(row);
+                    }
+                });
+            }).start();
+        });
+
+        row.getChildren().add(menuBtn);
+        row.setOnMouseClicked(e -> loadUserPlaylistView(
+            playlist.getPlaylistId(), playlist.getName(), "/images/playlist_default.jpg"
+        ));
+
         playlistListContainer.getChildren().add(row);
     }
 
