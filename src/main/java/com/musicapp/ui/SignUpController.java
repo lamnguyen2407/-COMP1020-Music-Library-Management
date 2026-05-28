@@ -43,25 +43,25 @@ public class SignUpController {
             return;
         }
         
-        // Vô hiệu hóa nút Đăng ký để tránh user click 2 lần liên tục
         Node source = (Node) event.getSource();
         source.setDisable(true);
 
-        // GIAO VIỆC CHO SERVICE XỬ LÝ DATABASE
         DatabaseManager.getInstance().getService().registerNewUser(email, username, password, fullname, new RegisterCallback() {
             @Override
             public void onSuccess(User user) {
                 Platform.runLater(() -> {
+                    showAlert(Alert.AlertType.INFORMATION, "Registration Successful", "Registration successful! Welcome " + username + ".");
+                    
                     SessionManager.currentUser = user;
                     SessionManager.isAdmin = false;
-                    goToMainView(event);
+                    goToMainView(event); 
                 });
             }
 
             @Override
             public void onError(String errorMessage) {
                 Platform.runLater(() -> {
-                    source.setDisable(false); // Bật lại nút nếu lỗi
+                    source.setDisable(false);
                     showAlert(Alert.AlertType.WARNING, "Registration Failed", errorMessage);
                 });
             }
