@@ -14,16 +14,37 @@ public class LinearSearchStrategy implements SearchStrategy {
         }
         
         String lowerKeyword = keyword.toLowerCase().trim();
-        
+        String[] tokens = lowerKeyword.split(" ");
+        String pivot = tokens[0];
+        int id = 0;
+        for(int i = 0; i < tokens.length; ++i) {
+        	if(tokens[i].length() > pivot.length()) {
+        		pivot = tokens[i];  
+        		id = i;
+        	}
+        }
         for (Song song : sourceList) {
             String title = song.getTitle().toLowerCase();
             String artist = song.getArtist().toLowerCase();
             
-            if (artist.contains(lowerKeyword) || title.contains(lowerKeyword)) {
+            if (artist.contains(pivot) || title.contains(pivot)) {
                 result.add(song);
             }
         }
-        return result;
+        List<Song> finalResult = new ArrayList<>();
+        for(Song s: result) {
+        	boolean isMatched = true;
+        	for(int i = 0; i < tokens.length; ++i) {
+        		if(i != id) {
+        			if(!s.getArtist().contains(tokens[i]) && !s.getTitle().contains(tokens[i])) {
+        				isMatched = false;
+        				break;
+        			}
+        		}
+        	}
+        	if(isMatched) finalResult.add(s);
+        }
+        return finalResult;
     }
 
     @Override
@@ -32,12 +53,36 @@ public class LinearSearchStrategy implements SearchStrategy {
         if (kw == null || kw.trim().isEmpty()) return result;
         
         String lowerKeyword = kw.toLowerCase().trim();
+        String[] tokens = lowerKeyword.split(" ");
+        String pivot = tokens[0];
+        int id = 0;
+        for(int i = 0; i < tokens.length; ++i) {
+        	if(tokens[i].length() > pivot.length()) {
+        		pivot = tokens[i];  
+        		id = i;
+        	}
+        }
         for (Song song : songCache.values()) {
-            if (song.getArtist().toLowerCase().contains(lowerKeyword) || 
-                song.getTitle().toLowerCase().contains(lowerKeyword)) {
+            String title = song.getTitle().toLowerCase();
+            String artist = song.getArtist().toLowerCase();
+            
+            if (artist.contains(pivot) || title.contains(pivot)) {
                 result.add(song);
             }
         }
-        return result;
+        List<Song> finalResult = new ArrayList<>();
+        for(Song s: result) {
+        	boolean isMatched = true;
+        	for(int i = 0; i < tokens.length; ++i) {
+        		if(i != id) {
+        			if(!s.getArtist().contains(tokens[i]) && !s.getTitle().contains(tokens[i])) {
+        				isMatched = false;
+        				break;
+        			}
+        		}
+        	}
+        	if(isMatched) finalResult.add(s);
+        }
+        return finalResult;
     }
 }

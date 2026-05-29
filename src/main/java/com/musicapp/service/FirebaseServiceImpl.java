@@ -344,6 +344,9 @@ public class FirebaseServiceImpl implements FirebaseService {
         usersRef.child(user.getUserId()).setValueAsync(user);
     }
     
+    // UserId processing 
+    private final static int[][] HASH_PAIRS = {{991, 997}, {1993, 1999}, {3989, 4003}, {7963, 8011}, {15901, 16007}};
+
     private int getIntegerKey(String text) {
         int key = 0, prime = 29;
         for(int i = 0; i < text.length(); ++i) {
@@ -354,15 +357,36 @@ public class FirebaseServiceImpl implements FirebaseService {
 
     @Override
     public void registerNewUser(String email, String username, String password, String fullname, RegisterCallback callback) {
-        dbRef.child("users").orderByChild("username").equalTo(username)
-            .addListenerForSingleValueEvent(new ValueEventListener() {
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot usernameSnapshot) {
-                    if (usernameSnapshot.exists()) {
+                public void onDataChange(DataSnapshot root) {
+                	long userCount = root.child("users").getChildrenCount();
+                	int tableSize = 997, stepPrime = 991;
+                	if(root.hasChild("metadata/tableSize")) {
+                		tableSize = root.child("metadata/tableSize").getValue(Integer.class);
+                		stepPrime = root.child("metadata/stepPrime").getValue(Integer.class);
+                	}
+                	// Condition to rehashing table if load factor >= 0.7
+                	if((double)(userCount + 1) / tableSize > 0.7) {
+                		int nextSize = -1, nextStep = -1;
+                		for(int i = 0; i < HASH_PAIRS.length - 1; i++) {
+                			if(HASH_PAIRS[i][1] == tableSize) {
+                				nextStep = HASH_PAIRS[i + 1][0];
+                				nextSize = HASH_PAIRS[i + 1][1];
+                				break;
+                			}
+                		}
+                		if(nextSize != -1) {
+                			System.out.println("Resizing: " + tableSize + " -> " + nextSize);
+                			rehashTable(root, nextSize, nextStep, callback);
+                			return;
+                		}
+                	}
+                    if (root.child("users").child(username).exists()) {
                         callback.onError("Username is already taken.");
                         return;
                     }
-                    proceedWithEmailHash(email, username, password, fullname, 0, callback);
+                    proceedWithEmailHash(email, username, password, fullname, 0, tableSize, stepPrime, callback);
                 }
 
                 @Override
@@ -371,16 +395,62 @@ public class FirebaseServiceImpl implements FirebaseService {
                 }
             });
     }
-
-    private void proceedWithEmailHash(String email, String username, String password, String fullname, int i, RegisterCallback callback) {
+    private void rehashTable(DataSnapshot root, int newSize, int newStep, RegisterCallback callback) {
+    	Map<String, Object> updates = new HashMap<>();
+        Map<String, String> idMap = new HashMap<>(); // oldId -> newId
+        // 1. Re-hash every user
+        for (DataSnapshot userSnap : root.child("users").getChildren()) {
+        	String email = userSnap.child("email").getValue(String.class);
+            int key = getIntegerKey(email);
+               
+            // Find new slot in the larger table
+            String newId = "";
+            for (int i = 0; i < newSize; i++) {
+            	int idx = ((key % newSize) + i * (newStep - (key % newStep))) % newSize;
+            	newId = String.format("U%08d", Math.abs(idx));
+            	if (!idMap.containsValue(newId)) break; 
+            	}
+       
+            idMap.put(userSnap.getKey(), newId);
+            updates.put("users/" + userSnap.getKey(), null); // Delete old
+            updates.put("users/" + newId, userSnap.getValue()); // Add new (with data)
+            updates.put("users/" + newId + "/userId", newId);   // Update internal ID field
+            }
+      
+        // Fix Referential Integrity (Playlists & Favorites)
+        for (DataSnapshot pl : root.child("playlists").getChildren()) {
+        	String owner = pl.child("ownerId").getValue(String.class);
+            if (idMap.containsKey(owner)) {
+            	updates.put("playlists/" + pl.getKey() + "/ownerId", idMap.get(owner));
+            }
+           
+           // Rename favorite playlist node
+            if (pl.getKey().startsWith("fav_")) {
+            	String oldUid = pl.getKey().substring(4);
+                if (idMap.containsKey(oldUid)) {
+                   updates.put("playlists/" + pl.getKey(), null);
+                   updates.put("playlists/fav_" + idMap.get(oldUid), pl.getValue());
+                }
+            }
+        }
+  
+       // Update the table configuration so Login/Register knows the new size
+       updates.put("metadata/tableSize", newSize);
+       updates.put("metadata/stepPrime", newStep);
+  
+       dbRef.updateChildren(updates, (error, ref) -> {
+           if (error == null) callback.onError("Resized! Please try registering again.");
+      });
+    }
+    private void proceedWithEmailHash(String email, String username, String password, String fullname, int i, int tableSize, int stepPrime, RegisterCallback callback) {
         // If i exists hash table size (997) 
-    	if(i >= 997) {
+    	if(i >= tableSize) {
     		callback.onError("Server capacity reached. Cannot register more users.");
     		return;
     	}
     	
     	int keyEmail = getIntegerKey(email);
-        int indexEmail = ((keyEmail % 997) + i * (991 - (keyEmail % 991))) % 997;
+        int indexEmail = ((keyEmail % tableSize) + i * (stepPrime - (keyEmail % stepPrime))) % stepPrime;
         String generatedUserId = String.format("U%08d", Math.abs(indexEmail));
         
         dbRef.child("users").child(generatedUserId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -401,7 +471,7 @@ public class FirebaseServiceImpl implements FirebaseService {
                         if (email.equalsIgnoreCase(dbEmail)) {
                             callback.onError("Email is already taken.");
                         } else {
-                            proceedWithEmailHash(email, username, password, fullname, i + 1, callback);
+                            proceedWithEmailHash(email, username, password, fullname, i + 1, tableSize, stepPrime, callback);
                         }
                     }
                 }
@@ -424,7 +494,19 @@ public class FirebaseServiceImpl implements FirebaseService {
         	proceedWithAdminAuth("admin2", email, password, callback);
         } 
         else {
-            attemptLogin(email, password, 0, callback);
+            dbRef.child("metadata").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    int tableSize = 997, stepPrime = 991;
+                    if (snapshot.hasChild("tableSize")) tableSize = snapshot.child("tableSize").getValue(Integer.class);
+                    if (snapshot.hasChild("stepPrime")) stepPrime = snapshot.child("stepPrime").getValue(Integer.class);
+                    attemptLogin(email, password, 0, tableSize, stepPrime, callback);
+                }
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    callback.onError("Database Error: " + error.getMessage());
+                }
+            });
         }
     }
     private void proceedWithAdminAuth(String username, String email, String password, LoginCallback callback) {
@@ -447,13 +529,13 @@ public class FirebaseServiceImpl implements FirebaseService {
     	});
     }
     // Helper method to check login email by hash code
-    private void attemptLogin(String email, String password, int i, LoginCallback callback) {
-    	if(i >= 997) {
+    private void attemptLogin(String email, String password, int i, int tableSize, int stepPrime, LoginCallback callback) {
+    	if(i >= tableSize) {
     		callback.onError("Account does not exist");
     		return;
     	}
     	int keyEmail = getIntegerKey(email);
-    	int indexEmail = ((keyEmail % 997) + i * (991 - (keyEmail % 991))) % 997;
+    	int indexEmail = ((keyEmail % tableSize) + i * (stepPrime - (keyEmail % stepPrime))) % tableSize;
     	String targetId = String.format("U%08d", Math.abs(indexEmail));
     	dbRef.child("users").child(targetId).addListenerForSingleValueEvent(new ValueEventListener() {
     		@Override
@@ -472,7 +554,7 @@ public class FirebaseServiceImpl implements FirebaseService {
     				}
     				else {
     					// Hashing collision, try next probe
-    					attemptLogin(email, password, i + 1, callback);
+    					attemptLogin(email, password, i + 1, tableSize, stepPrime, callback);
     				}
     			}
     			else {
