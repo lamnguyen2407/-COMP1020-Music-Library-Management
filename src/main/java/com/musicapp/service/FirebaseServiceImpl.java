@@ -566,6 +566,19 @@ public class FirebaseServiceImpl implements FirebaseService {
     }
     
     @Override
+    public void deletePlaylist(String userId, String playlistId) {
+        if (playlistId == null || playlistId.trim().isEmpty() || userId == null) {
+            return;
+        }
+
+        this.dbRef.child("users").child(userId).child("playlistIds").child(playlistId).removeValueAsync();
+        
+        this.dbRef.child("playlists").child(playlistId).removeValueAsync();
+        
+        System.out.println("Delete playlist " + playlistId + " khỏi Firebase ở cả 2 nơi!");
+    }
+    
+    @Override
     public void toggleFavoriteSong(String userId, Song song) {
         DatabaseReference ref = FirebaseDatabase.getInstance()
             .getReference("playlists")
