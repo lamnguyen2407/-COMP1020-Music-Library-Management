@@ -3,6 +3,8 @@ package com.musicapp.service;
 import com.musicapp.model.Playlist;
 import com.musicapp.model.Song;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class PlaylistManager {
     
@@ -83,4 +85,28 @@ public class PlaylistManager {
         DatabaseManager.getInstance().getService().saveUserPlaylist(currentUserId, target);
         System.out.println("Added " + song.getTitle() + " to playlist " + target.getName());
     }
+
+    public List<Playlist> getAllUserPlaylists() {
+        if (playlistMap.isEmpty()) {
+            List<Playlist> fetched = DatabaseManager.getInstance().getService().fetchUserPlaylists(currentUserId);
+            if (fetched != null) {
+                for (Playlist p : fetched) {
+                    playlistMap.put(p.getPlaylistId(), p);
+                }
+            }
+        }
+        return new ArrayList<>(playlistMap.values());
+    }
+
+    public void deletePlaylist(String playlistId) {
+        if (playlistId != null) {
+            playlistMap.remove(playlistId);
+            
+            DatabaseManager.getInstance().getService().deletePlaylist(currentUserId, playlistId);
+            
+            System.out.println("Playlist " + playlistId + " has been deleted.");
+        }
+    }
+    
+    
 }

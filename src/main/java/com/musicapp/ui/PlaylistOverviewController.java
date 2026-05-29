@@ -10,7 +10,8 @@ import java.util.ResourceBundle;
 import com.musicapp.model.Playlist;
 import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
-import com.musicapp.service.DatabaseManager;
+import com.musicapp.service.LibraryManager;
+import com.musicapp.service.PlaylistManager;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -45,13 +46,24 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     @FXML private TableColumn<Song, String> audioColumn;
 
     private MainViewController mainController;
+    
+    private LibraryManager libraryManager;
+    private PlaylistManager playlistManager;
 
     @Override
     public void setMainController(MainViewController mainController) {
         this.mainController = mainController;
+        
+        if (mainController != null) {
+            this.libraryManager = mainController.getLibraryManager();
+            this.playlistManager = mainController.getPlaylistManager();
+        }
+
         if (playlistListContainer != null && playlistListContainer.getScene() != null) {
             this.contentArea = (StackPane) playlistListContainer.getScene().lookup("#contentArea");
         }
+
+        refreshData();
     }
 
     @Override
@@ -74,7 +86,6 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                 favoriteRow.setOnMouseClicked(e -> loadFavoriteSongView());
             }
         }
-        refreshData();
     }
 
     public void addNewPlaylist(String playlistName, File coverImageFile) {
@@ -92,21 +103,28 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
         new Thread(() -> {
             try {
                 if (SessionManager.isAdmin) {
-                    List<Song> updatedSongs = DatabaseManager.getInstance().getService().fetchSongs();
+                    List<Song> updatedSongs = (libraryManager != null) ? libraryManager.getAllSong() : new ArrayList<>();
+                    
                     Platform.runLater(() -> {
                         if (tableView != null) {
                             tableView.getItems().setAll(updatedSongs);
                         }
                     });
                 } else {
-                    String uid = SessionManager.currentUser.getUserId();
-                    List<Playlist> userPlaylists = DatabaseManager.getInstance().getService().fetchUserPlaylists(uid);
+                    // === MÁY PHÁT HIỆN LỖI (DEBUG) ===
+                    System.out.println("--- BẮT ĐẦU TẢI PLAYLIST ---");
+                    System.out.println("User ID hiện tại: " + SessionManager.currentUser.getUserId());
+                    System.out.println("Tình trạng PlaylistManager: " + (playlistManager == null ? "BỊ NULL !!!" : "Đã kích hoạt"));
+                    // ===================================
 
+                    List<Playlist> userPlaylists = (playlistManager != null) ? playlistManager.getAllUserPlaylists() : new ArrayList<>();
+                    
+                    System.out.println("Số lượng Playlist lấy được: " + userPlaylists.size());
+                    
                     Platform.runLater(() -> {
                         if (playlistListContainer.getChildren().size() > 3) {
                             playlistListContainer.getChildren().remove(3, playlistListContainer.getChildren().size());
                         }
-
                         for (Playlist p : userPlaylists) {
                             if (p.getPlaylistId().startsWith("fav_")) continue;
                             addCustomPlaylistRow(p);
@@ -121,15 +139,11 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
 
     private void addCustomPlaylistRow(Playlist playlist) {
         HBox row = buildPlaylistRow(playlist.getName(), "♫");
-
-        // Remove the default chevron ›
         row.getChildren().remove(row.getChildren().size() - 1);
 
-        // Build 3-dot button
         Label menuBtn = new Label("⋮");
         menuBtn.setStyle("-fx-font-size: 20px; -fx-text-fill: #9E8E84; -fx-cursor: hand; -fx-padding: 4 8 4 8;");
 
-        // Build dropdown popup
         javafx.scene.control.PopupControl popup = new javafx.scene.control.PopupControl();
 
         Label deleteLabel = new Label("Delete");
@@ -175,7 +189,9 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
             popup.hide();
             new Thread(() -> {
                 try {
-                    DatabaseManager.getInstance().getService().deletePlaylist(playlist.getPlaylistId());
+                    if (playlistManager != null) {
+                        playlistManager.deletePlaylist(playlist.getPlaylistId());
+                    }
                 } catch (Exception ex) {
                     System.err.println("Error deleting playlist: " + ex.getMessage());
                 }
@@ -199,13 +215,16 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
     private void loadUserPlaylistView(String playlistId, String name, String coverUrl) {
         new Thread(() -> {
             try {
-                List<String> songIds = DatabaseManager.getInstance().getService().fetchSongIdsFromPlaylist(playlistId);
-                List<Song> songs = new ArrayList<>();
-                if (songIds != null && !songIds.isEmpty()) {
-                    songs = DatabaseManager.getInstance().getService().fetchSongsByIds(songIds);
+                List<Song> tempSongs = new ArrayList<>();
+                if (playlistManager != null && libraryManager != null) {
+                    Playlist p = playlistManager.getPlaylist(playlistId);
+                    if (p != null && p.getSongIdList() != null && !p.getSongIdList().isEmpty()) {
+                        tempSongs = libraryManager.getSongsByIds(p.getSongIdList()); 
+                    }
                 }
 
-                List<Song> finalSongs = songs;
+                final List<Song> songsToPass = tempSongs;
+
                 Platform.runLater(() -> {
                     try {
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/userplaylistview.fxml"));
@@ -213,7 +232,7 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                         UserPlaylistViewController ctrl = loader.getController();
                         
                         ctrl.setMainController(this.mainController);
-                        ctrl.setPlaylistData(playlistId, name, coverUrl, finalSongs);
+                        ctrl.setPlaylistData(playlistId, name, coverUrl, songsToPass);
                         
                         if (mainController != null) {
                             mainController.navigateToView(view);
@@ -283,7 +302,6 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CreatePlaylistModal.fxml"));
             Node view = loader.load();
             
-            // Pass navigation references to the modal controller
             CreatePlaylistModalController ctrl = loader.getController();
             ctrl.setMainController(this.mainController);
             ctrl.setContentArea(this.contentArea);

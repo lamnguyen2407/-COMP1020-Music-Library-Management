@@ -2,8 +2,6 @@ package com.musicapp.ui;
 
 import com.musicapp.model.Playlist;
 import com.musicapp.model.Song;
-import com.musicapp.service.DatabaseManager;
-import com.musicapp.service.PlaylistManager;
 import com.musicapp.model.SessionManager; 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -12,6 +10,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import java.util.List;
+import java.util.ArrayList;
 
 public class AddToPlaylistController {
     
@@ -19,8 +18,7 @@ public class AddToPlaylistController {
     @FXML private Button addBtn;
 
     private Song songToAdd;
-    private PlaylistManager playlistManager;
-    private String currentUserId; 
+    private MainViewController mainController; 
 
     @FXML
     public void initialize() {
@@ -41,21 +39,26 @@ public class AddToPlaylistController {
 
     public void initData(Song song) {
         this.songToAdd = song;
+    }
 
-        if (SessionManager.currentUser != null) {
-            this.currentUserId = SessionManager.currentUser.getUserId();
-        } else {
-            this.currentUserId = "tester01"; 
-        }
-
-        this.playlistManager = new PlaylistManager(currentUserId);
+    public void setMainController(MainViewController mainController) {
+        this.mainController = mainController;
         loadUserPlaylists();
     }
 
     private void loadUserPlaylists() {
-        List<Playlist> userPlaylists = DatabaseManager.getInstance().getService().fetchUserPlaylists(currentUserId);
-        if (userPlaylists != null) {
-            playlistListView.setItems(FXCollections.observableArrayList(userPlaylists));
+        if (mainController != null && mainController.getPlaylistManager() != null) {
+            List<Playlist> userPlaylists = mainController.getPlaylistManager().getAllUserPlaylists();
+            
+            List<Playlist> displayList = new ArrayList<>();
+            if (userPlaylists != null) {
+                for (Playlist p : userPlaylists) {
+                    if (!p.getPlaylistId().startsWith("fav_")) {
+                        displayList.add(p);
+                    }
+                }
+            }
+            playlistListView.setItems(FXCollections.observableArrayList(displayList));
         }
     }
 
@@ -63,9 +66,15 @@ public class AddToPlaylistController {
     private void handleAdd() {
         Playlist selected = playlistListView.getSelectionModel().getSelectedItem();
         
-        if (selected != null && songToAdd != null) {
+        if (selected != null && songToAdd != null && mainController != null) {
             System.out.println("Adding song: " + songToAdd.getSongId() + " to playlist: " + selected.getPlaylistId());
-            DatabaseManager.getInstance().getService().addSongToPlaylist(selected.getPlaylistId(), songToAdd.getSongId());
+            
+            mainController.getPlaylistManager().addSongToSpecificPlaylist(selected.getPlaylistId(), songToAdd);
+            
+            if (PlaylistOverviewController.instance != null) {
+                PlaylistOverviewController.instance.refreshData();
+            }
+
             closeModal();
         } else {
             System.err.println("Error: Playlist selection or song payload target is missing.");

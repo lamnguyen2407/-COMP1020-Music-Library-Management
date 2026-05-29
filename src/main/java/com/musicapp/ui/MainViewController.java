@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import com.musicapp.model.SessionManager;
 import com.musicapp.model.Song;
 import com.musicapp.service.DatabaseManager;
+import com.musicapp.service.LibraryManager;
+import com.musicapp.service.PlaylistManager;
 import com.musicapp.service.SearchEngine;
 
 import javafx.application.Platform;
@@ -59,6 +61,16 @@ public class MainViewController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         userNameLabel.setText(SessionManager.isAdmin ? "Admin View" : "User View");
+        
+        if (SessionManager.currentUser != null) {
+            if (this.libraryManager == null) {
+                this.libraryManager = new LibraryManager(DatabaseManager.getInstance().getService());
+            }
+            if (this.playlistManager == null) {
+                this.playlistManager = new PlaylistManager(SessionManager.currentUser.getUserId());
+            }
+        }
+
         loadView(FXML_DISCOVERY);
         
         // Initialize Search Engine in background to avoid blocking UI
@@ -386,6 +398,16 @@ public class MainViewController implements Initializable {
             this.mediaPlayer.dispose();
             this.mediaPlayer = null;
         }
+    }
+    
+    private LibraryManager libraryManager;
+    private PlaylistManager playlistManager;
+    public LibraryManager getLibraryManager() {
+        return this.libraryManager;
+    }
+
+    public PlaylistManager getPlaylistManager() {
+        return this.playlistManager;
     }
     
     

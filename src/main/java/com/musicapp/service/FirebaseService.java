@@ -42,6 +42,8 @@ public interface FirebaseService {
     void removeSongFromAlbum(String albumId, String songId);
     void removeSongFromPlaylist(String playlistId, String songId);
     
+    void deletePlaylist(String userId, String playlistId);
+    
     void removeSongContextually(String contextId, String songId);
     List<Song> fetchSongsContextually(String contextId, String contextTitle);
     
