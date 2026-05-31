@@ -344,8 +344,8 @@ public class FirebaseServiceImpl implements FirebaseService {
         usersRef.child(user.getUserId()).setValueAsync(user);
     }
     
-    // UserId processing 
-    private final static int[][] HASH_PAIRS = {{991, 997}, {1993, 1999}, {3989, 4003}, {7963, 8011}, {15901, 16007}};
+
+    private static final double GOLDEN_RATIO = 0.6180339887498949; 
 
     private int getIntegerKey(String text) {
         int key = 0, prime = 29;
@@ -355,78 +355,82 @@ public class FirebaseServiceImpl implements FirebaseService {
         return key & Integer.MAX_VALUE;
     }
 
+    private int h1(int key, int tableSize) {
+        double fractionalPart = (key * GOLDEN_RATIO) % 1.0;
+        return (int) Math.floor(tableSize * fractionalPart);
+    }
+
+    private int h2(int key) {
+        int step = key % 97; 
+        return step | 1; 
+    }
+
     @Override
     public void registerNewUser(String email, String username, String password, String fullname, RegisterCallback callback) {
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot root) {
-                	long userCount = root.child("users").getChildrenCount();
-                	int tableSize = 997, stepPrime = 991;
-                	if(root.hasChild("metadata/tableSize")) {
-                		tableSize = root.child("metadata/tableSize").getValue(Integer.class);
-                		stepPrime = root.child("metadata/stepPrime").getValue(Integer.class);
-                	}
-                	// Condition to rehashing table if load factor >= 0.7
-                	if((double)(userCount + 1) / tableSize > 0.7) {
-                		int nextSize = -1, nextStep = -1;
-                		for(int i = 0; i < HASH_PAIRS.length - 1; i++) {
-                			if(HASH_PAIRS[i][1] == tableSize) {
-                				nextStep = HASH_PAIRS[i + 1][0];
-                				nextSize = HASH_PAIRS[i + 1][1];
-                				break;
-                			}
-                		}
-                		if(nextSize != -1) {
-                			System.out.println("Resizing: " + tableSize + " -> " + nextSize);
-                			rehashTable(root, nextSize, nextStep, callback);
-                			return;
-                		}
-                	}
-                    if (root.child("users").child(username).exists()) {
-                        callback.onError("Username is already taken.");
-                        return;
-                    }
-                    proceedWithEmailHash(email, username, password, fullname, 0, tableSize, stepPrime, callback);
+            @Override
+            public void onDataChange(DataSnapshot root) {
+                long userCount = root.child("users").getChildrenCount();
+                
+                int tableSize = 1024;
+                if(root.hasChild("metadata/tableSize")) {
+                    tableSize = root.child("metadata/tableSize").getValue(Integer.class);
                 }
+                
+                if((double)(userCount + 1) / tableSize > 0.7) {
+                    int nextSize = tableSize * 2;
+                    System.out.println("Resizing: " + tableSize + " -> " + nextSize);
+                    rehashTable(root, nextSize, callback);
+                    return;
+                }
+                
+                if (root.child("users").child(username).exists()) {
+                    callback.onError("Username is already taken.");
+                    return;
+                }
+                proceedWithEmailHash(email, username, password, fullname, 0, tableSize, callback);
+            }
 
-                @Override
-                public void onCancelled(DatabaseError error) {
-                    callback.onError("Database Error: " + error.getMessage());
-                }
-            });
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onError("Database Error: " + error.getMessage());
+            }
+        });
     }
-    private void rehashTable(DataSnapshot root, int newSize, int newStep, RegisterCallback callback) {
-    	Map<String, Object> updates = new HashMap<>();
+
+    private void rehashTable(DataSnapshot root, int newSize, RegisterCallback callback) {
+        Map<String, Object> updates = new HashMap<>();
         Map<String, String> idMap = new HashMap<>(); // oldId -> newId
-        // 1. Re-hash every user
+        Set<String> usedNewIds = new HashSet<>(); // HashSet giúp check trùng lặp O(1) thay vì O(N)
+
         for (DataSnapshot userSnap : root.child("users").getChildren()) {
-        	String email = userSnap.child("email").getValue(String.class);
+            String email = userSnap.child("email").getValue(String.class);
             int key = getIntegerKey(email);
                
-            // Find new slot in the larger table
             String newId = "";
             for (int i = 0; i < newSize; i++) {
-            	int idx = ((key % newSize) + i * (newStep - (key % newStep))) % newSize;
-            	newId = String.format("U%08d", Math.abs(idx));
-            	if (!idMap.containsValue(newId)) break; 
-            	}
+                int idx = (h1(key, newSize) + i * h2(key)) % newSize;
+                newId = String.format("U%08d", Math.abs(idx));
+                if (!usedNewIds.contains(newId)) {
+                    usedNewIds.add(newId);
+                    break;
+                }
+            }
        
             idMap.put(userSnap.getKey(), newId);
             updates.put("users/" + userSnap.getKey(), null); // Delete old
             updates.put("users/" + newId, userSnap.getValue()); // Add new (with data)
             updates.put("users/" + newId + "/userId", newId);   // Update internal ID field
-            }
+        }
       
-        // Fix Referential Integrity (Playlists & Favorites)
         for (DataSnapshot pl : root.child("playlists").getChildren()) {
-        	String owner = pl.child("ownerId").getValue(String.class);
+            String owner = pl.child("ownerId").getValue(String.class);
             if (idMap.containsKey(owner)) {
-            	updates.put("playlists/" + pl.getKey() + "/ownerId", idMap.get(owner));
+                updates.put("playlists/" + pl.getKey() + "/ownerId", idMap.get(owner));
             }
            
-           // Rename favorite playlist node
             if (pl.getKey().startsWith("fav_")) {
-            	String oldUid = pl.getKey().substring(4);
+                String oldUid = pl.getKey().substring(4);
                 if (idMap.containsKey(oldUid)) {
                    updates.put("playlists/" + pl.getKey(), null);
                    updates.put("playlists/fav_" + idMap.get(oldUid), pl.getValue());
@@ -434,73 +438,75 @@ public class FirebaseServiceImpl implements FirebaseService {
             }
         }
   
-       // Update the table configuration so Login/Register knows the new size
        updates.put("metadata/tableSize", newSize);
-       updates.put("metadata/stepPrime", newStep);
+       
+       if (root.hasChild("metadata/stepPrime")) {
+           updates.put("metadata/stepPrime", null);
+       }
   
        dbRef.updateChildren(updates, (error, ref) -> {
            if (error == null) callback.onError("Resized! Please try registering again.");
-      });
+       });
     }
-    private void proceedWithEmailHash(String email, String username, String password, String fullname, int i, int tableSize, int stepPrime, RegisterCallback callback) {
-        // If i exists hash table size (997) 
-    	if(i >= tableSize) {
-    		callback.onError("Server capacity reached. Cannot register more users.");
-    		return;
-    	}
-    	
-    	int keyEmail = getIntegerKey(email);
-        int indexEmail = ((keyEmail % tableSize) + i * (stepPrime - (keyEmail % stepPrime))) % stepPrime;
+
+    private void proceedWithEmailHash(String email, String username, String password, String fullname, int i, int tableSize, RegisterCallback callback) {
+        if(i >= tableSize) {
+            callback.onError("Server capacity reached. Cannot register more users.");
+            return;
+        }
+        
+        int keyEmail = getIntegerKey(email);
+        
+        int indexEmail = (h1(keyEmail, tableSize) + i * h2(keyEmail)) % tableSize;
         String generatedUserId = String.format("U%08d", Math.abs(indexEmail));
         
         dbRef.child("users").child(generatedUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot snapshot) {
-                    if (!snapshot.exists()) { // If the key is free, register user
-                        ListenerUser newUser = new ListenerUser(generatedUserId, fullname, email, username, password);
-                        try {
-                            saveUser(newUser); 
-                            setSession(newUser.getUserId(), newUser.getRole()); 
-                            callback.onSuccess(newUser);
-                        } catch (Exception e) {
-                            callback.onError("Failed to save user data.");
-                        }
-                    } 
-                    else { // Hashing collision, already exist user with generated id, try next probe
-                        String dbEmail = snapshot.child("email").getValue(String.class);
-                        if (email.equalsIgnoreCase(dbEmail)) {
-                            callback.onError("Email is already taken.");
-                        } else {
-                            proceedWithEmailHash(email, username, password, fullname, i + 1, tableSize, stepPrime, callback);
-                        }
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (!snapshot.exists()) { 
+                    ListenerUser newUser = new ListenerUser(generatedUserId, fullname, email, username, password);
+                    try {
+                        saveUser(newUser); 
+                        setSession(newUser.getUserId(), newUser.getRole()); 
+                        callback.onSuccess(newUser);
+                    } catch (Exception e) {
+                        callback.onError("Failed to save user data.");
+                    }
+                } 
+                else { 
+                    String dbEmail = snapshot.child("email").getValue(String.class);
+                    if (email.equalsIgnoreCase(dbEmail)) {
+                        callback.onError("Email is already taken.");
+                    } else {
+                        proceedWithEmailHash(email, username, password, fullname, i + 1, tableSize, callback);
                     }
                 }
+            }
 
-                @Override
-                public void onCancelled(DatabaseError error) {
-                    callback.onError("Database Error: " + error.getMessage());
-                }
-            });
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onError("Database Error: " + error.getMessage());
+            }
+        });
     }
     
     @Override
     public void authenticateUser(String email, String password, LoginCallback callback) {
-    	
         if (email.equalsIgnoreCase("admin1@musicapp.com")) { 
             proceedWithAdminAuth("admin1", email, password, callback);
         } 
-        
         else if (email.equalsIgnoreCase("admin2@musicapp.com")) { 
-        	proceedWithAdminAuth("admin2", email, password, callback);
+            proceedWithAdminAuth("admin2", email, password, callback);
         } 
         else {
             dbRef.child("metadata").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
-                    int tableSize = 997, stepPrime = 991;
-                    if (snapshot.hasChild("tableSize")) tableSize = snapshot.child("tableSize").getValue(Integer.class);
-                    if (snapshot.hasChild("stepPrime")) stepPrime = snapshot.child("stepPrime").getValue(Integer.class);
-                    attemptLogin(email, password, 0, tableSize, stepPrime, callback);
+                    int tableSize = 1024;
+                    if (snapshot.hasChild("tableSize")) {
+                        tableSize = snapshot.child("tableSize").getValue(Integer.class);
+                    }
+                    attemptLogin(email, password, 0, tableSize, callback);
                 }
                 @Override
                 public void onCancelled(DatabaseError error) {
@@ -509,64 +515,68 @@ public class FirebaseServiceImpl implements FirebaseService {
             });
         }
     }
+
     private void proceedWithAdminAuth(String username, String email, String password, LoginCallback callback) {
-    	dbRef.child("users").child(username).addListenerForSingleValueEvent(new ValueEventListener() {
-    		@Override
-    		public void onDataChange(DataSnapshot snapshot) {
-    			String dbPassword = snapshot.child("password").getValue(String.class);
-				if(password.equals(dbPassword)) {
-					User user = snapshot.getValue(ListenerUser.class);
-					callback.onSuccess(user, snapshot.child("role").getValue(String.class));
-				}
-				else {
-					callback.onError("Incorrect password. Please try again !");
-				}
-    		}
-    		@Override
-    		public void onCancelled(DatabaseError error) {
-    			callback.onError("Database Error: " + error.getMessage());
-    		}
-    	});
+        dbRef.child("users").child(username).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                String dbPassword = snapshot.child("password").getValue(String.class);
+                if(password.equals(dbPassword)) {
+                    User user = snapshot.getValue(ListenerUser.class);
+                    callback.onSuccess(user, snapshot.child("role").getValue(String.class));
+                }
+                else {
+                    callback.onError("Incorrect password. Please try again !");
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onError("Database Error: " + error.getMessage());
+            }
+        });
     }
-    // Helper method to check login email by hash code
-    private void attemptLogin(String email, String password, int i, int tableSize, int stepPrime, LoginCallback callback) {
-    	if(i >= tableSize) {
-    		callback.onError("Account does not exist");
-    		return;
-    	}
-    	int keyEmail = getIntegerKey(email);
-    	int indexEmail = ((keyEmail % tableSize) + i * (stepPrime - (keyEmail % stepPrime))) % tableSize;
-    	String targetId = String.format("U%08d", Math.abs(indexEmail));
-    	dbRef.child("users").child(targetId).addListenerForSingleValueEvent(new ValueEventListener() {
-    		@Override
-    		public void onDataChange(DataSnapshot snapshot) {
-    			if(snapshot.exists()) {
-    				String dbEmail = snapshot.child("email").getValue(String.class);
-    				if(email.equalsIgnoreCase(dbEmail)) {
-    					String dbPassword = snapshot.child("password").getValue(String.class);
-    					if(password.equals(dbPassword)) {
-    						User user = snapshot.getValue(ListenerUser.class);
-    						callback.onSuccess(user, snapshot.child("role").getValue(String.class));
-    					}
-    					else {
-    						callback.onError("Incorrect password. Please try again !");
-    					}
-    				}
-    				else {
-    					// Hashing collision, try next probe
-    					attemptLogin(email, password, i + 1, tableSize, stepPrime, callback);
-    				}
-    			}
-    			else {
-    				callback.onError("Account is not registered yet. Please register");
-    			}
-    		}
-    		@Override
-    		public void onCancelled(DatabaseError error) {
-    			callback.onError("Database Error: " + error.getMessage());
-    		}
-    	});
+
+    private void attemptLogin(String email, String password, int i, int tableSize, LoginCallback callback) {
+        if(i >= tableSize) {
+            callback.onError("Account does not exist");
+            return;
+        }
+        
+        int keyEmail = getIntegerKey(email);
+        
+        int indexEmail = (h1(keyEmail, tableSize) + i * h2(keyEmail)) % tableSize;
+        String targetId = String.format("U%08d", Math.abs(indexEmail));
+        
+        dbRef.child("users").child(targetId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if(snapshot.exists()) {
+                    String dbEmail = snapshot.child("email").getValue(String.class);
+                    if(email.equalsIgnoreCase(dbEmail)) {
+                        String dbPassword = snapshot.child("password").getValue(String.class);
+                        if(password.equals(dbPassword)) {
+                            User user = snapshot.getValue(ListenerUser.class);
+                            callback.onSuccess(user, snapshot.child("role").getValue(String.class));
+                        }
+                        else {
+                            callback.onError("Incorrect password. Please try again !");
+                        }
+                    }
+                    else {
+                        attemptLogin(email, password, i + 1, tableSize, callback);
+                    }
+                }
+                else {
+                    callback.onError("Account is not registered yet. Please register");
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onError("Database Error: " + error.getMessage());
+            }
+        });
     }
+
     @Override
     public List<Playlist> fetchUserPlaylists(String userId) {
         List<Playlist> playlists = new ArrayList<>();
