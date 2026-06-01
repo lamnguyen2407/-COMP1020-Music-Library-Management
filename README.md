@@ -287,7 +287,7 @@ You can also use the **Sign Up** feature on the login screen to create a new acc
 
 # 🚀 Test Cases
 
-## Account View & Update
+## 7. Account View & Update
 ```text
 User Account interface displaying current session metadata and allowing profile modifications.
 ```
@@ -298,7 +298,7 @@ Real-time Firebase synchronization confirming the updated user profile data (e.g
 ```
 ![Account Database](screenshots/B.7.2.png)
 
-## User: Search Engine 
+## 8. User: Search Engine 
 ```text
 Search engine accurately resolving a partial title query (”leave”) to fetch the exact track.
 ```
@@ -309,7 +309,7 @@ Search engine demonstrating multi-attribute prefix matching, successfully retrie
 ```
 ![Search example 2](screenshots/B.8.2.png)
 
-## Admin: Global Library Mutation
+## 9. Admin: Global Library Mutation
 ```text
 Aministrative modal for inputting new track metadata and Google Drive media links.
 ```
@@ -325,7 +325,7 @@ The ’All Songs’ library view immediately reflecting the newly added track, r
 ```
 ![Admin Library View 3](screenshots/B.9.3.png)
 
-## Admin: Album management 
+## 10. Admin: Album management 
 ```text
 Administrative interface for defining a new Album with global metadata.
 ```
