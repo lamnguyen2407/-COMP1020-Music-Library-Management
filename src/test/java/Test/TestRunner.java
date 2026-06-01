@@ -247,7 +247,6 @@ public class TestRunner {
 
     // ─────────────────────────────────────────────────────────────
     // TEST 9: Session Manager — State Management
-    // ─────────────────────────────────────────────────────────────
     private static void testSessionManager() {
         printHeader("Session Manager");
 
@@ -263,9 +262,7 @@ public class TestRunner {
         assertTest("clearSession() resets isAdmin to false", !SessionManager.isAdmin);
     }
 
-    // ─────────────────────────────────────────────────────────────
     // TEST 10: PriorityQueue Top-K Selection (Album ranking logic)
-    // ─────────────────────────────────────────────────────────────
     private static void testPriorityQueueTopK() {
         printHeader("PriorityQueue Top-K Selection");
 
@@ -297,13 +294,10 @@ public class TestRunner {
         assertTest("All top-3 songs are from 2022+", allRecent);
     }
 
- /// ─────────────────────────────────────────────────────────────
     // TEST 11: Double Hashing — Collision Resolution (Multiplication Method)
-    // ─────────────────────────────────────────────────────────────
     private static void testDoubleHashingCollisionResolution() {
         printHeader("Double Hashing & Multiplication (User ID Generation)");
 
-        // Replicate the NEW hashing logic from FirebaseServiceImpl
         String email1 = "alice@example.com";
         String email2 = "bob@example.com";
         String email3 = "charlie@example.com";
@@ -312,11 +306,9 @@ public class TestRunner {
         String id2 = generateUserId(email2, 0);
         String id3 = generateUserId(email3, 0);
 
-        // Chỉ giữ lại đúng 3 hàm assertTest để tổng số test vẫn là 35
         assertTest("Hash produces formatted ID (e.g. U00000XXX)", id1.startsWith("U") && id1.length() == 9);
         assertTest("Different emails produce different IDs", !id1.equals(id2) && !id2.equals(id3));
 
-        // Test collision resolution (probing with i=1)
         String id1_probe1 = generateUserId(email1, 1);
         assertTest("Probing (i=1) produces different ID than (i=0)", !id1.equals(id1_probe1));
     }
@@ -349,9 +341,7 @@ public class TestRunner {
         return String.format("U%08d", index);
     }
 
-    // ─────────────────────────────────────────────────────────────
     // Helpers
-    // ─────────────────────────────────────────────────────────────
     private static void assertTest(String name, boolean condition) {
         if (condition) {
             passed++;
