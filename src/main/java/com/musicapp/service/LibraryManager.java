@@ -5,6 +5,8 @@ import java.util.*;
 
 public class LibraryManager {
     private Map<String, Song> songCache = new HashMap<>();
+    
+    
     private FirebaseService firebaseService;
     
     public LibraryManager(FirebaseService firebaseService) {
@@ -47,7 +49,7 @@ public class LibraryManager {
     }
     
     public List<Song> getSongsByIds(List<String> songIds) {
-        loadDataToCache(); // BỔ SUNG DÒNG NÀY: Đảm bảo kho có hàng
+        loadDataToCache(); 
         List<Song> results = new ArrayList<>();
         if (songIds == null || songIds.isEmpty()) {
             return results;
