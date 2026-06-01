@@ -144,50 +144,53 @@ git clone https://github.com/lamnguyen2407/-COMP1020-Music-Library-Management.gi
 Navigate to the project directory:
 
 ```bash
-cd -COMP1020-Music-Library-Management
+cd ./-COMP1020-Music-Library-Management
 ```
+
+> **Note for Git Bash users:** The `./` prefix is highly recommended because the folder name starts with a hyphen (`-`). Without it, terminal environments like Git Bash might interpret the folder name as a command-line option and return an `invalid option` error.
 
 ---
 
-# 2. Firebase Configuration
-
-Place your `firebase-config.json` service account key inside:
-
-```text
-src/main/resources/
-```
-
-This is required to establish a connection with Firebase Realtime Database.
-
----
-
-# 3. Run via IDE (Recommended)
+# 2.1. Run via IDE (Recommended)
 
 ## Eclipse
 
-1. Open the project as a Maven Project
-2. Right-click project root → `Run As`
-3. Select `Maven Build...`
-4. Enter the following goal:
+### Step 1: Import as a Maven Project
+
+1. Open Eclipse.
+2. Go to **File → Import...**
+3. Search for **Maven**.
+4. Select **Existing Maven Projects** → **Next**.
+5. Click **Browse...** and choose the cloned `-COMP1020-Music-Library-Management` folder.
+6. Ensure that `pom.xml` is checked in the project list.
+7. Click **Finish**.
+8. Wait until Eclipse finishes downloading all Maven dependencies.
+
+### Step 2: Run the Application
+
+1. Right-click the project root (it should display a small **M** icon).
+2. Select **Run As → Maven Build...**
+3. In the **Goals** field, enter:
 
 ```text
 clean javafx:run
 ```
 
-5. Click **Run**
+4. Click **Run**.
 
 ---
 
 ## IntelliJ IDEA
 
-1. Open the Maven Tool Window
-2. Navigate to:
+1. Open the project.
+2. Open the **Maven Tool Window**.
+3. Navigate to:
 
 ```text
 Plugins → javafx
 ```
 
-3. Double-click:
+4. Double-click:
 
 ```text
 javafx:run
@@ -195,7 +198,7 @@ javafx:run
 
 ---
 
-# 4. Run via Terminal
+# 2.2. Run via Terminal
 
 ## macOS / Linux / Git Bash
 
@@ -223,22 +226,44 @@ mvnw clean javafx:run
 
 ## Notes
 
-If the `mvnw` wrapper is missing, you can either:
-
-* Generate it using:
+**Note 1:** If the Maven Wrapper (`mvnw`) is missing, you can either generate it:
 
 ```bash
 mvn wrapper:wrapper
 ```
 
-* Or run directly with a global Maven installation:
+or run the project using a globally installed Maven:
 
 ```bash
 mvn clean javafx:run
 ```
 
+
+**Note 2:** If you encounter a **"Failed to delete target"** error during execution (commonly caused by IDEs, file indexing services, or OneDrive locking files on Windows), you can safely skip the `clean` phase and run the application directly:
+
+### macOS / Linux / Git Bash
+
+```bash
+./mvnw javafx:run
+```
+
+### Windows CMD
+
+```cmd
+mvnw javafx:run
+```
+
+### Windows PowerShell
+
+```powershell
+.\mvnw javafx:run
+```
+
+This issue does not affect the application source code. It only prevents Maven from deleting and recreating the `target/` directory before launching the application.
+
 ---
-# 5. Test Credentials
+
+# 3. Test Credentials
 
 Once the application is running, you can use the following pre-configured accounts to test the Role-Based Access Control (RBAC) features.
 
@@ -256,18 +281,19 @@ Email: tester02@gmail.com
 Password: tester
 ```
 
-## Account View & Update
-```text
-User Account interface displaying current session metadata and allowing profile modifications.
-```
-![Account View](screenshots/figure7-1.png)
-
----
 
 ## Alternative Option
 
 You can also use the **Sign Up** feature on the login screen to create a new account.
 
+
+## Account View & Update
+
+```text
+User Account interface displaying current session metadata and allowing profile modifications.
+```
+
+---
 
 # 👥 Team Members (Team 2)
 
