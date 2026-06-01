@@ -135,20 +135,17 @@ This approach performs significantly better than naive linear search for large m
 
 ---
 
-# 1. Clone the Repository
+# 1. Download & Extract
 
-```bash
-git clone https://github.com/lamnguyen2407/-COMP1020-Music-Library-Management.git
-```
+> **Security Note:** To comply with security best practices and prevent the exposure of database credentials on public repositories, the `firebase-config.json` key has been excluded from the GitHub repository via `.gitignore`. 
+>
+> Therefore, **please do not `git clone` this project.** Instead, download the provided `.zip` file from the submission portal, which already includes the necessary secure configurations.
 
-Navigate to the project directory:
+1. Download the provided `COMP1020-Music-Library-Management.zip` submission file.
+2. Extract the `.zip` file to your preferred local directory.
+3. Open your terminal or IDE and navigate to the extracted folder.
 
-```bash
-cd ./-COMP1020-Music-Library-Management
-```
-
-> **Note for Git Bash users:** The `./` prefix is highly recommended because the folder name starts with a hyphen (`-`). Without it, terminal environments like Git Bash might interpret the folder name as a command-line option and return an `invalid option` error.
-
+*(The required `firebase-config.json` file is already pre-configured and located inside the `src/main/resources/` directory).*
 ---
 
 # 2.1. Run via IDE (Recommended)
