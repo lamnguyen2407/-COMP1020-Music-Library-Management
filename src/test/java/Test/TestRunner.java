@@ -297,13 +297,13 @@ public class TestRunner {
         assertTest("All top-3 songs are from 2022+", allRecent);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // TEST 11: Double Hashing — Collision Resolution
+ /// ─────────────────────────────────────────────────────────────
+    // TEST 11: Double Hashing — Collision Resolution (Multiplication Method)
     // ─────────────────────────────────────────────────────────────
     private static void testDoubleHashingCollisionResolution() {
-        printHeader("Double Hashing (User ID Generation)");
+        printHeader("Double Hashing & Multiplication (User ID Generation)");
 
-        // Replicate the hashing logic from FirebaseServiceImpl
+        // Replicate the NEW hashing logic from FirebaseServiceImpl
         String email1 = "alice@example.com";
         String email2 = "bob@example.com";
         String email3 = "charlie@example.com";
@@ -312,6 +312,7 @@ public class TestRunner {
         String id2 = generateUserId(email2, 0);
         String id3 = generateUserId(email3, 0);
 
+        // Chỉ giữ lại đúng 3 hàm assertTest để tổng số test vẫn là 35
         assertTest("Hash produces formatted ID (e.g. U00000XXX)", id1.startsWith("U") && id1.length() == 9);
         assertTest("Different emails produce different IDs", !id1.equals(id2) && !id2.equals(id3));
 
@@ -320,15 +321,32 @@ public class TestRunner {
         assertTest("Probing (i=1) produces different ID than (i=0)", !id1.equals(id1_probe1));
     }
 
-    // Replicated from FirebaseServiceImpl
+    // Replicated NEW hashing logic from FirebaseServiceImpl (Giữ nguyên thuật toán xịn)
     private static String generateUserId(String email, int i) {
-        int key = 0, prime = 29;
+        // Step 1: Polynomial Rolling Hash
+        long key = 0;
+        int prime = 29;
         for (int j = 0; j < email.length(); j++) {
             key = key * prime + email.charAt(j);
         }
-        key = key & Integer.MAX_VALUE;
-        int index = ((key % 997) + i * (991 - (key % 991))) % 997;
-        return String.format("U%08d", Math.abs(index));
+        // Force positive integer representation
+        key = key & 0x7FFFFFFF;
+
+        // Step 2 & 3: Multiplication Method & Double Hashing
+        int M = 1024; // Initial Power-of-2 capacity
+        double A = 0.6180339887; // Golden Ratio
+
+        // h1(key) = floor(M * ((key * A) % 1))
+        double fractionalPart = (key * A) % 1.0;
+        int h1 = (int) Math.floor(M * fractionalPart);
+
+        // h2(key) = (key % 97) | 1  (Bitwise OR forces odd number)
+        int h2 = (int) ((key % 97) | 1);
+
+        // index = (h1 + i * h2) % M
+        int index = (h1 + i * h2) % M;
+
+        return String.format("U%08d", index);
     }
 
     // ─────────────────────────────────────────────────────────────
