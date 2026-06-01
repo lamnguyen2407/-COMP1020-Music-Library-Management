@@ -8,8 +8,6 @@ public class SearchEngine {
     private AdvancedSearchStrategy advancedStrategy;
     private LinearSearchStrategy linearStrategy;
     
-    // Manual toggle for strategy choice
-    // private boolean useAdvanced = true;
 
     public SearchEngine() {
         FirebaseService firebaseService = DatabaseManager.getInstance().getService();
@@ -30,26 +28,5 @@ public class SearchEngine {
         List<Song> advancedResults = advancedStrategy.search(cache, query);
         return advancedResults;
     }
-    /*
-    public List<Song> search(String query) {
-        Map<String, Song> cache = libraryManager.getSongCache();
-        
-        // Performance comparison in terminal
-        long startL = System.nanoTime();
-        List<Song> linearResults = linearStrategy.search(cache, query);
-        long endL = System.nanoTime();
-        
-        long startA = System.nanoTime();
-        List<Song> advancedResults = advancedStrategy.search(cache, query);
-        long endA = System.nanoTime();
-        
-        double timeL = (endL - startL) / 1_000_000.0;
-        double timeA = (endA - startA) / 1_000_000.0;
-        
-        System.out.printf("[BENCHMARK] Query: '%s' | Linear: %.3fms | Advanced: %.3fms | Mode: %s\n", 
-                          query, timeL, timeA, (useAdvanced ? "ADVANCED" : "LINEAR"));
-        
-        return useAdvanced ? advancedResults : linearResults;
-    }
-    */
+ 
 }
