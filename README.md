@@ -347,11 +347,13 @@ Global library view automatically synchronizing the new track from the Album, en
 ```
 ![Admin Album View 5](screenshots/B.10.5.png)
 
+
 ## Alternative Option
 
 You can also use the **Sign Up** feature on the login screen to create a new account.
 
 ---
+
 
 # 👥 Team Members (Team 2)
 
