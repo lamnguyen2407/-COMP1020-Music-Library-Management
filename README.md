@@ -238,6 +238,36 @@ mvn clean javafx:run
 ```
 
 ---
+# 5. Test Credentials
+
+Once the application is running, you can use the following pre-configured accounts to test the Role-Based Access Control (RBAC) features.
+
+## Admin Account
+
+```text
+Email: admin1@musicapp.com
+Password: admin
+```
+
+## Listener (User) Account
+
+```text
+Email: tester02@gmail.com
+Password: tester
+```
+
+## Account View & Update
+```text
+User Account interface displaying current session metadata and allowing profile modifications.
+```
+![Account View](screenshots/figure7-1.png)
+
+---
+
+## Alternative Option
+
+You can also use the **Sign Up** feature on the login screen to create a new account.
+
 
 # 👥 Team Members (Team 2)
 
