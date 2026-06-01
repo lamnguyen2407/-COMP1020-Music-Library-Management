@@ -255,12 +255,70 @@ Password: admin
 Email: tester02@gmail.com
 Password: tester
 ```
-
+#6. System UI and State Verification Screenshots
 ## Account View & Update
 ```text
 User Account interface displaying current session metadata and allowing profile modifications.
 ```
-![Account View](screenshots/figure7-1.png)
+![Account View](screenshots/B.7.1.png)
+
+```text
+Real-time Firebase synchronization confirming the updated user profile data (e.g, fullname: "Ali Ali")
+```
+![Account Database](screenshots/B.7.2.png)
+
+## User: Search Engine 
+```text
+Search engine accurately resolving a partial title query (”leave”) to fetch the exact track.
+```
+![Searching example 1](screenshots/B.8.1.png)
+
+```text
+Search engine demonstrating multi-attribute prefix matching, successfully retrieving all tracks where the artist’s name begins with ”bru” (Bruno Mars).
+```
+![Search example 2](screenshots/B.8.2.png)
+
+## Admin: Global Library Mutation
+```text
+Aministrative modal for inputting new track metadata and Google Drive media links.
+```
+![Admin Library View 1](screenshots/B.9.1.png)
+
+```text
+Firebase database confirming the automatic conversion of input URL to the direct exportable streaming format.
+```
+![Admin Library View 2](screenshots/B.9.2.png)
+
+```text
+The ’All Songs’ library view immediately reflecting the newly added track, ready for immediate playback.
+```
+![Admin Library View 3](screenshots/B.9.3.png)
+
+## Admin: Album management 
+```text
+Administrative interface for defining a new Album with global metadata.
+```
+![Admin Album View 1](screenshots/B.10.1.png)
+
+```text
+Firebase root node for Albums, serving as the parent entity.
+```
+![Admin Album View 2](screenshots/B.10.2.png)
+
+```text
+Nested structure: Tracks inheriting shared attributes from the parent Album node.
+```
+![Admin Album View 3](screenshots/B.10.3.png)
+
+```text
+Album detail view rendering tracks that successfully inherited parent metadata, ensuring consistency across the UI.
+```
+![Admin Album View 4](screenshots/B.10.4.png)
+
+```text
+Global library view automatically synchronizing the new track from the Album, ensuring the song is accessible via both Album and All Songs views.
+```
+![Admin Album View 5](screenshots/B.10.5.png)
 
 ---
 
