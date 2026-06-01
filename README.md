@@ -256,6 +256,12 @@ Email: tester02@gmail.com
 Password: tester
 ```
 
+## Account View & Update
+```text
+User Account interface displaying current session metadata and allowing profile modifications.
+```
+![Account View](screenshots/figure7-1.png)
+
 ---
 
 ## Alternative Option
