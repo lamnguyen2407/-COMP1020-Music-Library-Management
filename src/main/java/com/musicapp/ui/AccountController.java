@@ -46,12 +46,16 @@ public class AccountController implements Initializable {
     }
 
     private void loadUserData() {
+        System.out.println("Loading data for User ID: " + currentUserId);
+
         DatabaseManager.getInstance().getService().getDbRef()
                 .child("users")
                 .child(currentUserId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
+                System.out.println("Data found on Firebase: " + snapshot.exists());
+
                 if (snapshot.exists()) {
                     String username = snapshot.child("name").getValue(String.class);
                     String email = snapshot.child("email").getValue(String.class);
@@ -77,6 +81,8 @@ public class AccountController implements Initializable {
                         usernameField.setText(savedUsername);
                         emailField.setText(savedEmail);
                         nameField.setText(savedName);
+
+                        setEditMode(false);
                     });
                 }
             }

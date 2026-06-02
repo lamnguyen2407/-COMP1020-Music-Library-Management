@@ -284,6 +284,59 @@ You can also use the **Sign Up** feature on the login screen to create a new acc
 
 # 🚀 Test Cases
 
+## 4. Playback Engine (Play/Next/Prev)
+```text
+UI player actively streaming audio, correctly highlighting the current track and updating the progress bar.
+```
+![Playback View](screenshots/B4.1.jpg)
+
+```text
+System console logging the underlying data structure behaviors: sequential traversal through the LinkedList queue and LIFO retrieval from the History stack.
+```
+![Playback Console](screenshots/B4.2.png)
+
+## 5. User: Favorites
+```text
+UI highlighting the heart icon to visually confirm the track's favorited state.
+```
+![Favorite Heart Icon](screenshots/B5.1.jpg)
+
+```text
+The favorited track is successfully aggregated into the user's personal 'Your Favorite Songs' library view.
+```
+![Favorite Song View](screenshots/B5.2.png)
+
+```text
+Real-time Firebase synchronization appending the song ID (S1071) to the user's distinct favorites node (fav_U00000256).
+```
+![Favorite Firebase Sync](screenshots/B5.3.png)
+
+## 6. User: Playlist Management
+```text
+UI form for creating a new custom playlist.
+```
+![Create Playlist](screenshots/B6.1.png)
+
+```text
+Firebase syncing the generated Playlist ID directly to the User's document.
+```
+![Playlist Firebase User](screenshots/B6.2.png)
+
+```text
+The isolated Playlist node storing its metadata and associated track IDs (S1007).
+```
+![Playlist Firebase Node](screenshots/B6.3.png)
+
+```text
+Modal interface allowing users to append selected tracks to their custom playlists.
+```
+![Add To Playlist Modal](screenshots/B6.4.png)
+
+```text
+The playlist view dynamically rendering the newly aggregated track.
+```
+![Playlist Track View](screenshots/B6.5.png)
+
 ## 7. Account View & Update
 ```text
 User Account interface displaying current session metadata and allowing profile modifications.
@@ -347,61 +400,6 @@ Album detail view rendering tracks that successfully inherited parent metadata, 
 Global library view automatically synchronizing the new track from the Album, ensuring the song is accessible via both Album and All Songs views.
 ```
 ![Admin Album View 5](screenshots/B.10.5.png)
-
-## Playback Engine (Play/Next/Prev)
-```text
-UI player actively streaming audio, correctly highlighting the current track and updating the progress bar.
-```
-![Playback View](screenshots/B4.1.jpg)
-
-```text
-System console logging the underlying data structure behaviors: sequential traversal through the LinkedList queue and LIFO retrieval from the History stack.
-```
-![Playback Console](screenshots/B4.2.png)
-
-## User: Favorites
-```text
-UI highlighting the heart icon to visually confirm the track's favorited state.
-```
-![Favorite Heart Icon](screenshots/B5.1.jpg)
-
-```text
-The favorited track is successfully aggregated into the user's personal 'Your Favorite Songs' library view.
-```
-![Favorite Song View](screenshots/B5.2.png)
-
-```text
-Real-time Firebase synchronization appending the song ID (S1071) to the user's distinct favorites node (fav_U00000256).
-```
-![Favorite Firebase Sync](screenshots/B5.3.png)
-
-## User: Playlist Management
-```text
-UI form for creating a new custom playlist.
-```
-![Create Playlist](screenshots/B6.1.png)
-
-```text
-Firebase syncing the generated Playlist ID directly to the User's document.
-```
-![Playlist Firebase User](screenshots/B6.2.png)
-
-```text
-The isolated Playlist node storing its metadata and associated track IDs (S1007).
-```
-![Playlist Firebase Node](screenshots/B6.3.png)
-
-```text
-Modal interface allowing users to append selected tracks to their custom playlists.
-```
-![Add To Playlist Modal](screenshots/B6.4.png)
-
-```text
-The playlist view dynamically rendering the newly aggregated track.
-```
-![Playlist Track View](screenshots/B6.5.png)
-
-
 
 ---
 
