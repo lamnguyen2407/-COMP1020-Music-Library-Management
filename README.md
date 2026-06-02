@@ -283,6 +283,51 @@ Password: tester
 You can also use the **Sign Up** feature on the login screen to create a new account.
 
 # 🚀 Test Cases
+## C.3.1 TC-01: Account Registration
+
+```text
+System correctly catches duplicate credentials and displays a warning popup.
+```
+![Fig B.1.1](screenshots/B.1.1.jpg)
+
+```text
+Successful registration confirmation popup routing the user to the Login view.
+```
+![Fig B.1.2](screenshots/B.1.2.jpg)
+
+```text
+Real-time Firebase Database state showing the newly created user with a deterministic Double-Hashed ID (U00000256).
+```
+![Fig B.1.3](screenshots/B.1.3.jpg)
+
+---
+
+## C.3.2 TC-02: Authentication (Login)
+
+```text
+Login interface capturing the registered user's credentials.
+```
+![Fig B.2.1](screenshots/B.2.1.jpg)
+
+```text
+System console verifying Firebase credential validation, successful Dashboard redirection, and the initialization of the AVL Tree search index (104 songs loaded).
+```
+![Fig B.2.2](screenshots/B.2.2.jpg)
+
+---
+
+## C.3.3 TC-03: Role-Based Access Control (RBAC)
+
+```text
+Admin interface displaying elevated privileges with visible 'ADD' and 'DELETE' mutation controls.
+```
+![Fig B.3.1](screenshots/B.3.1.jpg)
+
+```text
+Standard Listener interface showing restricted access, dynamically hiding all administrative mutation controls to prevent unauthorized actions.
+```
+![Fig B.3.2](screenshots/B.3.2.jpg)
+
 
 ## 4. Playback Engine (Play/Next/Prev)
 ```text
