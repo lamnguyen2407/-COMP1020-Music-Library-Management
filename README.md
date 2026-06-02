@@ -135,59 +135,59 @@ This approach performs significantly better than naive linear search for large m
 
 ---
 
-# 1. Clone the Repository
+# 1. Download & Extract
 
-```bash
-git clone https://github.com/lamnguyen2407/-COMP1020-Music-Library-Management.git
-```
+> **Security Note:** To comply with security best practices and prevent the exposure of database credentials on public repositories, the `firebase-config.json` key has been excluded from the GitHub repository via `.gitignore`. 
+>
+> Therefore, **please do not `git clone` this project.** Instead, download the provided `.zip` file from the submission portal, which already includes the necessary secure configurations.
 
-Navigate to the project directory:
+1. Download the provided `COMP1020-Music-Library-Management.zip` submission file.
+2. Extract the `.zip` file to your preferred local directory.
+3. Open your terminal or IDE and navigate to the extracted folder.
 
-```bash
-cd -COMP1020-Music-Library-Management
-```
-
+*(The required `firebase-config.json` file is already pre-configured and located inside the `src/main/resources/` directory).*
 ---
 
-# 2. Firebase Configuration
-
-Place your `firebase-config.json` service account key inside:
-
-```text
-src/main/resources/
-```
-
-This is required to establish a connection with Firebase Realtime Database.
-
----
-
-# 3. Run via IDE (Recommended)
+# 2.1. Run via IDE (Recommended)
 
 ## Eclipse
 
-1. Open the project as a Maven Project
-2. Right-click project root → `Run As`
-3. Select `Maven Build...`
-4. Enter the following goal:
+### Step 1: Import as a Maven Project
+
+1. Open Eclipse.
+2. Go to **File → Import...**
+3. Search for **Maven**.
+4. Select **Existing Maven Projects** → **Next**.
+5. Click **Browse...** and choose the cloned `-COMP1020-Music-Library-Management` folder.
+6. Ensure that `pom.xml` is checked in the project list.
+7. Click **Finish**.
+8. Wait until Eclipse finishes downloading all Maven dependencies.
+
+### Step 2: Run the Application
+
+1. Right-click the project root (it should display a small **M** icon).
+2. Select **Run As → Maven Build...**
+3. In the **Goals** field, enter:
 
 ```text
 clean javafx:run
 ```
 
-5. Click **Run**
+4. Click **Run**.
 
 ---
 
 ## IntelliJ IDEA
 
-1. Open the Maven Tool Window
-2. Navigate to:
+1. Open the project.
+2. Open the **Maven Tool Window**.
+3. Navigate to:
 
 ```text
 Plugins → javafx
 ```
 
-3. Double-click:
+4. Double-click:
 
 ```text
 javafx:run
@@ -195,7 +195,7 @@ javafx:run
 
 ---
 
-# 4. Run via Terminal
+# 2.2. Run via Terminal
 
 ## macOS / Linux / Git Bash
 
@@ -223,22 +223,44 @@ mvnw clean javafx:run
 
 ## Notes
 
-If the `mvnw` wrapper is missing, you can either:
-
-* Generate it using:
+**Note 1:** If the Maven Wrapper (`mvnw`) is missing, you can either generate it:
 
 ```bash
 mvn wrapper:wrapper
 ```
 
-* Or run directly with a global Maven installation:
+or run the project using a globally installed Maven:
 
 ```bash
 mvn clean javafx:run
 ```
 
+
+**Note 2:** If you encounter a **"Failed to delete target"** error during execution (commonly caused by IDEs, file indexing services, or OneDrive locking files on Windows), you can safely skip the `clean` phase and run the application directly:
+
+### macOS / Linux / Git Bash
+
+```bash
+./mvnw javafx:run
+```
+
+### Windows CMD
+
+```cmd
+mvnw javafx:run
+```
+
+### Windows PowerShell
+
+```powershell
+.\mvnw javafx:run
+```
+
+This issue does not affect the application source code. It only prevents Maven from deleting and recreating the `target/` directory before launching the application.
+
 ---
-# 5. Test Credentials
+
+# 3. Test Credentials
 
 Once the application is running, you can use the following pre-configured accounts to test the Role-Based Access Control (RBAC) features.
 
@@ -256,17 +278,132 @@ Email: tester02@gmail.com
 Password: tester
 ```
 
-## Account View & Update
-```text
-User Account interface displaying current session metadata and allowing profile modifications.
-```
-![Account View](screenshots/figure7-1.png)
-
----
-
 ## Alternative Option
 
 You can also use the **Sign Up** feature on the login screen to create a new account.
+
+# 🚀 Test Cases
+
+## 7. Account View & Update
+```text
+User Account interface displaying current session metadata and allowing profile modifications.
+```
+![Account View](screenshots/B.7.1.png)
+
+```text
+Real-time Firebase synchronization confirming the updated user profile data (e.g, fullname: "Ali Ali")
+```
+![Account Database](screenshots/B.7.2.png)
+
+## 8. User: Search Engine 
+```text
+Search engine accurately resolving a partial title query (”leave”) to fetch the exact track.
+```
+![Searching example 1](screenshots/B.8.1.png)
+
+```text
+Search engine demonstrating multi-attribute prefix matching, successfully retrieving all tracks where the artist’s name begins with ”bru” (Bruno Mars).
+```
+![Search example 2](screenshots/B.8.2.png)
+
+## 9. Admin: Global Library Mutation
+```text
+Aministrative modal for inputting new track metadata and Google Drive media links.
+```
+![Admin Library View 1](screenshots/B.9.1.png)
+
+```text
+Firebase database confirming the automatic conversion of input URL to the direct exportable streaming format.
+```
+![Admin Library View 2](screenshots/B.9.2.png)
+
+```text
+The ’All Songs’ library view immediately reflecting the newly added track, ready for immediate playback.
+```
+![Admin Library View 3](screenshots/B.9.3.png)
+
+## 10. Admin: Album management 
+```text
+Administrative interface for defining a new Album with global metadata.
+```
+![Admin Album View 1](screenshots/B.10.1.png)
+
+```text
+Firebase root node for Albums, serving as the parent entity.
+```
+![Admin Album View 2](screenshots/B.10.2.png)
+
+```text
+Nested structure: Tracks inheriting shared attributes from the parent Album node.
+```
+![Admin Album View 3](screenshots/B.10.3.png)
+
+```text
+Album detail view rendering tracks that successfully inherited parent metadata, ensuring consistency across the UI.
+```
+![Admin Album View 4](screenshots/B.10.4.png)
+
+```text
+Global library view automatically synchronizing the new track from the Album, ensuring the song is accessible via both Album and All Songs views.
+```
+![Admin Album View 5](screenshots/B.10.5.png)
+
+## Playback Engine (Play/Next/Prev)
+```text
+UI player actively streaming audio, correctly highlighting the current track and updating the progress bar.
+```
+![Playback View](screenshots/B4.1.jpg)
+
+```text
+System console logging the underlying data structure behaviors: sequential traversal through the LinkedList queue and LIFO retrieval from the History stack.
+```
+![Playback Console](screenshots/B4.2.png)
+
+## User: Favorites
+```text
+UI highlighting the heart icon to visually confirm the track's favorited state.
+```
+![Favorite Heart Icon](screenshots/B5.1.jpg)
+
+```text
+The favorited track is successfully aggregated into the user's personal 'Your Favorite Songs' library view.
+```
+![Favorite Song View](screenshots/B5.2.png)
+
+```text
+Real-time Firebase synchronization appending the song ID (S1071) to the user's distinct favorites node (fav_U00000256).
+```
+![Favorite Firebase Sync](screenshots/B5.3.png)
+
+## User: Playlist Management
+```text
+UI form for creating a new custom playlist.
+```
+![Create Playlist](screenshots/B6.1.png)
+
+```text
+Firebase syncing the generated Playlist ID directly to the User's document.
+```
+![Playlist Firebase User](screenshots/B6.2.png)
+
+```text
+The isolated Playlist node storing its metadata and associated track IDs (S1007).
+```
+![Playlist Firebase Node](screenshots/B6.3.png)
+
+```text
+Modal interface allowing users to append selected tracks to their custom playlists.
+```
+![Add To Playlist Modal](screenshots/B6.4.png)
+
+```text
+The playlist view dynamically rendering the newly aggregated track.
+```
+![Playlist Track View](screenshots/B6.5.png)
+
+
+
+---
 
 
 # 👥 Team Members (Team 2)
