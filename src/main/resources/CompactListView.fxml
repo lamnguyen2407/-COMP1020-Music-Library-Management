@@ -1,96 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<<<<<<< HEAD
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-
-<VBox alignment="CENTER" spacing="20" style="-fx-background-color: #FAF7F4;" 
-      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" 
-      fx:controller="com.musicapp.ui.CompactListController">
-    <Label text="Compact List View Placeholder" style="-fx-font-size: 24px;" />
-</VBox>
-=======
-
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-
-<!--
-    CompactListView.fxml — Template B (#)
-    Dùng cho: Click Latest Song, Click Recently Replayed Songs, Click + sign
-    Phần này được load vào contentArea (StackPane) bên trong MainView.
-    Controller sẽ gọi setData(title, ObservableList) để đổ dữ liệu vào.
-
-    Khác với Template A (SongListView):
-    - KHÔNG có header ảnh bìa lớn
-    - KHÔNG có PLAY/SHUFFLE button
-    - Chỉ có title lớn + bảng danh sách scroll được
--->
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-	fx:controller="com.musicapp.ui.CompactListController"      spacing="0"
+      fx:controller="com.musicapp.ui.CompactListController"      
+      spacing="0"
       style="-fx-background-color: #FAF7F4;">
 
-    <!-- ═══════════════════════════════════════════
-         TITLE
-    ════════════════════════════════════════════ -->
     <Label fx:id="titleLabel"
            text=""
-           style="-fx-font-size: 28px;
-                  -fx-font-weight: bold;
-                  -fx-text-fill: #2C1810;
-                  -fx-padding: 32 40 24 40;"/>
+           style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2C1810; -fx-padding: 32 40 24 40;"/>
 
-    <!-- ═══════════════════════════════════════════
-         TABLE HEADER ROW (cố định, không scroll)
-    ════════════════════════════════════════════ -->
     <HBox style="-fx-padding: 8 40 8 40;">
-        <!-- Ảnh nhỏ placeholder -->
         <Region prefWidth="46"/>
-        <!-- Tên bài -->
+        
         <Label text="SONG"
                prefWidth="360"
                style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;"/>
-        <!-- Artist -->
+               
         <Label text="ARTIST"
                prefWidth="200"
                style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;"/>
-        <!-- Album -->
+               
         <Label text="ALBUM"
                prefWidth="220"
                HBox.hgrow="ALWAYS"
                style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;"/>
-        <!-- Time -->
+               
         <Label text="TIME"
                prefWidth="60"
                style="-fx-font-size: 11px; -fx-text-fill: #9E8E84; -fx-font-weight: bold;"/>
     </HBox>
 
     <Separator style="-fx-opacity: 0.2;">
-        <padding><Insets left="40" right="40"/></padding>
+        <padding>
+            <Insets left="40" right="40"/>
+        </padding>
     </Separator>
 
-    <!-- ═══════════════════════════════════════════
-         DANH SÁCH BÀI HÁT — có thể scroll
-         Header cột bên trên đứng yên, chỉ
-         phần ListView này cuộn.
-    ════════════════════════════════════════════ -->
     <ListView fx:id="songListView"
               VBox.vgrow="ALWAYS"
               fixedCellSize="62"
-              style="-fx-background-color: transparent;
-                     -fx-background-insets: 0;
-                     -fx-padding: 0 40 20 40;
-                     -fx-border-color: transparent;">
-        <!--
-            Controller set:
-              songListView.setItems(data);
-              songListView.setCellFactory(lv -> new CompactSongCell());
-            Mỗi cell là 1 HBox gồm:
-              [ImageView nhỏ] [Label tên bài] [♡ button] [Label artist] [Label album] [+ button] [Label time]
-        -->
+              style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0 40 20 40; -fx-border-color: transparent;">
     </ListView>
 
 </VBox>
->>>>>>> origin/main

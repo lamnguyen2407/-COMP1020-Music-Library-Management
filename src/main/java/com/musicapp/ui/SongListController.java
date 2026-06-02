@@ -528,7 +528,7 @@ public class SongListController implements Initializable, MainViewController.Mai
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddToPlaylistModal.fxml"));
             Parent root = loader.load();
-            AddToPlaylistController controller = loader.getController(); // <--- CHÍNH LÀ NÓ!
+            AddToPlaylistController controller = loader.getController(); 
             
             Song song = new Song(item.getSongId(), item.getTitle(), item.getArtist(), 
                                  item.getGenre(), item.getDuration(), item.getReleaseYear(), 
