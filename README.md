@@ -6,6 +6,8 @@
 ![Architecture](https://img.shields.io/badge/Architecture-MVC_%7C_SPA-success?style=flat-square)
 
 > A desktop music streaming platform built with custom Data Structures and Algorithms using JavaFX and Firebase. Developed as the Final Project for the **COMP1020 Object-Oriented Programming & Data Structures** course at VinUniversity (Spring 2026).
+>
+> Github Link: https://github.com/lamnguyen2407/-COMP1020-Music-Library-Management
 
 ---
 
