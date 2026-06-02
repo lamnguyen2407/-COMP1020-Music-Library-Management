@@ -111,15 +111,11 @@ public class PlaylistOverviewController implements Initializable, MainViewContro
                         }
                     });
                 } else {
-                    // === MÁY PHÁT HIỆN LỖI (DEBUG) ===
-                    System.out.println("--- BẮT ĐẦU TẢI PLAYLIST ---");
-                    System.out.println("User ID hiện tại: " + SessionManager.currentUser.getUserId());
-                    System.out.println("Tình trạng PlaylistManager: " + (playlistManager == null ? "BỊ NULL !!!" : "Đã kích hoạt"));
-                    // ===================================
+                    System.out.println("User ID: " + SessionManager.currentUser.getUserId());
 
                     List<Playlist> userPlaylists = (playlistManager != null) ? playlistManager.getAllUserPlaylists() : new ArrayList<>();
                     
-                    System.out.println("Số lượng Playlist lấy được: " + userPlaylists.size());
+                    System.out.println("Number of playlist: " + userPlaylists.size());
                     
                     Platform.runLater(() -> {
                         if (playlistListContainer.getChildren().size() > 3) {

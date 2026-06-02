@@ -1,6 +1,7 @@
 package com.musicapp.ui;
 
 import com.musicapp.service.DatabaseManager;
+import com.musicapp.model.SessionManager;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -35,10 +36,9 @@ public class AccountController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        this.currentUserId = DatabaseManager.getInstance().getService().getCurrentUserId();
-        this.currentUserRole = DatabaseManager.getInstance().getService().getCurrentUserRole();
-
-        if (currentUserId != null) {
+        if (SessionManager.currentUser != null) {
+            this.currentUserId = SessionManager.currentUser.getUserId();
+            this.currentUserRole = SessionManager.isAdmin ? "admin" : "user";
             loadUserData();
         } else {
             System.err.println("Session not found");
