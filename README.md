@@ -148,11 +148,12 @@ This approach performs significantly better than naive linear search for large m
 *(The required `firebase-config.json` file is already pre-configured and located inside the `src/main/resources/` directory).*
 ---
 
-# 2.1. Run via IDE (Recommended)
+# 2. Run code
+## 2.1. Run via IDE (Recommended)
 
-## Eclipse
+### Eclipse
 
-### Step 1: Import as a Maven Project
+#### Step 1: Import as a Maven Project
 
 1. Open Eclipse.
 2. Go to **File → Import...**
@@ -163,7 +164,7 @@ This approach performs significantly better than naive linear search for large m
 7. Click **Finish**.
 8. Wait until Eclipse finishes downloading all Maven dependencies.
 
-### Step 2: Run the Application
+#### Step 2: Run the Application
 
 1. Right-click the project root (it should display a small **M** icon).
 2. Select **Run As → Maven Build...**
@@ -177,7 +178,7 @@ clean javafx:run
 
 ---
 
-## IntelliJ IDEA
+### IntelliJ IDEA
 
 1. Open the project.
 2. Open the **Maven Tool Window**.
@@ -195,9 +196,9 @@ javafx:run
 
 ---
 
-# 2.2. Run via Terminal
+## 2.2. Run via Terminal
 
-## macOS / Linux / Git Bash
+### macOS / Linux / Git Bash
 
 ```bash
 ./mvnw clean javafx:run
@@ -205,7 +206,7 @@ javafx:run
 
 ---
 
-## Windows CMD
+### Windows CMD
 
 ```cmd
 mvnw clean javafx:run
@@ -213,7 +214,7 @@ mvnw clean javafx:run
 
 ---
 
-## Windows PowerShell
+### Windows PowerShell
 
 ```powershell
 .\mvnw clean javafx:run
@@ -221,7 +222,7 @@ mvnw clean javafx:run
 
 ---
 
-## Notes
+### Notes
 
 **Note 1:** If the Maven Wrapper (`mvnw`) is missing, you can either generate it:
 
@@ -238,19 +239,19 @@ mvn clean javafx:run
 
 **Note 2:** If you encounter a **"Failed to delete target"** error during execution (commonly caused by IDEs, file indexing services, or OneDrive locking files on Windows), you can safely skip the `clean` phase and run the application directly:
 
-### macOS / Linux / Git Bash
+#### macOS / Linux / Git Bash
 
 ```bash
 ./mvnw javafx:run
 ```
 
-### Windows CMD
+#### Windows CMD
 
 ```cmd
 mvnw javafx:run
 ```
 
-### Windows PowerShell
+#### Windows PowerShell
 
 ```powershell
 .\mvnw javafx:run
@@ -282,8 +283,68 @@ Password: tester
 
 You can also use the **Sign Up** feature on the login screen to create a new account.
 
-# 🚀 Test Cases
-## C.3.1 TC-01: Account Registration
+# 4. Database Validation Test for Admin (Recommended)
+
+To verify that Firebase synchronization, album creation, song insertion, and playback functionality are working correctly, you may perform the following end-to-end database test.
+
+### Step 1: Login as Admin
+
+Use the admin credentials provided above and log in to the application.
+
+### Step 2: Navigate to Album Management
+
+1. Open the **Playlist** tab.
+2. Select **All Albums**.
+3. Click **Add Album**.
+
+### Step 3: Create a Test Album
+
+Fill in the following information:
+
+```text
+Album Title: Random Access Memories
+Artist: Daft Punk
+Release Year: 2013
+Genre: Funk
+Image URL:
+https://drive.google.com/file/d/11tEfga9YSzNyCWbmBsC-0NAOBi7Gcok1/view?usp=sharing
+```
+
+Click **Save/Add Album**.
+
+### Step 4: Add Songs to the Album
+
+Open the newly created album and click **Add Song**.
+
+#### Song 1
+
+```text
+Title: Contact
+Audio URL:
+https://drive.google.com/file/d/1qxqyrQq2eh_t7X4X4GOjhwXyzG1HTWI5/view?usp=sharing
+Duration: 384
+```
+
+#### Song 2
+
+```text
+Title: Give Life Back To Music
+Audio URL:
+https://drive.google.com/file/d/1401aXDA_9IPGXfVPMKSm8rEcpH_yRDT6/view?usp=sharing
+Duration: 279
+```
+
+### Step 5: Verify Functionality
+
+After both songs have been added:
+
+1. Confirm that the album appears in **All Albums**.
+2. Confirm that both songs appear inside the album.
+3. Play each song to verify audio streaming functionality.
+4. Refresh the application and verify that the album and songs remain synchronized with Firebase Realtime Database.
+
+# 💻 Test Cases
+## 1. Account Registration
 
 ```text
 System correctly catches duplicate credentials and displays a warning popup.
@@ -302,7 +363,7 @@ Real-time Firebase Database state showing the newly created user with a determin
 
 ---
 
-## C.3.2 TC-02: Authentication (Login)
+## 2. TC-02: Authentication (Login)
 
 ```text
 Login interface capturing the registered user's credentials.
@@ -316,7 +377,7 @@ System console verifying Firebase credential validation, successful Dashboard re
 
 ---
 
-## C.3.3 TC-03: Role-Based Access Control (RBAC)
+## 3. TC-03: Role-Based Access Control (RBAC)
 
 ```text
 Admin interface displaying elevated privileges with visible 'ADD' and 'DELETE' mutation controls.
