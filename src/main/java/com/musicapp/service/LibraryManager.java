@@ -66,13 +66,13 @@ public class LibraryManager {
     
     private void loadDataToCache() {
         if (songCache.isEmpty()) {
-            List<Song> fetchedSongs = firebaseService.fetchSongs(); // Gọi mạng lấy toàn bộ bài hát
+            List<Song> fetchedSongs = firebaseService.fetchSongs(); 
             if (fetchedSongs != null) {
                 for (Song s : fetchedSongs) {
                     songCache.put(s.getSongId(), s);
                 }
             }
-            System.out.println("LibraryManager: Đã nạp " + songCache.size() + " bài hát từ mây vào RAM!");
+            System.out.println("LibraryManager: Loaded " + songCache.size() + " songs into RAM");
         }
     }
     

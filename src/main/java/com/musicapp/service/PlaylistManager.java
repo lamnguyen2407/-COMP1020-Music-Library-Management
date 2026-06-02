@@ -76,23 +76,22 @@ public class PlaylistManager {
     public void addSongToSpecificPlaylist(String playlistId, Song song) {
         Playlist target = playlistMap.get(playlistId);
         if (target == null) {
-            System.err.println("Cannot find playlist ID: " + playlistId);
-            return;
+            getAllUserPlaylists();
+            target = playlistMap.get(playlistId);
         }
-
-        target.addSongToPlaylist(song.getSongId());
         
-        DatabaseManager.getInstance().getService().saveUserPlaylist(currentUserId, target);
-        System.out.println("Added " + song.getTitle() + " to playlist " + target.getName());
+        if (target != null) {
+            target.addSongToPlaylist(song.getSongId());
+            DatabaseManager.getInstance().getService().saveUserPlaylist(currentUserId, target);
+        }
     }
 
     public List<Playlist> getAllUserPlaylists() {
-        if (playlistMap.isEmpty()) {
-            List<Playlist> fetched = DatabaseManager.getInstance().getService().fetchUserPlaylists(currentUserId);
-            if (fetched != null) {
-                for (Playlist p : fetched) {
-                    playlistMap.put(p.getPlaylistId(), p);
-                }
+        List<Playlist> fetched = DatabaseManager.getInstance().getService().fetchUserPlaylists(currentUserId);
+        if (fetched != null) {
+            playlistMap.clear();
+            for (Playlist p : fetched) {
+                playlistMap.put(p.getPlaylistId(), p);
             }
         }
         return new ArrayList<>(playlistMap.values());
