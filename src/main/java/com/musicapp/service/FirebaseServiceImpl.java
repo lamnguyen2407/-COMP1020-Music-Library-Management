@@ -107,7 +107,36 @@ public class FirebaseServiceImpl implements FirebaseService {
 
     @Override
     public void deleteSong(String id) {
+        if (id == null || id.isEmpty()) return;
+
         this.dbRef.child("songs").child(id).removeValueAsync();
+
+        this.dbRef.child("albums").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot albumSnap : snapshot.getChildren()) {
+                    if (albumSnap.hasChild("songIds") && albumSnap.child("songIds").hasChild(id)) {
+                        albumSnap.child("songIds").child(id).getRef().removeValueAsync();
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {}
+        });
+
+        this.dbRef.child("playlists").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot playlistSnap : snapshot.getChildren()) {
+                    if (playlistSnap.hasChild("songIds") && playlistSnap.child("songIds").hasChild(id)) {
+                        playlistSnap.child("songIds").child(id).getRef().removeValueAsync();
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {}
+        });
+        System.out.println("Song completely removed from all databases: " + id);
     }
     
     @Override 

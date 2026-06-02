@@ -53,16 +53,5 @@
 
         <TextField fx:id="playlistNameField" maxWidth="380" promptText="Give your playlist a name"
                    style="-fx-background-color: transparent; -fx-border-color: #E0D8D0; -fx-border-width: 0 0 1 0; -fx-padding: 5 0 5 0; -fx-font-size: 16px;"/>
-
-     
-
-     
-
-        <Region minHeight="32" />
-
-        <HBox alignment="CENTER_LEFT" maxWidth="380" onMouseClicked="#onAddMusicClicked" spacing="10" style="-fx-cursor: hand;">
-            <Label text="⊕" style="-fx-text-fill: #C0703A; -fx-font-size: 20px;" />
-            <Label text="Add Music" style="-fx-text-fill: #2C1810; -fx-font-size: 14px; -fx-font-weight: bold;" />
-        </HBox>
     </VBox>
 </VBox>
