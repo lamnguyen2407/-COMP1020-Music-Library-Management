@@ -430,7 +430,7 @@ public class FirebaseServiceImpl implements FirebaseService {
     private void rehashTable(DataSnapshot root, int newSize, RegisterCallback callback) {
         Map<String, Object> updates = new HashMap<>();
         Map<String, String> idMap = new HashMap<>(); // oldId -> newId
-        Set<String> usedNewIds = new HashSet<>(); // HashSet giúp check trùng lặp O(1) thay vì O(N)
+        Set<String> usedNewIds = new HashSet<>(); 
 
         for (DataSnapshot userSnap : root.child("users").getChildren()) {
             String email = userSnap.child("email").getValue(String.class);

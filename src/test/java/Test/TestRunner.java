@@ -313,7 +313,6 @@ public class TestRunner {
         assertTest("Probing (i=1) produces different ID than (i=0)", !id1.equals(id1_probe1));
     }
 
-    // Replicated NEW hashing logic from FirebaseServiceImpl (Giữ nguyên thuật toán xịn)
     private static String generateUserId(String email, int i) {
         // Step 1: Polynomial Rolling Hash
         long key = 0;
